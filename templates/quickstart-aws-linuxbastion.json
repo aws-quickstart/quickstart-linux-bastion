@@ -1,0 +1,30 @@
+[
+    {
+        "ParameterKey": "InstanceType",
+        "ParameterValue": "t2.micro"
+    },
+    {
+        "ParameterKey": "KeyPairName",
+        "ParameterValue": "tonynv"
+    },
+    {
+        "ParameterKey": "OperatingSystem",
+        "ParameterValue": "AMZNLINUX"
+    },
+    {
+        "ParameterKey": "PrivateIP",
+        "ParameterValue": "172.31.0.20"
+    },
+    {
+        "ParameterKey": "PublicSubnetID",
+        "ParameterValue": "5eab4828"
+    },
+    {
+        "ParameterKey": "RemoteAccessCIDR",
+        "ParameterValue": "0.0.0.0/0"
+    },
+    {
+        "ParameterKey": "VPCID",
+        "ParameterValue": "vpc-7c5f6819"
+    }
+]
