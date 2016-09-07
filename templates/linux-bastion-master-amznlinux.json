@@ -1,30 +1,54 @@
 [
     {
-        "ParameterKey": "InstanceType",
+        "ParameterKey": "AvailabilityZones",
+        "ParameterValue": "$[alfred_genaz_2]"
+    },
+    {
+        "ParameterKey": "Bastion1InstanceType",
         "ParameterValue": "t2.micro"
     },
     {
+        "ParameterKey": "Bastion1PrivateIP",
+        "ParameterValue": "10.0.128.5"
+    },
+    {
+        "ParameterKey": "Bastion2InstanceType",
+        "ParameterValue": "t2.micro"
+    },
+    {
+        "ParameterKey": "Bastion2PrivateIP",
+        "ParameterValue": "10.0.144.5"
+    },
+    {
+        "ParameterKey": "BastionCIDR",
+        "ParameterValue": "10.0.0.0/16"
+    },
+    {
         "ParameterKey": "KeyPairName",
-        "ParameterValue": "tonynv"
+        "ParameterValue": "cikey"
     },
     {
-        "ParameterKey": "OperatingSystem",
-        "ParameterValue": "AMZNLINUX"
+        "ParameterKey": "NATInstanceType",
+        "ParameterValue": "t2.small"
     },
     {
-        "ParameterKey": "PrivateIP",
-        "ParameterValue": "172.31.0.20"
+        "ParameterKey": "PrivateSubnet1CIDR",
+        "ParameterValue": "10.0.0.0/19"
     },
     {
-        "ParameterKey": "PublicSubnetID",
-        "ParameterValue": "5eab4828"
+        "ParameterKey": "PrivateSubnet2CIDR",
+        "ParameterValue": "10.0.32.0/19"
     },
     {
-        "ParameterKey": "RemoteAccessCIDR",
-        "ParameterValue": "0.0.0.0/0"
+        "ParameterKey": "PublicSubnet1CIDR",
+        "ParameterValue": "10.0.128.0/20"
     },
     {
-        "ParameterKey": "VPCID",
-        "ParameterValue": "vpc-7c5f6819"
+        "ParameterKey": "PublicSubnet2CIDR",
+        "ParameterValue": "10.0.144.0/20"
+    },
+    {
+        "ParameterKey": "VPCCIDR",
+        "ParameterValue": "10.0.0.0/16"
     }
 ]
