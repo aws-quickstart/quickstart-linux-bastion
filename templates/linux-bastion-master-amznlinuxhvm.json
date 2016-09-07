@@ -20,16 +20,16 @@
         "ParameterValue": "10.0.144.5"
     },
     {
+        "ParameterKey": "BastionAMIOS",
+        "ParameterValue": "AMZNLINUXHVM"
+    },
+    {
         "ParameterKey": "KeyPairName",
         "ParameterValue": "cikey"
     },
     {
         "ParameterKey": "NATInstanceType",
         "ParameterValue": "t2.small"
-    },
-    {
-        "ParameterKey": "OperatingSystem",
-        "ParameterValue": "AMZNLINUXHVM"
     },
     {
         "ParameterKey": "PrivateSubnet1CIDR",

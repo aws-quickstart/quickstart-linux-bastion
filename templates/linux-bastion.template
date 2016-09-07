@@ -50,11 +50,7 @@
             "Description": "Fixed private IP for the second bastion located in Availability Zone 2",
             "Type": "String"
         },
-        "KeyPairName": {
-            "Description": "Public/private key pair",
-            "Type": "AWS::EC2::KeyPair::KeyName"
-        },
-        "OperatingSystem": {
+        "BastionAMIOS": {
             "AllowedValues": [
                 "AMZNLINUXHVM",
                 "CENTOS7HVM",
@@ -63,6 +59,10 @@
             "Default": "AMZNLINUXHVM",
             "Description": "This selects the AMI with a specific Linux distribution to be used for the bastion instances",
             "Type": "String"
+        },
+        "KeyPairName": {
+            "Description": "Public/private key pair",
+            "Type": "AWS::EC2::KeyPair::KeyName"
         },
         "PublicSubnet1ID": {
             "Description": "ID of the public subnet 1 that you want to provision the first bastion into (e.g., subnet-a0246dcd)",
@@ -262,7 +262,7 @@
                             "Ref": "AWS::Region"
                         },
                         {
-                            "Ref": "OperatingSystem"
+                            "Ref": "BastionAMIOS"
                         }
                     ]
                 },
@@ -321,7 +321,7 @@
                             "Ref": "AWS::Region"
                         },
                         {
-                            "Ref": "OperatingSystem"
+                            "Ref": "BastionAMIOS"
                         }
                     ]
                 },

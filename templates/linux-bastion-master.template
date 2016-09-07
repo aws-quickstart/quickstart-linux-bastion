@@ -143,6 +143,16 @@
             "Type": "String",
             "Default": "10.0.144.5"
         },
+        "BastionAMIOS": {
+            "AllowedValues": [
+                "AMZNLINUXHVM",
+                "CENTOS7HVM",
+                "US1404HVM"
+            ],
+            "Default": "AMZNLINUXHVM",
+            "Description": "This selects the AMI with a specific Linux distribution to be used for the bastion instances",
+            "Type": "String"
+        },
         "KeyPairName": {
             "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
             "Type": "AWS::EC2::KeyPair::KeyName"
@@ -160,16 +170,6 @@
             ],
             "Default": "t2.small",
             "Description": "Amazon EC2 instance type for the NAT Instances. This is only used if the region does not support NAT gateways.",
-            "Type": "String"
-        },
-        "OperatingSystem": {
-            "AllowedValues": [
-                "AMZNLINUXHVM",
-                "CENTOS7HVM",
-                "US1404HVM"
-            ],
-            "Default": "AMZNLINUXHVM",
-            "Description": "This selects the AMI with a specific Linux distribution to be used for the bastion instances",
             "Type": "String"
         },
         "PrivateSubnet1CIDR": {
@@ -380,8 +380,8 @@
                     "KeyPairName": {
                         "Ref": "KeyPairName"
                     },
-                    "OperatingSystem": {
-                        "Ref": "OperatingSystem"
+                    "BastionAMIOS": {
+                        "Ref": "BastionAMIOS"
                     },
                     "PublicSubnet1ID": {
                         "Fn::GetAtt": [

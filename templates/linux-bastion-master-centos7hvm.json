@@ -20,16 +20,16 @@
         "ParameterValue": "10.0.144.5"
     },
     {
+        "ParameterKey": "BastionAMIOS",
+        "ParameterValue": "CENTOS7HVM"
+    },
+    {
         "ParameterKey": "KeyPairName",
         "ParameterValue": "cikey"
     },
     {
         "ParameterKey": "NATInstanceType",
         "ParameterValue": "t2.small"
-    },
-    {
-        "ParameterKey": "OperatingSystem",
-        "ParameterValue": "CENTOS7HVM"
     },
     {
         "ParameterKey": "PrivateSubnet1CIDR",

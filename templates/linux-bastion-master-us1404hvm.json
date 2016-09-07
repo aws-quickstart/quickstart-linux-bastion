@@ -20,16 +20,16 @@
         "ParameterValue": "10.0.144.5"
     },
     {
+        "ParameterKey": "BastionAMIOS",
+        "ParameterValue": "US1404HVM"
+    },
+    {
         "ParameterKey": "KeyPairName",
         "ParameterValue": "cikey"
     },
     {
         "ParameterKey": "NATInstanceType",
         "ParameterValue": "t2.small"
-    },
-    {
-        "ParameterKey": "OperatingSystem",
-        "ParameterValue": "US1404HVM"
     },
     {
         "ParameterKey": "PrivateSubnet1CIDR",
