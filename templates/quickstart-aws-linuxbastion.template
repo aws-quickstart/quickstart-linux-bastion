@@ -47,7 +47,7 @@
                 "AMZNLINUXHVM",
                 "CENTOS7HVM",
                 "US1404HVM"
-                ]
+            ]
         },
         "RemoteAccessCIDR": {
             "Description": "CIDR Block or IP for SSH access",
@@ -182,10 +182,9 @@
                         "SubnetId": {
                             "Ref": "PublicSubnetID"
                         },
-                        "PrivateIpAddress":
-                            {
-                                    "Ref": "PrivateIP1"
-                            },
+                        "PrivateIpAddress": {
+                            "Ref": "PrivateIP1"
+                        },
                         "GroupSet": [
                             {
                                 "Ref": "SecurityGroup"
