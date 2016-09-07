@@ -30,7 +30,7 @@
     {
         "ParameterKey": "OperatingSystem",
         "ParameterValue": "US1404HVM"
-    }
+    },
     {
         "ParameterKey": "PrivateSubnet1CIDR",
         "ParameterValue": "10.0.0.0/19"
