@@ -1,7 +1,7 @@
 global:
-  marketplace-ami: false
+  marketplace-ami: true
   owner: quickstart-eng@amazon.com
-  qsname: quickstart-aws-linuxbastion
+  qsname: quickstart-linux-bastion
   regions:
     - ap-northeast-1
     - ap-northeast-2
@@ -17,5 +17,5 @@ global:
   reporting: true
 tests:
   amznlinux:
-    parameter_input: aws-linuxbastion-master-amznlinux.json
-    template_file: aws-linuxbastion-master.template
+    parameter_input: linux-bastion-master-amznlinux.json
+    template_file: linux-bastion-master.template
