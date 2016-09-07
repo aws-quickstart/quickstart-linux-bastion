@@ -377,11 +377,11 @@
                     "Bastion2PrivateIP": {
                         "Ref": "Bastion2PrivateIP"
                     },
-                    "KeyPairName": {
-                        "Ref": "KeyPairName"
-                    },
                     "BastionAMIOS": {
                         "Ref": "BastionAMIOS"
+                    },
+                    "KeyPairName": {
+                        "Ref": "KeyPairName"
                     },
                     "PublicSubnet1ID": {
                         "Fn::GetAtt": [
