@@ -96,7 +96,7 @@
             "Description": "ID of the VPC (e.g., vpc-0343606e)",
             "Type": "AWS::EC2::VPC::Id"
         }
-    }
+    },
     "Rules": {
         "SubnetsInVPC": {
             "Assertions": [
