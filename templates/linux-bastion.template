@@ -1,75 +1,102 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "QS(0037) Creates Linux bastion host ",
+    "Description": "This template is intended to be deployed into an existing VPC with two public subnets. It will deploy one Linux bastion instance in each public VPC subnet. **WARNING** This template creates Amazon EC2 Windows instance and related resources. You will be billed for the AWS resources used if you create a stack from this template. QS(0037)",
     "Parameters": {
-        "KeyPairName": {
-            "Description": "Public/private key pair",
-            "Type": "AWS::EC2::KeyPair::KeyName"
-        },
-        "PublicSubnetID": {
-            "Description": "VPC Subnet ID for EC2 Instances",
-            "Type": "AWS::EC2::Subnet::Id"
-        },
-        "InstanceType": {
-            "Description": "Amazon EC2 instance type",
-            "Type": "String",
-            "Default": "t2.micro",
+        "Bastion1InstanceType": {
             "AllowedValues": [
                 "t2.nano",
                 "t2.micro",
                 "t2.small",
                 "t2.medium",
-                "m3.medium",
+                "t2.large",
                 "m3.large",
                 "m3.xlarge",
                 "m3.2xlarge",
-                "c3.large",
-                "c3.xlarge",
-                "c3.2xlarge",
-                "c3.4xlarge",
-                "c3.8xlarge",
-                "r3.large",
-                "r3.xlarge",
-                "r3.2xlarge",
-                "r3.4xlarge",
-                "r3.8xlarge",
-                "i2.xlarge",
-                "i2.2xlarge",
-                "i2.4xlarge",
-                "i2.8xlarge"
-            ]
+                "m4.large",
+                "m4.xlarge",
+                "m4.2xlarge",
+                "m4.4xlarge"
+            ],
+            "Default": "t2.micro",
+            "Description": "Amazon EC2 instance type for the first bastion instance",
+            "Type": "String"
+        },
+        "Bastion1PrivateIP": {
+            "Default": "10.0.128.5",
+            "Description": "Fixed private IP for the first bastion located in Availability Zone 1",
+            "Type": "String"
+        },
+        "Bastion2InstanceType": {
+            "AllowedValues": [
+                "t2.nano",
+                "t2.micro",
+                "t2.small",
+                "t2.medium",
+                "t2.large",
+                "m3.large",
+                "m3.xlarge",
+                "m3.2xlarge",
+                "m4.large",
+                "m4.xlarge",
+                "m4.2xlarge",
+                "m4.4xlarge"
+            ],
+            "Default": "t2.micro",
+            "Description": "Amazon EC2 instance type for the second bastion instance",
+            "Type": "String"
+        },
+        "Bastion2PrivateIP": {
+            "Default": "10.0.144.5",
+            "Description": "Fixed private IP for the second bastion located in Availability Zone 2",
+            "Type": "String"
+        },
+        "KeyPairName": {
+            "Description": "Public/private key pair",
+            "Type": "AWS::EC2::KeyPair::KeyName"
         },
         "OperatingSystem": {
-            "Description": "OperatingSystem Type",
-            "Type": "String",
-            "Default": "AMZNLINUXHVM",
             "AllowedValues": [
                 "AMZNLINUXHVM",
                 "CENTOS7HVM",
                 "US1404HVM"
-            ]
+            ],
+            "Default": "AMZNLINUXHVM",
+            "Description": "This selects the AMI with a specific Linux distribution to be used for the bastion instances",
+            "Type": "String"
+        },
+        "PublicSubnet1ID": {
+            "Description": "ID of the public subnet 1 that you want to provision the first bastion into (e.g., subnet-a0246dcd)",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
+        "PublicSubnet2ID": {
+            "Description": "ID of the public subnet 2 you want to provision the second bastion into (e.g., subnet-e3246d8e)",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
+        "QSS3BucketName": {
+            "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
+            "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Default": "quickstart-reference",
+            "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Type": "String"
+        },
+        "QSS3KeyPrefix": {
+            "AllowedPattern": "^[0-9a-zA-Z-]+(/[0-9a-zA-Z-]+)*$",
+            "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with forward slash (/) because they are automatically appended.",
+            "Default": "linux/bastion/latest",
+            "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with forward slash (/) because they are automatically appended.",
+            "Type": "String"
         },
         "RemoteAccessCIDR": {
-            "Description": "CIDR Block or IP for SSH access",
-            "Type": "String",
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
             "Default": "0.0.0.0/0",
-            "AllowedPattern": "[a-zA-Z0-9]+\\..+"
+            "Description": "Allowed CIDR block for external SSH access to the bastions",
+            "Type": "String"
         },
         "VPCID": {
-            "Description": "VPC Id",
+            "Description": "ID of the VPC (e.g., vpc-0343606e)",
             "Type": "AWS::EC2::VPC::Id"
-        },
-        "PrivateIP1": {
-            "Description": "Private for Linux Bastion in first AZ",
-            "Type": "String",
-            "Default": "172.31.0.20"
-        },
-        "PrivateIP2": {
-            "Description": "Private for Linux Bastion in first AZ",
-            "Type": "String",
-            "Default": "172.31.0.21"
         }
-    },
+    }
     "Rules": {
         "SubnetsInVPC": {
             "Assertions": [
@@ -95,9 +122,9 @@
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "AMZNLINUXHVM": "amzn-ami-hvm-2016.03.3.x86_64-gp2",
-                "CENTOS7HVM": "CentOS Linux 7 x86_64 HVM EBS 1602-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-d7e1d2bd.3",
-                "US1404HVM": "ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20160714"
+                "AMZNLINUXHVM": "update",
+                "CENTOS7HVM": "update",
+                "US1404HVM": "update"
             },
             "ap-northeast-1": {
                 "AMZNLINUXHVM": "ami-374db956",
@@ -154,10 +181,78 @@
                 "CENTOS7HVM": "ami-d2c924b2",
                 "US1404HVM": "ami-d732f0b7"
             }
+        },
+        "AWSInfoRegionMap": {
+            "ap-northeast-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "ap-northeast-2": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "ap-south-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "ap-southeast-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "ap-southeast-2": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "eu-central-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "eu-west-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "sa-east-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "us-east-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "us-gov-west-1": {
+                "Partition": "aws-us-gov",
+                "QuickStartS3URL": "https://s3-us-gov-west-1.amazonaws.com"
+            },
+            "us-west-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "us-west-2": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            }
         }
     },
     "Resources": {
-        "LinuxBastion": {
+        "LinuxBastion1EIP": {
+            "Type": "AWS::EC2::EIP",
+            "Properties": {
+                "Domain": "vpc",
+                "InstanceId": {
+                    "Ref": "LinuxBastion1"
+                }
+            }
+        },
+        "LinuxBastion2EIP": {
+            "Type": "AWS::EC2::EIP",
+            "Properties": {
+                "Domain": "vpc",
+                "InstanceId": {
+                    "Ref": "LinuxBastion2"
+                }
+            }
+        },
+        "LinuxBastion1": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
                 "ImageId": {
@@ -172,7 +267,7 @@
                     ]
                 },
                 "InstanceType": {
-                    "Ref": "InstanceType"
+                    "Ref": "Bastion1InstanceType"
                 },
                 "NetworkInterfaces": [
                     {
@@ -180,14 +275,14 @@
                         "DeleteOnTermination": "true",
                         "DeviceIndex": 0,
                         "SubnetId": {
-                            "Ref": "PublicSubnetID"
+                            "Ref": "PublicSubnet1ID"
                         },
                         "PrivateIpAddress": {
-                            "Ref": "PrivateIP1"
+                            "Ref": "Bastion1PrivateIP"
                         },
                         "GroupSet": [
                             {
-                                "Ref": "SecurityGroup"
+                                "Ref": "BastionSecurityGroup"
                             }
                         ]
                     }
@@ -195,7 +290,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": "LinuxBastion"
+                        "Value": "LinuxBastion1"
                     }
                 ],
                 "KeyName": {
@@ -216,7 +311,66 @@
                 }
             }
         },
-        "SecurityGroup": {
+        "LinuxBastion2": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSAMIRegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        {
+                            "Ref": "OperatingSystem"
+                        }
+                    ]
+                },
+                "InstanceType": {
+                    "Ref": "Bastion2InstanceType"
+                },
+                "NetworkInterfaces": [
+                    {
+                        "AssociatePublicIpAddress": true,
+                        "DeleteOnTermination": "true",
+                        "DeviceIndex": 0,
+                        "SubnetId": {
+                            "Ref": "PublicSubnet2ID"
+                        },
+                        "PrivateIpAddress": {
+                            "Ref": "Bastion2PrivateIP"
+                        },
+                        "GroupSet": [
+                            {
+                                "Ref": "BastionSecurityGroup"
+                            }
+                        ]
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "LinuxBastion2"
+                    }
+                ],
+                "KeyName": {
+                    "Ref": "KeyPairName"
+                },
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash\n",
+                                " >/root/domainname",
+                                "date >/root/born_date",
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "BastionSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
                 "GroupDescription": "Enables SSH Access",
@@ -233,9 +387,9 @@
                         }
                     },
                     {
-                        "IpProtocol": "tcp",
-                        "FromPort": "22",
-                        "ToPort": "22",
+                        "IpProtocol": "icmp",
+                        "FromPort": "-1",
+                        "ToPort": "-1",
                         "CidrIp": {
                             "Ref": "RemoteAccessCIDR"
                         }
@@ -245,14 +399,35 @@
         }
     },
     "Outputs": {
-        "LinuxBastionDnsName": {
+        "LinuxBastion1PublicDNSName": {
             "Value": {
                 "Fn::GetAtt": [
-                    "LinuxBastion",
+                    "LinuxBastion1",
                     "PublicDnsName"
                 ]
             },
-            "Description": "Public DNS Name "
+            "Description": "Public DNS name of the Linux Bastion 1 in Avalability Zone 1"
+        },
+        "LinuxBastion1ElasticIP": {
+            "Value": {
+                "Ref": "LinuxBastion1EIP"
+            },
+            "Description": "Elastic IP address of the Linux Bastion 1 in Avalability Zone 1"
+        },
+        "LinuxBastion2PublicDNSName": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "LinuxBastion2",
+                    "PublicDnsName"
+                ]
+            },
+            "Description": "Public DNS name of the Linux Bastion 2 in Avalability Zone 2"
+        },
+        "LinuxBastion2ElasticIP": {
+            "Value": {
+                "Ref": "LinuxBastion2EIP"
+            },
+            "Description": "Elastic IP address of the Linux Bastion 2 in Avalability Zone 2"
         }
     }
 }

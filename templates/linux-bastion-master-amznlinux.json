@@ -20,10 +20,6 @@
         "ParameterValue": "10.0.144.5"
     },
     {
-        "ParameterKey": "BastionCIDR",
-        "ParameterValue": "10.0.0.0/16"
-    },
-    {
         "ParameterKey": "KeyPairName",
         "ParameterValue": "cikey"
     },
@@ -46,6 +42,10 @@
     {
         "ParameterKey": "PublicSubnet2CIDR",
         "ParameterValue": "10.0.144.0/20"
+    },
+    {
+        "ParameterKey": "RemoteAccessCIDR",
+        "ParameterValue": "10.0.0.0/16"
     },
     {
         "ParameterKey": "VPCCIDR",
