@@ -29,7 +29,7 @@
     },
     {
         "ParameterKey": "OperatingSystem",
-        "ParameterValue": "AMZNLINUXHVM"
+        "ParameterValue": "US1404HVM"
     }
     {
         "ParameterKey": "PrivateSubnet1CIDR",

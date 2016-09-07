@@ -29,7 +29,7 @@
     },
     {
         "ParameterKey": "OperatingSystem",
-        "ParameterValue": "AMZNLINUXHVM"
+        "ParameterValue": "CENTOS7HVM"
     }
     {
         "ParameterKey": "PrivateSubnet1CIDR",

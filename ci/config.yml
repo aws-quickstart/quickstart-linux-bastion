@@ -16,6 +16,12 @@ global:
     - us-west-2
   reporting: true
 tests:
-  amznlinux:
-    parameter_input: linux-bastion-master-amznlinux.json
+  amznlinuxhvm:
+    parameter_input: linux-bastion-master-amznlinuxhvm.json
+    template_file: linux-bastion-master.template
+  centos7hvm:
+    parameter_input: linux-bastion-master-centos7hvm.json
+    template_file: linux-bastion-master.template
+  us1404hvm:
+    parameter_input: linux-bastion-master-us1404hvm.json
     template_file: linux-bastion-master.template
