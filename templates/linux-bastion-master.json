@@ -1,0 +1,30 @@
+[
+    {
+        "ParameterKey": "InstanceType",
+        "ParameterValue": "t2.micro"
+    },
+    {
+        "ParameterKey": "KeyPairName",
+        "ParameterValue": "cikey"
+    },
+    {
+        "ParameterKey": "OperatingSystem",
+        "ParameterValue": "AMZNLINUXHVM"
+    },
+    {
+        "ParameterKey": "PrivateIP1",
+        "ParameterValue": "10.0.128.5"
+    },
+    {
+        "ParameterKey": "PublicSubnetID",
+        "ParameterValue": "5eab4828"
+    },
+    {
+        "ParameterKey": "RemoteAccessCIDR",
+        "ParameterValue": "0.0.0.0/0"
+    },
+    {
+        "ParameterKey": "VPCID",
+        "ParameterValue": "vpc-7c5f6819"
+    }
+]
