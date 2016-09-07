@@ -16,8 +16,6 @@ global:
     - us-west-2
   reporting: true
 tests:
-  test1:
-    parameter_input: quickstart-aws-linuxbastion.json
-    template_file: quickstart-aws-linuxbastion.template
-quickstart-aws-linuxbastion.json	quickstart-aws-linuxbastion.template
-
+  amznlinux:
+    parameter_input: aws-linuxbastion-master-amznlinux.json
+    template_file: aws-linuxbastion-master.template
