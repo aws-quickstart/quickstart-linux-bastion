@@ -167,7 +167,7 @@
         "Bastion2HostName": {
             "Description": "Host name of the second bastion (up to 15 characters)",
             "Type": "String",
-            "Default": "Bastion",
+            "Default": "Bastion2",
             "MinLength": "1",
             "MaxLength": "15",
             "AllowedPattern": "[a-zA-Z0-9]+"
