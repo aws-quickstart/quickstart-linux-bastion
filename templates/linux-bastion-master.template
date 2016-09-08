@@ -26,6 +26,7 @@
                         "KeyPairName",
                         "NATInstanceType",
                         "Bastion1InstanceType",
+                        "BastionAMIOS",
                         "Bastion1PrivateIP",
                         "Bastion2InstanceType",
                         "Bastion2PrivateIP"
@@ -56,6 +57,9 @@
                 },
                 "Bastion2PrivateIP": {
                     "default": "Bastion 2 Private IP Address"
+                },
+                "BastionAMIOS": {
+                    "default": "Bastion AMI Operating System"
                 },
                 "KeyPairName": {
                     "default": "Key Pair Name"
