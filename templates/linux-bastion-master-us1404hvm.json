@@ -21,7 +21,7 @@
     },
     {
         "ParameterKey": "BastionAMIOS",
-        "ParameterValue": "US1404HVM"
+        "ParameterValue": "UbuntuServer1404LTSHVM"
     },
     {
         "ParameterKey": "KeyPairName",

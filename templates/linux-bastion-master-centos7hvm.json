@@ -21,7 +21,7 @@
     },
     {
         "ParameterKey": "BastionAMIOS",
-        "ParameterValue": "CENTOS7HVM"
+        "ParameterValue": "CentOS7HVM"
     },
     {
         "ParameterKey": "KeyPairName",
