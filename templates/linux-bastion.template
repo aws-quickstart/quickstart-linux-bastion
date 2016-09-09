@@ -52,12 +52,12 @@
         },
         "BastionAMIOS": {
             "AllowedValues": [
-                "AMZNLINUXHVM",
-                "CENTOS7HVM",
-                "US1404HVM"
+                "AmazonLinuxHVM",
+                "CentOS7HVM",
+                "UbuntuServer1404LTSHVM"
             ],
-            "Default": "AMZNLINUXHVM",
-            "Description": "This selects the AMI with a specific Linux distribution to be used for the bastion instances",
+            "Default": "AmazonLinuxHVM",
+            "Description": "The Linux distribution for the AMI to be used for the bastion instances",
             "Type": "String"
         },
         "KeyPairName": {
@@ -231,6 +231,17 @@
                 "Partition": "aws",
                 "QuickStartS3URL": "https://s3.amazonaws.com"
             }
+        },
+        "LinuxAMINameMap": {
+            "AmazonLinuxHVM": {
+                "Code": "AMZNLINUXHVM"
+            },
+            "CentOS7HVM": {
+                "Code": "CENTOS7HVM"
+            },
+            "UbuntuServer1404LTSHVM": {
+                "Code": "US1404HVM"
+            }
         }
     },
     "Resources": {
@@ -262,7 +273,13 @@
                             "Ref": "AWS::Region"
                         },
                         {
-                            "Ref": "BastionAMIOS"
+                            "Fn::FindInMap": [
+                                "LinuxAMINameMap",
+                                {
+                                    "Ref": "BastionAMIOS"
+                                },
+                                "Code"
+                            ]
                         }
                     ]
                 },
@@ -321,7 +338,13 @@
                             "Ref": "AWS::Region"
                         },
                         {
-                            "Ref": "BastionAMIOS"
+                            "Fn::FindInMap": [
+                                "LinuxAMINameMap",
+                                {
+                                    "Ref": "BastionAMIOS"
+                                },
+                                "Code"
+                            ]
                         }
                     ]
                 },
@@ -428,6 +451,13 @@
                 "Ref": "LinuxBastion2EIP"
             },
             "Description": "Elastic IP address of the Linux Bastion 2 in Avalability Zone 2"
+        },
+        "BastionSecurityGroupID": {
+            "Value": {
+                "Ref": "BastionSecurityGroup"
+            },
+            "Description": "Bastion Security Group ID"
         }
+
     }
 }
