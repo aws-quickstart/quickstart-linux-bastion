@@ -25,8 +25,8 @@
                     "Parameters": [
                         "KeyPairName",
                         "NATInstanceType",
-                        "Bastion1InstanceType",
                         "BastionAMIOS",
+                        "Bastion1InstanceType",
                         "Bastion1PrivateIP",
                         "Bastion2InstanceType",
                         "Bastion2PrivateIP"
