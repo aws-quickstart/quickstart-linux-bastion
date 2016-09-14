@@ -28,7 +28,7 @@
         },
         "BastionBanner": {
             "Default": "https://s3.amazonaws.com/quickstart-reference/linux/bastion/latest/scripts/banner.msg",
-            "Description": "Display Logon Message",
+            "Description": "Display bastion banner upon login (Replace with you on ascii file to update message)",
             "Type": "String"
         },
         "EnableBanner": {
