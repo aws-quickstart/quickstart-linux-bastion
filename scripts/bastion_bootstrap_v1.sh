@@ -97,6 +97,10 @@ if [[ $ENABLE == "True" ]];then
       if [ -f /etc/lsb-release ]; then
         service ssh restart
       fi
+
+      if [ -f /etc/system-release ]; then
+        service sshd restart
+      fi
   else
      echo "[INFO] banner file is not accessable skipping ..." 
      exit 1;
