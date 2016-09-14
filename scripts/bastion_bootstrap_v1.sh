@@ -89,8 +89,14 @@ if [[ $ENABLE == "True" ]];then
 
   if [ $BANNER_FILE ] ;then
      echo "[INFO] Installing banner ... "
-     echo -e "\n Banner ${BANNER_FILE}" >>/etc/ssh/sshd_config && service sshd restart
-  
+     echo -e "\n Banner ${BANNER_FILE}" >>/etc/ssh/sshd_config 
+      if [ -f /etc/redhat-release ]; then
+        /bin/systemctl restart  sshd.service
+      fi
+
+      if [ -f /etc/lsb-release ]; then
+        service ssh restart
+      fi
   else
      echo "[INFO] banner file is not accessable skipping ..." 
      exit 1;
