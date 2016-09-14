@@ -22,22 +22,8 @@
             "Type": "String"
         },
         "Bastion1PrivateIP": {
-            "Default": "172.30.0.11",
+            "Default": "10.0.128.5",
             "Description": "Fixed private IP for the first bastion located in Availability Zone 1",
-            "Type": "String"
-        },
-        "BastionBanner": {
-            "Default": "https://s3.amazonaws.com/quickstart-reference/linux/bastion/latest/scripts/banner.msg",
-            "Description": "Display bastion banner upon login (Replace with you own ascii s3 text file to update message)",
-            "Type": "String"
-        },
-        "EnableBanner": {
-            "AllowedValues": [
-                "True",
-                "False"
-            ],
-            "Description": "Optionally Enable Banner that will be displayed when sshing to Bastion",
-            "Default": "True",
             "Type": "String"
         },
         "Bastion2InstanceType": {
@@ -60,7 +46,7 @@
             "Type": "String"
         },
         "Bastion2PrivateIP": {
-            "Default": "172.30.1.11",
+            "Default": "10.0.144.5",
             "Description": "Fixed private IP for the second bastion located in Availability Zone 2",
             "Type": "String"
         },
@@ -74,6 +60,20 @@
             "Description": "The Linux distribution for the AMI to be used for the bastion instances",
             "Type": "String"
         },
+        "BastionBanner": {
+            "Default": "https://s3.amazonaws.com/quickstart-reference/linux/bastion/latest/scripts/banner_message.txt",
+            "Description": "Banner text to display upon login",
+            "Type": "String"
+        },
+        "EnableBanner": {
+            "AllowedValues": [
+                "True",
+                "False"
+            ],
+            "Default": "False",
+            "Description": "To include a banner to be displayed when connecting via SSH to the bastion, set this parameter to true",
+            "Type": "String"
+        },
         "KeyPairName": {
             "Description": "Public/private key pair",
             "Type": "AWS::EC2::KeyPair::KeyName"
@@ -85,12 +85,6 @@
         "PublicSubnet2ID": {
             "Description": "ID of the public subnet 2 you want to provision the second bastion into (e.g., subnet-e3246d8e)",
             "Type": "AWS::EC2::Subnet::Id"
-        },
-        "QuickStartS3URL": {
-            "ConstraintDescription": "S3Url",
-            "Default": "https://s3.amazonaws.com",
-            "Description": "AWS S3 Url",
-            "Type": "String"
         },
         "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
@@ -108,13 +102,8 @@
         },
         "RemoteAccessCIDR": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-            "Default": "0.0.0.0/0",
             "Description": "Allowed CIDR block for external SSH access to the bastions",
             "Type": "String"
-        },
-        "AvailabilityZones": {
-            "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved and only 2 AZs are used for this deployment.",
-            "Type": "List<AWS::EC2::AvailabilityZone::Name>"
         },
         "VPCID": {
             "Description": "ID of the VPC (e.g., vpc-0343606e)",
@@ -346,7 +335,13 @@
                                 "BASTION_BOOTSTRAP_FILE=bastion_bootstrap_v1.sh\n",
                                 "BASTION_BOOTSTRAP=",
                                 {
-                                    "Ref": "QuickStartS3URL"
+                                    "Fn::FindInMap": [
+                                        "AWSInfoRegionMap",
+                                        {
+                                            "Ref": "AWS::Region"
+                                        },
+                                        "QuickStartS3URL"
+                                    ]
                                 },
                                 "/",
                                 {
@@ -439,7 +434,13 @@
                                 "BASTION_BOOTSTRAP_FILE=bastion_bootstrap_v1.sh\n",
                                 "BASTION_BOOTSTRAP=",
                                 {
-                                    "Ref": "QuickStartS3URL"
+                                    "Fn::FindInMap": [
+                                        "AWSInfoRegionMap",
+                                        {
+                                            "Ref": "AWS::Region"
+                                        },
+                                        "QuickStartS3URL"
+                                    ]
                                 },
                                 "/",
                                 {

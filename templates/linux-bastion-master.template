@@ -23,8 +23,6 @@
                         "default": "Amazon EC2 Configuration"
                     },
                     "Parameters": [
-                        "BastionBanner",
-                        "EnableBanner",
                         "KeyPairName",
                         "NATInstanceType",
                         "BastionAMIOS",
@@ -32,6 +30,15 @@
                         "Bastion1PrivateIP",
                         "Bastion2InstanceType",
                         "Bastion2PrivateIP"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Linux Bastion Configuration"
+                    },
+                    "Parameters": [
+                        "BastionBanner",
+                        "EnableBanner"
                     ]
                 },
                 {
@@ -48,11 +55,6 @@
                 "AvailabilityZones": {
                     "default": "Availability Zones"
                 },
-                "BastionBanner": {
-                "Default": "***This system is for authorized users only*** (Replace this sample with your own message)",
-                "Description": "Display Logon Message",
-                "Type": "String"
-                },
                 "Bastion1InstanceType": {
                     "default": "Bastion 1 Instance Type"
                 },
@@ -67,6 +69,12 @@
                 },
                 "BastionAMIOS": {
                     "default": "Bastion AMI Operating System"
+                },
+                "BastionBanner": {
+                    "default": "Bastion Banner"
+                },
+                "EnableBanner": {
+                    "default": "Enable Banner"
                 },
                 "KeyPairName": {
                     "default": "Key Pair Name"
@@ -154,15 +162,20 @@
             "Type": "String",
             "Default": "10.0.144.5"
         },
+        "BastionBanner": {
+            "Default": "https://s3.amazonaws.com/quickstart-reference/linux/bastion/latest/scripts/banner_message.txt",
+            "Description": "Banner text to display upon login",
+            "Type": "String"
+        },
         "EnableBanner": {
             "AllowedValues": [
                 "True",
                 "False"
-                ],
-            "Description": "Optionally Enable Banner that will be displayed when sshing to Bastion",
-            "Default": "True",
+            ],
+            "Default": "False",
+            "Description": "To include a banner to be displayed when connecting via SSH to the bastion, set this parameter to true",
             "Type": "String"
-            },
+        },
         "BastionAMIOS": {
             "AllowedValues": [
                 "AmazonLinuxHVM",
@@ -232,7 +245,6 @@
         },
         "RemoteAccessCIDR": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-            "Default": "0.0.0.0/0",
             "Description": "Allowed CIDR block for external SSH access to the bastions",
             "Type": "String"
         },
@@ -399,6 +411,12 @@
                     },
                     "BastionAMIOS": {
                         "Ref": "BastionAMIOS"
+                    },
+                    "BastionBanner": {
+                        "Ref": "BastionBanner"
+                    },
+                    "EnableBanner": {
+                        "Ref": "EnableBanner"
                     },
                     "KeyPairName": {
                         "Ref": "KeyPairName"
