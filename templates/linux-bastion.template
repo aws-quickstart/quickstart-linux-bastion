@@ -35,11 +35,11 @@
             "AllowedValues": [
                 "True",
                 "False"
-                ],
+            ],
             "Description": "Optionally Enable Banner that will be displayed when sshing to Bastion",
             "Default": "True",
             "Type": "String"
-            },
+        },
         "Bastion2InstanceType": {
             "AllowedValues": [
                 "t2.nano",
@@ -148,62 +148,62 @@
             "AMI": {
                 "AMZNLINUXHVM": "amzn-ami-hvm-2016.03.3.x86_64-gp2",
                 "CENTOS7HVM": "CentOS Linux 7 x86_64 HVM EBS 1602-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-d7e1d2bd.3",
-                "US1404HVM": "ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20160627"
+                "US1404HVM": "ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20160714"
             },
             "ap-northeast-1": {
                 "AMZNLINUXHVM": "ami-374db956",
                 "CENTOS7HVM": "ami-eec1c380",
-                "US1404HVM": "ami-2e63924f"
+                "US1404HVM": "ami-63b44a02"
             },
             "ap-northeast-2": {
                 "AMZNLINUXHVM": "ami-2b408b45",
                 "CENTOS7HVM": "ami-c74789a9",
-                "US1404HVM": "ami-979258f9"
+                "US1404HVM": "ami-4238ed2c"
             },
             "ap-south-1": {
                 "AMZNLINUXHVM": "ami-ffbdd790",
                 "CENTOS7HVM": "ami-95cda6fa",
-                "US1404HVM": "ami-4a90fa25"
+                "US1404HVM": "ami-d3f98cbc"
             },
             "ap-southeast-1": {
                 "AMZNLINUXHVM": "ami-a59b49c6",
                 "CENTOS7HVM": "ami-f068a193",
-                "US1404HVM": "ami-ea2bf989"
+                "US1404HVM": "ami-21d30f42"
             },
             "ap-southeast-2": {
                 "AMZNLINUXHVM": "ami-dc361ebf",
                 "CENTOS7HVM": "ami-fedafc9d",
-                "US1404HVM": "ami-396a415a"
+                "US1404HVM": "ami-ba3e14d9"
             },
             "eu-central-1": {
                 "AMZNLINUXHVM": "ami-ea26ce85",
                 "CENTOS7HVM": "ami-9bf712f4",
-                "US1404HVM": "ami-4bd03b24"
+                "US1404HVM": "ami-26c43149"
             },
             "eu-west-1": {
                 "AMZNLINUXHVM": "ami-f9dd458a",
                 "CENTOS7HVM": "ami-7abd0209",
-                "US1404HVM": "ami-02b62c71"
+                "US1404HVM": "ami-ed82e39e"
             },
             "sa-east-1": {
                 "AMZNLINUXHVM": "ami-6dd04501",
                 "CENTOS7HVM": "ami-26b93b4a",
-                "US1404HVM": "ami-d952c7b5"
+                "US1404HVM": "ami-dc48dcb0"
             },
             "us-east-1": {
                 "AMZNLINUXHVM": "ami-6869aa05",
                 "CENTOS7HVM": "ami-6d1c2007",
-                "US1404HVM": "ami-2d39803a"
+                "US1404HVM": "ami-3bdd502c"
             },
             "us-west-1": {
                 "AMZNLINUXHVM": "ami-31490d51",
                 "CENTOS7HVM": "ami-af4333cf",
-                "US1404HVM": "ami-992661f9"
+                "US1404HVM": "ami-48db9d28"
             },
             "us-west-2": {
                 "AMZNLINUXHVM": "ami-7172b611",
                 "CENTOS7HVM": "ami-d2c924b2",
-                "US1404HVM": "ami-42569022"
+                "US1404HVM": "ami-d732f0b7"
             }
         },
         "AWSInfoRegionMap": {
@@ -345,17 +345,17 @@
                                 "#!/bin/bash\n",
                                 "BASTION_BOOTSTRAP_FILE=bastion_bootstrap_v1.sh\n",
                                 "BASTION_BOOTSTRAP=",
-                                {   
+                                {
                                     "Ref": "QuickStartS3URL"
-                                },  
+                                },
                                 "/",
-                                {   
+                                {
                                     "Ref": "QSS3BucketName"
-                                },  
+                                },
                                 "/",
-                                {   
+                                {
                                     "Ref": "QSS3KeyPrefix"
-                                },  
+                                },
                                 "/scripts/",
                                 "${BASTION_BOOTSTRAP_FILE}",
                                 "\n",
@@ -366,13 +366,13 @@
                                 "chmod +x ${BASTION_BOOTSTRAP_FILE}\n",
                                 "./${BASTION_BOOTSTRAP_FILE} ",
                                 " --banner ",
-                                {   
+                                {
                                     "Ref": "BastionBanner"
-                                },  
+                                },
                                 " --enable ",
-                                {   
+                                {
                                     "Ref": "EnableBanner"
-                                },  
+                                },
                                 "\n"
                             ]
                         ]
@@ -438,17 +438,17 @@
                                 "#!/bin/bash\n",
                                 "BASTION_BOOTSTRAP_FILE=bastion_bootstrap_v1.sh\n",
                                 "BASTION_BOOTSTRAP=",
-                                {   
+                                {
                                     "Ref": "QuickStartS3URL"
-                                },  
+                                },
                                 "/",
-                                {   
+                                {
                                     "Ref": "QSS3BucketName"
-                                },  
+                                },
                                 "/",
-                                {   
+                                {
                                     "Ref": "QSS3KeyPrefix"
-                                },  
+                                },
                                 "/scripts/",
                                 "${BASTION_BOOTSTRAP_FILE}",
                                 "\n",
@@ -459,13 +459,13 @@
                                 "chmod +x ${BASTION_BOOTSTRAP_FILE}\n",
                                 "./${BASTION_BOOTSTRAP_FILE} ",
                                 " --banner ",
-                                {   
+                                {
                                     "Ref": "BastionBanner"
-                                },  
+                                },
                                 " --enable ",
-                                {   
+                                {
                                     "Ref": "EnableBanner"
-                                },  
+                                },
                                 "\n"
                             ]
                         ]
