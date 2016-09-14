@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "This template is intended to be deployed into an existing VPC with two public subnets. It will deploy one Linux bastion instance in each public VPC subnet. **WARNING** This template creates Amazon EC2 Windows instance and related resources. You will be billed for the AWS resources used if you create a stack from this template. QS(0037)",
+    "Description": "This template is intended to be deployed into an existing VPC with two public subnets. It will deploy one Linux bastion instance in each public VPC subnet. **WARNING** This template creates Amazon EC2 instance and related resources. You will be billed for the AWS resources used if you create a stack from this template. QS(0037)",
     "Parameters": {
         "Bastion1InstanceType": {
             "AllowedValues": [
@@ -22,10 +22,24 @@
             "Type": "String"
         },
         "Bastion1PrivateIP": {
-            "Default": "10.0.128.5",
+            "Default": "172.30.0.11",
             "Description": "Fixed private IP for the first bastion located in Availability Zone 1",
             "Type": "String"
         },
+        "BastionBanner": {
+            "Default": "https://s3.amazonaws.com/quickstart-reference/linux/bastion/latest/scripts/banner.msg",
+            "Description": "Display Logon Message",
+            "Type": "String"
+        },
+        "EnableBanner": {
+            "AllowedValues": [
+                "True",
+                "False"
+                ],
+            "Description": "Optionally Enable Banner that will be displayed when sshing to Bastion",
+            "Default": "True",
+            "Type": "String"
+            },
         "Bastion2InstanceType": {
             "AllowedValues": [
                 "t2.nano",
@@ -46,7 +60,7 @@
             "Type": "String"
         },
         "Bastion2PrivateIP": {
-            "Default": "10.0.144.5",
+            "Default": "172.30.1.11",
             "Description": "Fixed private IP for the second bastion located in Availability Zone 2",
             "Type": "String"
         },
@@ -72,6 +86,12 @@
             "Description": "ID of the public subnet 2 you want to provision the second bastion into (e.g., subnet-e3246d8e)",
             "Type": "AWS::EC2::Subnet::Id"
         },
+        "QuickStartS3URL": {
+            "ConstraintDescription": "S3Url",
+            "Default": "https://s3.amazonaws.com",
+            "Description": "AWS S3 Url",
+            "Type": "String"
+        },
         "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
@@ -91,6 +111,10 @@
             "Default": "0.0.0.0/0",
             "Description": "Allowed CIDR block for external SSH access to the bastions",
             "Type": "String"
+        },
+        "AvailabilityZones": {
+            "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved and only 2 AZs are used for this deployment.",
+            "Type": "List<AWS::EC2::AvailabilityZone::Name>"
         },
         "VPCID": {
             "Description": "ID of the VPC (e.g., vpc-0343606e)",
@@ -319,8 +343,36 @@
                             "",
                             [
                                 "#!/bin/bash\n",
-                                " >/root/domainname",
-                                "date >/root/born_date",
+                                "BASTION_BOOTSTRAP_FILE=bastion_bootstrap_v1.sh\n",
+                                "BASTION_BOOTSTRAP=",
+                                {   
+                                    "Ref": "QuickStartS3URL"
+                                },  
+                                "/",
+                                {   
+                                    "Ref": "QSS3BucketName"
+                                },  
+                                "/",
+                                {   
+                                    "Ref": "QSS3KeyPrefix"
+                                },  
+                                "/scripts/",
+                                "${BASTION_BOOTSTRAP_FILE}",
+                                "\n",
+                                "echo ${BASTION_BOOTSTRAP}",
+                                "\n",
+                                "wget ${BASTION_BOOTSTRAP}",
+                                "\n",
+                                "chmod +x ${BASTION_BOOTSTRAP_FILE}\n",
+                                "./${BASTION_BOOTSTRAP_FILE} ",
+                                " --banner ",
+                                {   
+                                    "Ref": "BastionBanner"
+                                },  
+                                " --enable ",
+                                {   
+                                    "Ref": "EnableBanner"
+                                },  
                                 "\n"
                             ]
                         ]
@@ -384,8 +436,36 @@
                             "",
                             [
                                 "#!/bin/bash\n",
-                                " >/root/domainname",
-                                "date >/root/born_date",
+                                "BASTION_BOOTSTRAP_FILE=bastion_bootstrap_v1.sh\n",
+                                "BASTION_BOOTSTRAP=",
+                                {   
+                                    "Ref": "QuickStartS3URL"
+                                },  
+                                "/",
+                                {   
+                                    "Ref": "QSS3BucketName"
+                                },  
+                                "/",
+                                {   
+                                    "Ref": "QSS3KeyPrefix"
+                                },  
+                                "/scripts/",
+                                "${BASTION_BOOTSTRAP_FILE}",
+                                "\n",
+                                "echo ${BASTION_BOOTSTRAP}",
+                                "\n",
+                                "wget ${BASTION_BOOTSTRAP}",
+                                "\n",
+                                "chmod +x ${BASTION_BOOTSTRAP_FILE}\n",
+                                "./${BASTION_BOOTSTRAP_FILE} ",
+                                " --banner ",
+                                {   
+                                    "Ref": "BastionBanner"
+                                },  
+                                " --enable ",
+                                {   
+                                    "Ref": "EnableBanner"
+                                },  
                                 "\n"
                             ]
                         ]

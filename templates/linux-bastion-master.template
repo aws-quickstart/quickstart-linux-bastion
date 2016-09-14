@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "This template creates a VPC infrastructure for a multi-AZ, multi-tier deployment of a Linux based Application infrastructure. It will deploy a bastion and managed NAT gateways or NAT instances into the public subnet for each Availability Zone. **WARNING** This template creates Amazon EC2 Windows instance and related resources. You will be billed for the AWS resources used if you create a stack from this template.",
+    "Description": "This template creates a VPC infrastructure for a multi-AZ, multi-tier deployment of a Linux based Application infrastructure. It will deploy a bastion and managed NAT gateways or NAT instances into the public subnet for each Availability Zone. **WARNING** This template creates Amazon EC2 instance and related resources. You will be billed for the AWS resources used if you create a stack from this template.",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
@@ -23,6 +23,8 @@
                         "default": "Amazon EC2 Configuration"
                     },
                     "Parameters": [
+                        "BastionBanner",
+                        "EnableBanner",
                         "KeyPairName",
                         "NATInstanceType",
                         "BastionAMIOS",
@@ -45,6 +47,11 @@
             "ParameterLabels": {
                 "AvailabilityZones": {
                     "default": "Availability Zones"
+                },
+                "BastionBanner": {
+                "Default": "***This system is for authorized users only*** (Replace this sample with your own message)",
+                "Description": "Display Logon Message",
+                "Type": "String"
                 },
                 "Bastion1InstanceType": {
                     "default": "Bastion 1 Instance Type"
@@ -147,6 +154,15 @@
             "Type": "String",
             "Default": "10.0.144.5"
         },
+        "EnableBanner": {
+            "AllowedValues": [
+                "True",
+                "False"
+                ],
+            "Description": "Optionally Enable Banner that will be displayed when sshing to Bastion",
+            "Default": "True",
+            "Type": "String"
+            },
         "BastionAMIOS": {
             "AllowedValues": [
                 "AmazonLinuxHVM",
