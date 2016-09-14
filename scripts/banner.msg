@@ -1,19 +1,12 @@
 
-
-
-
-
-##############################################
-#     This is only a sample message          #
-#--------------------------------------------#
-#     If you are not an authorized user!     #
-#     Please disconnect Immediately!         #
-##############################################
-#                                            #
-#  You can customize the above message by    #
-#  updating the inputs provided at launch    #
-#                                            #
-#  NOTE: You can also disable this message   #
-#  by setting the EnableBanner option        #
-#  to False                                  #
-**********************************************
+###############################################################################
+#     ___        ______     ___        _      _      ____  _             _    #
+#    / \ \      / / ___|   / _ \ _   _(_) ___| | __ / ___|| |_ __ _ _ __| |_  #
+#   / _ \ \ /\ / /\___ \  | | | | | | | |/ __| |/ / \___ \| __/ _` | '__| __| #
+#  / ___ \ V  V /  ___) | | |_| | |_| | | (__|   <   ___) | || (_| | |  | |_  #
+# /_/   \_\_/\_/  |____/   \__\_\\__,_|_|\___|_|\_\ |____/ \__\__,_|_|   \__| #
+#-----------------------------------------------------------------------------#
+#                           Authorized access only!                           #
+#         Disconnect IMMEDIATELY if you are not an authorized user!!!         #
+#                All actions will be monitored and recorded.                  #
+###############################################################################
