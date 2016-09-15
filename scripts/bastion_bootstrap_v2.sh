@@ -75,10 +75,10 @@ done
 
 
 BANNER_FILE="/etc/ssh_banner"
-BASTION_MNT=/var/log/bastion
-BASTION_LOG=bastion.log
+BASTION_MNT="/var/log/bastion"
+BASTION_LOG="bastion.log"
 
-echo "Setting up bastion log in ${BASTION_MNT}/${BASTION_LOG}"
+echo "Setting up bastion session log in ${BASTION_MNT}/${BASTION_LOG}"
 mkdir -p ${BASTION_MNT}
 BASTION_LOGFILE="${BASTION_MNT}/${BASTION_LOG}"
 BASTION_LOGFILE_SHADOW="${BASTION_MNT}/.${BASTION_LOG}"
@@ -93,8 +93,6 @@ if [[ $ENABLE == "True" ]];then
       echo "Creating Banner in ${BANNER_FILE}"
       echo "curl  -s ${BANNER_PATH} > ${BANNER_FILE}"
       curl  -s ${BANNER_PATH} > ${BANNER_FILE}
-
-
 
   if [ $BANNER_FILE ] ;then
      echo "[INFO] Installing banner ... "
