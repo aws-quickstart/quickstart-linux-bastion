@@ -356,7 +356,7 @@
                                 "\n",
                                 "echo ${BASTION_BOOTSTRAP}",
                                 "\n",
-                                "curl -s ${BASTION_BOOTSTRAP} ${BASTION_BOOTSTRAP_FILE} ",
+                                "curl -s ${BASTION_BOOTSTRAP} > ${BASTION_BOOTSTRAP_FILE} ",
                                 "\n",
                                 "chmod +x ${BASTION_BOOTSTRAP_FILE}\n",
                                 "./${BASTION_BOOTSTRAP_FILE} ",

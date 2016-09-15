@@ -104,7 +104,7 @@ if [[ $ENABLE == "True" ]];then
       echo -e "\nDefaults env_keep += \"SSH_CLIENT\"" >>/etc/sudoers
 cat <<'EOF' >> /etc/bashrc
 #Added by linux bastion bootstrap
-iIP=$(echo $SSH_CLIENT | awk '{print $1}')
+IP=$(echo $SSH_CLIENT | awk '{print $1}')
 TIME=$(date)
 EOF
 echo "BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc 
@@ -138,7 +138,7 @@ EOF
       chattr +a ${BASTION_LOGFILE_SHADOW}
       fi
 # AMZN Linux
-      if [ -f /etc/system-release ]; then
+      if [ -f /etc/system-release && ! -f /etc/redhat-release ]; then
         service sshd restart
       echo -e "\nDefaults env_keep += \"SSH_CLIENT\"" >>/etc/sudoers
 cat <<'EOF' >> /etc/bashrc
