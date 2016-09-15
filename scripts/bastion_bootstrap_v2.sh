@@ -139,6 +139,30 @@ EOF
       chattr +a ${BASTION_LOGFILE}
       chattr +a ${BASTION_LOGFILE_SHADOW}
       fi
-
+# AMZN Linux
+      if [ -f /etc/system-release ]; then
+        service sshd restart
+      echo -e "\nDefaults env_keep += \"SSH_CLIENT\"" >>/etc/sudoers
+cat <<'EOF' >> /etc/bashrc
+#Added by linux bastion bootstrap
+iIP=$(echo $SSH_CLIENT | awk '{print $1}')
+TIME=$(date)
+EOF
+echo "BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc 
+cat <<'EOF' >> /etc/bashrc
+PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+EOF
+      chown root:ec2-user  ${BASTION_LOGFILE} 
+      chown root:ec2-user  ${BASTION_LOGFILE_SHADOW}
+      chmod 622 ${BASTION_LOGFILE}
+      chmod 622 ${BASTION_LOGFILE_SHADOW}
+      chattr +a ${BASTION_LOGFILE}
+      chattr +a ${BASTION_LOGFILE_SHADOW}
+      fi
+  else
+     echo "[INFO] banner file is not accessable skipping ..." 
+     exit 1;
+  fi
+   fi 
 else echo "Banner message is not enabled!"
 fi
