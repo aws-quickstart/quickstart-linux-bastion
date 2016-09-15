@@ -120,6 +120,25 @@ EOF
       chattr +a ${BASTION_LOGFILE}
       chattr +a ${BASTION_LOGFILE_SHADOW}
       fi
+# Ubuntu Linux
+      if [ -f /etc/lsb-release ]; then
+        service ssh restart
+cat <<'EOF' >> /etc/bash.bashrc
+#Added by linux bastion bootstrap
+IP=$(who am i --ips|awk '{print $5}')
+TIME=$(date)
+EOF
+echo "BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bash.bashrc 
+cat <<'EOF' >> /etc/bash.bashrc
+PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+EOF
+      chown syslog:adm  ${BASTION_LOGFILE} 
+      chown syslog:adm  ${BASTION_LOGFILE_SHADOW}
+      chmod 622 ${BASTION_LOGFILE}
+      chmod 622 ${BASTION_LOGFILE_SHADOW}
+      chattr +a ${BASTION_LOGFILE}
+      chattr +a ${BASTION_LOGFILE_SHADOW}
+      fi
 
 else echo "Banner message is not enabled!"
 fi
