@@ -332,7 +332,7 @@
                             "",
                             [
                                 "#!/bin/bash\n",
-                                "BASTION_BOOTSTRAP_FILE=bastion_bootstrap_v2.sh\n",
+                                "BASTION_BOOTSTRAP_FILE=bastion_bootstrap.sh\n",
                                 "BASTION_BOOTSTRAP=",
                                 {
                                     "Fn::FindInMap": [
@@ -431,7 +431,7 @@
                             "",
                             [
                                 "#!/bin/bash\n",
-                                "BASTION_BOOTSTRAP_FILE=bastion_bootstrap_v1.sh\n",
+                                "BASTION_BOOTSTRAP_FILE=bastion_bootstrap.sh\n",
                                 "BASTION_BOOTSTRAP=",
                                 {
                                     "Fn::FindInMap": [
