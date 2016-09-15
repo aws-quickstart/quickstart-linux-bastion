@@ -111,8 +111,8 @@ echo "BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
 cat <<'EOF' >> /etc/bashrc
 PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
-      chown root:ec2-user  ${BASTION_LOGFILE} 
-      chown root:ec2-user  ${BASTION_LOGFILE_SHADOW}
+      chown root:adm  ${BASTION_LOGFILE} 
+      chown root:adm  ${BASTION_LOGFILE_SHADOW}
       chmod 622 ${BASTION_LOGFILE}
       chmod 622 ${BASTION_LOGFILE_SHADOW}
       chattr +a ${BASTION_LOGFILE}
