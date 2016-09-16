@@ -138,7 +138,7 @@ EOF
       chattr +a ${BASTION_LOGFILE_SHADOW}
       fi
 # AMZN Linux
-      if [ -f /etc/system-release && ! -f /etc/redhat-release ]; then
+      if [[ -f /etc/system-release && ! -f /etc/redhat-release ]]; then
         service sshd restart
       echo -e "\nDefaults env_keep += \"SSH_CLIENT\"" >>/etc/sudoers
 cat <<'EOF' >> /etc/bashrc
