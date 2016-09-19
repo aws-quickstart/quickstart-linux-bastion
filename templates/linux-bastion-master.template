@@ -37,8 +37,8 @@
                         "default": "Linux Bastion Configuration"
                     },
                     "Parameters": [
-                        "BastionBanner",
-                        "EnableBanner"
+                        "EnableBanner",
+                        "BastionBanner"
                     ]
                 },
                 {
@@ -173,10 +173,10 @@
         },
         "EnableBanner": {
             "AllowedValues": [
-                "True",
-                "False"
+                "true",
+                "false"
             ],
-            "Default": "False",
+            "Default": "false",
             "Description": "To include a banner to be displayed when connecting via SSH to the bastion, set this parameter to true",
             "Type": "String"
         },

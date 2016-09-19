@@ -1,10 +1,10 @@
 #!/bin/bash -e
-# Bastion Bootstraping 
+# Bastion Bootstraping
 # authors: tonynv@amazon.com, sancard@amazon.com
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you must install GNU getopt and mod the checkos fuction so its supported
 
 
-# Configuration 
+# Configuration
 PROGRAM='Linux Bastion'
 
 ##################################### Functions
@@ -58,16 +58,16 @@ while true; do
     -h | --help)
 	usage
 	exit 1
-	;; 
+	;;
     --banner )
-	BANNER_PATH="$2"; 
-	shift 2 
+	BANNER_PATH="$2";
+	shift 2
 	;;
     --enable )
-	ENABLE="$2"; 
-	shift 2 
+	ENABLE="$2";
+	shift 2
 	;;
-    -- ) 
+    -- )
 	break;;
     *) break ;;
   esac
@@ -85,10 +85,10 @@ BASTION_LOGFILE_SHADOW="${BASTION_MNT}/.${BASTION_LOG}"
 touch ${BASTION_LOGFILE}
 ln ${BASTION_LOGFILE} ${BASTION_LOGFILE_SHADOW}
 
-if [[ $ENABLE == "True" ]];then 
+if [[ $ENABLE == "true" ]];then
    if [ -z ${BANNER_PATH} ];then
      echo "BANNER_PATH is null skipping ..."
-   else 
+   else
       echo "BANNER_PATH = ${BANNER_PATH}"
       echo "Creating Banner in ${BANNER_FILE}"
       echo "curl  -s ${BANNER_PATH} > ${BANNER_FILE}"
@@ -96,7 +96,7 @@ if [[ $ENABLE == "True" ]];then
 
   if [ $BANNER_FILE ] ;then
      echo "[INFO] Installing banner ... "
-     echo -e "\n Banner ${BANNER_FILE}" >>/etc/ssh/sshd_config 
+     echo -e "\n Banner ${BANNER_FILE}" >>/etc/ssh/sshd_config
 
 # CentOS Linux
       if [ -f /etc/redhat-release ]; then
@@ -107,11 +107,11 @@ cat <<'EOF' >> /etc/bashrc
 IP=$(echo $SSH_CLIENT | awk '{print $1}')
 TIME=$(date)
 EOF
-echo "BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc 
+echo "BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
 cat <<'EOF' >> /etc/bashrc
 PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
-      chown root:adm  ${BASTION_LOGFILE} 
+      chown root:adm  ${BASTION_LOGFILE}
       chown root:adm  ${BASTION_LOGFILE_SHADOW}
       chmod 622 ${BASTION_LOGFILE}
       chmod 622 ${BASTION_LOGFILE_SHADOW}
@@ -126,11 +126,11 @@ cat <<'EOF' >> /etc/bash.bashrc
 IP=$(who am i --ips|awk '{print $5}')
 TIME=$(date)
 EOF
-echo "BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bash.bashrc 
+echo "BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bash.bashrc
 cat <<'EOF' >> /etc/bash.bashrc
 PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
-      chown syslog:adm  ${BASTION_LOGFILE} 
+      chown syslog:adm  ${BASTION_LOGFILE}
       chown syslog:adm  ${BASTION_LOGFILE_SHADOW}
       chmod 622 ${BASTION_LOGFILE}
       chmod 622 ${BASTION_LOGFILE_SHADOW}
@@ -146,11 +146,11 @@ cat <<'EOF' >> /etc/bashrc
 iIP=$(echo $SSH_CLIENT | awk '{print $1}')
 TIME=$(date)
 EOF
-echo "BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc 
+echo "BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
 cat <<'EOF' >> /etc/bashrc
 PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
-      chown root:ec2-user  ${BASTION_LOGFILE} 
+      chown root:ec2-user  ${BASTION_LOGFILE}
       chown root:ec2-user  ${BASTION_LOGFILE_SHADOW}
       chmod 622 ${BASTION_LOGFILE}
       chmod 622 ${BASTION_LOGFILE_SHADOW}
@@ -158,9 +158,9 @@ EOF
       chattr +a ${BASTION_LOGFILE_SHADOW}
       fi
   else
-     echo "[INFO] banner file is not accessable skipping ..." 
+     echo "[INFO] banner file is not accessable skipping ..."
      exit 1;
   fi
-   fi 
+   fi
 else echo "Banner message is not enabled!"
 fi

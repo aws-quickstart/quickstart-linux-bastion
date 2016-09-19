@@ -1,6 +1,98 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "This template is intended to be deployed into an existing VPC with two public subnets. It will deploy one Linux bastion instance in each public VPC subnet. **WARNING** This template creates Amazon EC2 instance and related resources. You will be billed for the AWS resources used if you create a stack from this template. QS(0037)",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Network Configuration"
+                    },
+                    "Parameters": [
+                        "VPCID",
+                        "PublicSubnet1ID",
+                        "PublicSubnet2ID",
+                        "RemoteAccessCIDR"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Amazon EC2 Configuration"
+                    },
+                    "Parameters": [
+                        "KeyPairName",
+                        "BastionAMIOS",
+                        "Bastion1InstanceType",
+                        "Bastion1PrivateIP",
+                        "Bastion2InstanceType",
+                        "Bastion2PrivateIP"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Linux Bastion Configuration"
+                    },
+                    "Parameters": [
+                        "EnableBanner",
+                        "BastionBanner"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "AWS Quick Start Configuration"
+                    },
+                    "Parameters": [
+                        "QSS3BucketName",
+                        "QSS3KeyPrefix"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "Bastion1InstanceType": {
+                    "default": "Bastion 1 Instance Type"
+                },
+                "Bastion1PrivateIP": {
+                    "default": "Bastion 1 Private IP Address"
+                },
+                "Bastion2InstanceType": {
+                    "default": "Bastion 2 Instance Type"
+                },
+                "Bastion2PrivateIP": {
+                    "default": "Bastion 2 Private IP Address"
+                },
+                "BastionAMIOS": {
+                    "default": "Bastion AMI Operating System"
+                },
+                "BastionBanner": {
+                    "default": "Bastion Banner"
+                },
+                "EnableBanner": {
+                    "default": "Enable Banner"
+                },
+                "KeyPairName": {
+                    "default": "Key Pair Name"
+                },
+                "PublicSubnet1ID": {
+                    "default": "Public Subnet 1 ID"
+                },
+                "PublicSubnet2ID": {
+                    "default": "Public Subnet 2 ID"
+                },
+                "QSS3BucketName": {
+                    "default": "Quick Start S3 Bucket Name"
+                },
+                "QSS3KeyPrefix": {
+                    "default": "Quick Start S3 Key Prefix"
+                },
+                "RemoteAccessCIDR": {
+                    "default": "Allowed Bastion External Access CIDR"
+                },
+                "VPCID": {
+                    "default": "VPC ID"
+                }
+            }
+        }
+    },
     "Parameters": {
         "Bastion1InstanceType": {
             "AllowedValues": [
@@ -71,10 +163,10 @@
         },
         "EnableBanner": {
             "AllowedValues": [
-                "True",
-                "False"
+                "true",
+                "false"
             ],
-            "Default": "False",
+            "Default": "false",
             "Description": "To include a banner to be displayed when connecting via SSH to the bastion, set this parameter to true",
             "Type": "String"
         },
