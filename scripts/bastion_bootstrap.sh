@@ -148,7 +148,7 @@ EOF
                 echo -e "\nDefaults env_keep += \"SSH_CLIENT\"" >>/etc/sudoers
 cat <<'EOF' >> /etc/bashrc
 #Added by linux bastion bootstrap
-iIP=$(echo $SSH_CLIENT | awk '{print $1}')
+IP=$(echo $SSH_CLIENT | awk '{print $1}')
 TIME=$(date)
 EOF
                 echo "BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
