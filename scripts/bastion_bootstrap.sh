@@ -118,7 +118,7 @@ TIME=$(date)
 EOF
     echo "BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
 cat <<'EOF' >> /etc/bashrc
-PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
     chown root:adm  ${BASTION_LOGFILE}
     chown root:adm  ${BASTION_LOGFILE_SHADOW}
@@ -136,7 +136,7 @@ TIME=$(date)
 EOF
 echo "BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bash.bashrc
 cat <<'EOF' >> /etc/bash.bashrc
-PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
     chown syslog:adm  ${BASTION_LOGFILE}
     chown syslog:adm  ${BASTION_LOGFILE_SHADOW}
@@ -155,7 +155,7 @@ TIME=$(date)
 EOF
     echo "BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
 cat <<'EOF' >> /etc/bashrc
-PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
     chown root:ec2-user  ${BASTION_LOGFILE}
     chown root:ec2-user  ${BASTION_LOGFILE_SHADOW}
@@ -164,3 +164,4 @@ EOF
     chattr +a ${BASTION_LOGFILE}
     chattr +a ${BASTION_LOGFILE_SHADOW}
 fi
+
