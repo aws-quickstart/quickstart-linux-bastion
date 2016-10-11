@@ -99,12 +99,12 @@ else
 fi
 
 # LOGGING CONFIGURATION
-BASTION_MNT="/var/log/bastion"
-BASTION_LOG="bastion.log"
+declare -rx BASTION_MNT="/var/log/bastion"
+declare -rx BASTION_LOG="bastion.log"
 echo "Setting up bastion session log in ${BASTION_MNT}/${BASTION_LOG}"
 mkdir -p ${BASTION_MNT}
-BASTION_LOGFILE="${BASTION_MNT}/${BASTION_LOG}"
-BASTION_LOGFILE_SHADOW="${BASTION_MNT}/.${BASTION_LOG}"
+declare -rx BASTION_LOGFILE="${BASTION_MNT}/${BASTION_LOG}"
+declare -rx BASTION_LOGFILE_SHADOW="${BASTION_MNT}/.${BASTION_LOG}"
 touch ${BASTION_LOGFILE}
 ln ${BASTION_LOGFILE} ${BASTION_LOGFILE_SHADOW}
 # CentOS Linux
@@ -113,12 +113,12 @@ if [ -f /etc/redhat-release ]; then
     echo -e "\nDefaults env_keep += \"SSH_CLIENT\"" >>/etc/sudoers
 cat <<'EOF' >> /etc/bashrc
 #Added by linux bastion bootstrap
-IP=$(echo $SSH_CLIENT | awk '{print $1}')
-TIME=$(date)
+declare -rx IP=$(echo $SSH_CLIENT | awk '{print $1}')
+declare -rx TIME=$(date)
 EOF
-    echo "BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
+    echo "declare -rx BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
 cat <<'EOF' >> /etc/bashrc
-declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${declare -rx TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
     chown root:adm  ${BASTION_LOGFILE}
     chown root:adm  ${BASTION_LOGFILE_SHADOW}
@@ -131,12 +131,12 @@ elif [ -f /etc/lsb-release ]; then
     service ssh restart
 cat <<'EOF' >> /etc/bash.bashrc
 #Added by linux bastion bootstrap
-IP=$(who am i --ips|awk '{print $5}')
-TIME=$(date)
+declare -rx IP=$(who am i --ips|awk '{print $5}')
+declare -rx TIME=$(date)
 EOF
-echo "BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bash.bashrc
+echo " declare -rx BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bash.bashrc
 cat <<'EOF' >> /etc/bash.bashrc
-declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${declare -rx TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
     chown syslog:adm  ${BASTION_LOGFILE}
     chown syslog:adm  ${BASTION_LOGFILE_SHADOW}
@@ -150,12 +150,12 @@ elif [[ -f /etc/system-release && ! -f /etc/redhat-release ]]; then
     echo -e "\nDefaults env_keep += \"SSH_CLIENT\"" >>/etc/sudoers
 cat <<'EOF' >> /etc/bashrc
 #Added by linux bastion bootstrap
-IP=$(echo $SSH_CLIENT | awk '{print $1}')
-TIME=$(date)
+declare -rx IP=$(echo $SSH_CLIENT | awk '{print $1}')
+declare -rx TIME=$(date)
 EOF
-    echo "BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
+    echo " declare -rx BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
 cat <<'EOF' >> /etc/bashrc
-declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${declare -rx TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
     chown root:ec2-user  ${BASTION_LOGFILE}
     chown root:ec2-user  ${BASTION_LOGFILE_SHADOW}
