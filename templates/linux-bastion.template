@@ -281,6 +281,11 @@
                 "CENTOS7HVM": "ami-6d1c2007",
                 "US1404HVM": "ami-c8580bdf"
             },
+            "us-east-2": {
+                "AMZNLINUXHVM": "ami-f6035893",
+                "CENTOS7HVM": "ami-6a2d760f",
+                "US1404HVM": "ami-b7075dd2"
+            },
             "us-west-1": {
                 "AMZNLINUXHVM": "ami-31490d51",
                 "CENTOS7HVM": "ami-af4333cf",
@@ -326,6 +331,10 @@
                 "QuickStartS3URL": "https://s3.amazonaws.com"
             },
             "us-east-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "us-east-2": {
                 "Partition": "aws",
                 "QuickStartS3URL": "https://s3.amazonaws.com"
             },
