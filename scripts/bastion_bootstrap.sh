@@ -1,6 +1,7 @@
 #!/bin/bash -e
 # Bastion Bootstraping
 # authors: tonynv@amazon.com, sancard@amazon.com
+# date Nov,9,2016
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you must install GNU getopt and mod the checkos fuction so its supported
 
 
@@ -114,11 +115,10 @@ if [ -f /etc/redhat-release ]; then
 cat <<'EOF' >> /etc/bashrc
 #Added by linux bastion bootstrap
 declare -rx IP=$(echo $SSH_CLIENT | awk '{print $1}')
-declare -rx TIME=$(date)
 EOF
     echo "declare -rx BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
 cat <<'EOF' >> /etc/bashrc
-declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${declare -rx TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
     chown root:adm  ${BASTION_LOGFILE}
     chown root:adm  ${BASTION_LOGFILE_SHADOW}
@@ -136,7 +136,7 @@ declare -rx TIME=$(date)
 EOF
 echo " declare -rx BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bash.bashrc
 cat <<'EOF' >> /etc/bash.bashrc
-declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${declare -rx TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
     chown syslog:adm  ${BASTION_LOGFILE}
     chown syslog:adm  ${BASTION_LOGFILE_SHADOW}
@@ -155,7 +155,7 @@ declare -rx TIME=$(date)
 EOF
     echo " declare -rx BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
 cat <<'EOF' >> /etc/bashrc
-declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${declare -rx TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
     chown root:ec2-user  ${BASTION_LOGFILE}
     chown root:ec2-user  ${BASTION_LOGFILE_SHADOW}
