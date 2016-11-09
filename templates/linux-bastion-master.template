@@ -303,6 +303,10 @@
                 "Partition": "aws",
                 "QuickStartS3URL": "https://s3.amazonaws.com"
             },
+            "us-east-2": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
             "us-gov-west-1": {
                 "Partition": "aws-us-gov",
                 "QuickStartS3URL": "https://s3-us-gov-west-1.amazonaws.com"
