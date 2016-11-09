@@ -1,7 +1,7 @@
 [
     {
         "ParameterKey": "AvailabilityZones",
-        "ParameterValue": "us-east-1a,us-east-1b"
+        "ParameterValue": "$[alfred_genaz_2]"
     },
     {
         "ParameterKey": "Bastion1InstanceType",
@@ -17,15 +17,15 @@
     },
     {
         "ParameterKey": "Bastion2PrivateIP",
-        "ParameterValue": "10.0.144.7"
+        "ParameterValue": "10.0.144.5"
     },
     {
         "ParameterKey": "BastionAMIOS",
-        "ParameterValue": "CentOS7HVM"
+        "ParameterValue": "AmazonLinuxHVM"
     },
     {
         "ParameterKey": "KeyPairName",
-        "ParameterValue": "tonynv"
+        "ParameterValue": "cikey"
     },
     {
         "ParameterKey": "NATInstanceType",
