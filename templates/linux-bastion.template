@@ -17,6 +17,14 @@
                 },
                 {
                     "Label": {
+                        "default": "Auto-Scaling Configuration"
+                    },
+                    "Parameters": [
+                        "MinNumberOfHostsPerAZ"
+                    ]
+                },
+                {
+                    "Label": {
                         "default": "Amazon EC2 Configuration"
                     },
                     "Parameters": [
@@ -86,6 +94,9 @@
                 },
                 "RemoteAccessCIDR": {
                     "default": "Allowed Bastion External Access CIDR"
+                },
+                "MinNumberOfHostsPerAZ": {
+                     "default": "1"
                 },
                 "VPCID": {
                     "default": "VPC ID"
@@ -171,8 +182,14 @@
             "Type": "String"
         },
         "KeyPairName": {
-            "Description": "Public/private key pair",
+            "Description": "Enter a Public/private key pair. If you do not have one in this region, please create it before continuing",
             "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "MinNumberOfHostsPerAZ": {
+              "AllowedValues": ["1", "2", "3", "4"],
+              "Default": "1",
+              "Description": "Enter the minimum Bastion Hosts to start with per AZ.",
+              "Type": "String"
         },
         "PublicSubnet1ID": {
             "Description": "ID of the public subnet 1 that you want to provision the first bastion into (e.g., subnet-a0246dcd)",
@@ -205,6 +222,15 @@
         "VPCID": {
             "Description": "ID of the VPC (e.g., vpc-0343606e)",
             "Type": "AWS::EC2::VPC::Id"
+        },
+        "EnableSSHForwarding": {
+            "Type": "String",
+            "Description": "Enable SSH Forwarding",
+            "Default": "true",
+            "AllowedValues": [
+              "true",
+              "false"
+            ]
         }
     },
     "Rules": {
@@ -382,6 +408,99 @@
         }
     },
     "Resources": {
+        "BastionMainLogGroup" : {
+            "Type" : "AWS::Logs::LogGroup"
+        },
+        "SSHWordMetric" : {
+            "Properties" : {
+                "LogGroupName" : {
+                "Ref" : "BastionMainLogGroup"
+                },
+                "FilterPattern" : "FROM",
+                "MetricTransformations" : [
+                {
+                    "MetricName" : "SSHOccurences",
+                    "MetricValue" : 1,
+                    "MetricNamespace" : {
+                        "Fn::Join" : [
+                            "/",
+                            [
+                        "EC2",
+                        {
+                            "Ref" : "LinuxBastion1"
+                        },
+                        "EC2",
+                        {
+                            "Ref" : "LinuxBastion2"
+                        }
+                            ]
+                        ]
+                    }
+                }
+                ]
+            },
+            "Type" : "AWS::Logs::MetricFilter"
+        },
+        "BastionHostRole" : {
+            "Properties" : {
+                "Policies" : [
+                {
+                    "PolicyDocument" : {
+                        "Version" : "2012-10-17",
+                        "Statement" : [
+                            {
+                            "Action" : [
+                                "logs:CreateLogStream",
+                                "logs:GetLogEvents",
+                                "logs:PutLogEvents",
+                                "logs:DescribeLogGroups",
+                                "logs:DescribeLogStreams",
+                                "logs:PutRetentionPolicy",
+                                "logs:PutMetricFilter",
+                                "logs:CreateLogGroup"
+                            ],
+                            "Resource" : [
+                                "arn:aws:logs:*:*:*"
+                            ],
+                            "Effect" : "Allow"
+                            }
+                        ]
+                    },
+                    "PolicyName" : "bastion-policy"
+                }
+                ],
+                "Path" : "/",
+                "AssumeRolePolicyDocument" : {
+                "Statement" : [
+                    {
+                        "Action" : [
+                            "sts:AssumeRole"
+                        ],
+                        "Principal" : {
+                            "Service" : [
+                            "ec2.amazonaws.com"
+                            ]
+                        },
+                        "Effect" : "Allow"
+                    }
+                ],
+                "Version" : "2012-10-17"
+                }
+            },
+            "Type" : "AWS::IAM::Role"
+        },
+        "BastionHostProfile": {
+        "Type": "AWS::IAM::InstanceProfile",
+        "Properties": {
+            "Roles": [
+            {
+                "Ref": "BastionHostRole"
+            }
+            ],
+            "Path": "/"
+        }
+        },
+
         "LinuxBastion1EIP": {
             "Type": "AWS::EC2::EIP",
             "Properties": {
@@ -403,6 +522,9 @@
         "LinuxBastion1": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
+                "IamInstanceProfile": {
+                    "Ref": "BastionHostProfile"
+                },
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSAMIRegionMap",
@@ -456,6 +578,11 @@
                             "",
                             [
                                 "#!/bin/bash\n",
+                                "CLOUDWATCHGROUP=",
+                                {
+                                    "Ref": "BastionMainLogGroup"
+                                },
+                                "\n",
                                 "BASTION_BOOTSTRAP_FILE=bastion_bootstrap.sh\n",
                                 "BASTION_BOOTSTRAP=",
                                 {
@@ -492,6 +619,10 @@
                                 {
                                     "Ref": "EnableBanner"
                                 },
+                                " --forwarding ",
+                                {
+                                    "Ref": "EnableSSHForwarding"
+                                },
                                 "\n"
                             ]
                         ]
@@ -502,6 +633,9 @@
         "LinuxBastion2": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
+                "IamInstanceProfile": {
+                    "Ref": "BastionHostProfile"
+                },
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSAMIRegionMap",
@@ -555,6 +689,11 @@
                             "",
                             [
                                 "#!/bin/bash\n",
+                                "CLOUDWATCHGROUP=",
+                                {
+                                    "Ref": "BastionMainLogGroup"
+                                },
+                                "\n",
                                 "BASTION_BOOTSTRAP_FILE=bastion_bootstrap.sh\n",
                                 "BASTION_BOOTSTRAP=",
                                 {
@@ -591,12 +730,134 @@
                                 {
                                     "Ref": "EnableBanner"
                                 },
+                                " --forwarding ",
+                                {
+                                    "Ref": "EnableSSHForwarding"
+                                },
                                 "\n"
                             ]
                         ]
                     }
                 }
             }
+        },
+        "AutoScalingServerGroup" : {
+            "Type" : "AWS::AutoScaling::AutoScalingGroup",
+            "Properties" : {
+            "AvailabilityZones" : { "Fn::GetAZs" : ""},
+            "LaunchConfigurationName" : { "Ref" : "LaunchConfig" },
+            "MinSize" : "1",
+            "MaxSize" : "4",
+            "Cooldown" : "300",        
+            "DesiredCapacity" : {"Ref": "MinNumberOfHostsPerAZ"},
+            "Tags" : [ {
+                    "Key" : "Name",
+                    "Value" : "Auto Scaling Instances",
+                    "PropagateAtLaunch" : "true"
+                    }, {
+                    "Key" : "Reference",
+                    "Value" : "Created from Cloudformation Stack",
+                    "PropagateAtLaunch" : "true"
+                    } ]
+            }
+        },
+        "LaunchConfig" : {
+            "Type" : "AWS::AutoScaling::LaunchConfiguration",
+            "Properties" : {
+            "KeyName" : { "Ref" : "KeyPairName" },
+            "ImageId" : {                     "Fn::FindInMap": [
+                        "AWSAMIRegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        {
+                            "Fn::FindInMap": [
+                                "LinuxAMINameMap",
+                                {
+                                    "Ref": "BastionAMIOS"
+                                },
+                                "Code"
+                            ]
+                        }
+                    ]
+            },        
+            "SecurityGroups" : [ { "Ref" : "BastionSecurityGroup" } ],
+            "InstanceType" : { "Ref" : "Bastion1InstanceType" },
+            "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash\n",
+                                "CLOUDWATCHGROUP=",
+                                {
+                                    "Ref": "BastionMainLogGroup"
+                                },
+                                "\n",
+                                "BASTION_BOOTSTRAP_FILE=bastion_bootstrap.sh\n",
+                                "BASTION_BOOTSTRAP=",
+                                {
+                                    "Fn::FindInMap": [
+                                        "AWSInfoRegionMap",
+                                        {
+                                            "Ref": "AWS::Region"
+                                        },
+                                        "QuickStartS3URL"
+                                    ]
+                                },
+                                "/",
+                                {
+                                    "Ref": "QSS3BucketName"
+                                },
+                                "/",
+                                {
+                                    "Ref": "QSS3KeyPrefix"
+                                },
+                                "/scripts/",
+                                "${BASTION_BOOTSTRAP_FILE}",
+                                "\n",
+                                "echo ${BASTION_BOOTSTRAP}",
+                                "\n",
+                                "curl -s ${BASTION_BOOTSTRAP} > ${BASTION_BOOTSTRAP_FILE} ",
+                                "\n",
+                                "chmod +x ${BASTION_BOOTSTRAP_FILE}\n",
+                                "./${BASTION_BOOTSTRAP_FILE} ",
+                                " --banner ",
+                                {
+                                    "Ref": "BastionBanner"
+                                },
+                                " --enable ",
+                                {
+                                    "Ref": "EnableBanner"
+                                },
+                                " --forwarding ",
+                                {
+                                    "Ref": "EnableSSHForwarding"
+                                },
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "BastionScaleUpPolicy" : {
+          "Type" : "AWS::AutoScaling::ScalingPolicy",
+          "Properties" : {
+            "AdjustmentType" : "ChangeInCapacity",
+            "AutoScalingGroupName" : { "Ref" : "AutoScalingServerGroup" },
+            "Cooldown" : "60",
+            "ScalingAdjustment" : "1"
+          }
+        },
+        "BastionScaleDownPolicy" : {
+          "Type" : "AWS::AutoScaling::ScalingPolicy",
+          "Properties" : {
+             "AdjustmentType" : "ChangeInCapacity",
+             "AutoScalingGroupName" : { "Ref" : "AutoScalingServerGroup" },
+             "Cooldown" : "60",
+             "ScalingAdjustment" : "-1"
+          }
         },
         "BastionSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
@@ -656,6 +917,20 @@
                 "Ref": "LinuxBastion2EIP"
             },
             "Description": "Elastic IP address of the Linux Bastion 2 in Avalability Zone 2"
+        },
+        "AutoScalingGroup" : {
+            "Description" : "Auto Scaling Group Reference ID",
+            "Value" : { "Ref" : "AutoScalingServerGroup" }
+        },
+        "AutoScalingPolicy" : {
+            "Description" : "Auto Scaling Policy Reference ID",
+            "Value" : { "Ref" : "BastionScaleUpPolicy" }
+        },
+        "CloudWatchLogs": {
+            "Value": {
+                "Ref": "BastionMainLogGroup"
+            },
+            "Description": "CloudWatch Logs GroupName. Your SSH logs will be stored here."
         },
         "BastionSecurityGroupID": {
             "Value": {
