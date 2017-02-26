@@ -205,6 +205,15 @@
         "VPCID": {
             "Description": "ID of the VPC (e.g., vpc-0343606e)",
             "Type": "AWS::EC2::VPC::Id"
+        },
+        "EnableSSHForwarding": {
+            "Type": "String",
+            "Description": "Enable/Disable SSH Forwarding",
+            "Default": "true",
+            "AllowedValues": [
+                "true",
+                "false"
+            ]
         }
     },
     "Rules": {
@@ -382,6 +391,68 @@
         }
     },
     "Resources": {
+        "BastionMainLogGroup": {
+            "Type": "AWS::Logs::LogGroup"
+        },
+        "BastionHostRole" : {
+            "Properties" : {
+                "Policies" : [
+                {
+                    "PolicyDocument" : {
+                        "Version" : "2012-10-17",
+                        "Statement" : [
+                            {
+                            "Action" : [
+                                "logs:CreateLogStream",
+                                "logs:GetLogEvents",
+                                "logs:PutLogEvents",
+                                "logs:DescribeLogGroups",
+                                "logs:DescribeLogStreams",
+                                "logs:PutRetentionPolicy",
+                                "logs:PutMetricFilter",
+                                "logs:CreateLogGroup"
+                            ],
+                            "Resource" : [
+                                "arn:aws:logs:*:*:*"
+                            ],
+                            "Effect" : "Allow"
+                            }
+                        ]
+                    },
+                    "PolicyName" : "bastion-policy"
+                }
+                ],
+                "Path" : "/",
+                "AssumeRolePolicyDocument" : {
+                "Statement" : [
+                    {
+                        "Action" : [
+                            "sts:AssumeRole"
+                        ],
+                        "Principal" : {
+                            "Service" : [
+                            "ec2.amazonaws.com"
+                            ]
+                        },
+                        "Effect" : "Allow"
+                    }
+                ],
+                "Version" : "2012-10-17"
+                }
+            },
+            "Type" : "AWS::IAM::Role"
+        },
+        "BastionHostProfile": {
+        "Type": "AWS::IAM::InstanceProfile",
+        "Properties": {
+            "Roles": [
+            {
+                "Ref": "BastionHostRole"
+            }
+            ],
+            "Path": "/"
+         }
+        },
         "LinuxBastion1EIP": {
             "Type": "AWS::EC2::EIP",
             "Properties": {
@@ -456,6 +527,11 @@
                             "",
                             [
                                 "#!/bin/bash\n",
+                                "export CLOUDWATCHGROUP=",
+                                {
+                                    "Ref": "BastionMainLogGroup"
+                                },
+                                "\n",
                                 "BASTION_BOOTSTRAP_FILE=bastion_bootstrap.sh\n",
                                 "BASTION_BOOTSTRAP=",
                                 {
@@ -491,6 +567,10 @@
                                 " --enable ",
                                 {
                                     "Ref": "EnableBanner"
+                                },
+                                " --forwarding ",
+                                {
+                                    "Ref": "EnableSSHForwarding"
                                 },
                                 "\n"
                             ]
@@ -555,6 +635,10 @@
                             "",
                             [
                                 "#!/bin/bash\n",
+                                "export CLOUDWATCHGROUP=",
+                                {
+                                    "Ref": "BastionMainLogGroup"
+                                },
                                 "BASTION_BOOTSTRAP_FILE=bastion_bootstrap.sh\n",
                                 "BASTION_BOOTSTRAP=",
                                 {
@@ -590,6 +674,9 @@
                                 " --enable ",
                                 {
                                     "Ref": "EnableBanner"
+                                },
+                                {
+                                    "Ref": "EnableSSHForwarding"
                                 },
                                 "\n"
                             ]
@@ -656,6 +743,12 @@
                 "Ref": "LinuxBastion2EIP"
             },
             "Description": "Elastic IP address of the Linux Bastion 2 in Avalability Zone 2"
+        },
+        "CloudWatchLogs": {
+            "Value": {
+                "Ref": "BastionMainLogGroup"
+            },
+            "Description": "CloudWatch Logs GroupName. Your SSH logs will be stored here."
         },
         "BastionSecurityGroupID": {
             "Value": {
