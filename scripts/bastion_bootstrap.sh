@@ -27,6 +27,7 @@ function usage () {
     echo -e "--help \t show options for this script"
     echo -e "--banner \t Bastion Message"
     echo -e "--enable \t SSH Banner"
+    echo -e "--forwarding \t Enable TCP Forwarding"
 }
 
 function chkstatus () {
@@ -47,7 +48,7 @@ checkos
 SSH_BANNER="LINUX BASTION"
 
 # Read the options from cli input
-TEMP=`getopt -o h:  --long help,banner:,enable: -n $0 -- "$@"`
+TEMP=`getopt -o h:  --long help,banner:,enable:,forwarding: -n $0 -- "$@"`
 eval set -- "$TEMP"
 
 
@@ -66,6 +67,10 @@ while true; do
             ;;
         --enable)
             ENABLE="$2";
+            shift 2
+            ;;
+        --forwarding)
+	    TCP_FORWARDING="$2";
             shift 2
             ;;
         --)
@@ -98,6 +103,17 @@ if [[ $ENABLE == "true" ]];then
 else
     echo "Banner message is not enabled!"
 fi
+
+#Disable TCP and X11 forwarding to harden security
+TCP_FORWARDING=`echo "$TCP_FORWARDING" | sed 's/\\n//g'`
+
+if [[ $TCP_FORWARDING == "false" ]];then
+	awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+	awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+	echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
+	echo "X11Forwarding no" >> /etc/ssh/sshd_config
+fi
+
 
 # LOGGING CONFIGURATION
 declare -rx BASTION_MNT="/var/log/bastion"
@@ -165,3 +181,78 @@ EOF
     chattr +a ${BASTION_LOGFILE_SHADOW}
 fi
 
+# Install CloudWatch Log service
+# Centos Linux
+if [ -f /etc/redhat-release ]; then
+  yum update -y
+  yum install -y awslogs
+  yum install /opt/aws/bin/ec2-metadata -y
+  export Region=`/opt/aws/bin/ec2-metadata | grep placement | rev | cut -c 2- | rev | sed 's/placement\: //g'`
+  export TMPREGION=`cat /etc/awslogs/awscli.conf | grep region`
+  sed -i.back "s/$TMPREGION/region = $Region/g" /etc/awslogs/awscli.conf
+#AMZN Linux
+elif [[ -f /etc/system-release && ! -f /etc/redhat-release ]]; then
+  yum update -y
+  yum install -y awslogs
+# Ubuntu Linux
+elif [ -f /etc/lsb-release ]; then
+    export CWG=`/usr/bin/ec2metadata | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g'`
+    echo "log_group_name = $CWG" >> /tmp/groupname.txt
+
+cat <<'EOF' >> ~/cloudwatchlog.conf
+[general]
+state_file = /var/awslogs/state/agent-state
+ 
+[/var/log/bastion]
+file = /var/log/bastion/.bastion.log
+log_stream_name = {instance_id}
+datetime_format = %b %d %H:%M:%S
+EOF
+    export Region=`/usr/bin/ec2metadata | grep availability-zone | rev | cut -c 2- | rev | sed 's/availability-zone\: //g'`
+    cat /tmp/groupname.txt >> ~/cloudwatchlog.conf
+
+    curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
+    chmod +x ./awslogs-agent-setup.py
+    ./awslogs-agent-setup.py -n -r $Region -c ~/cloudwatchlog.conf
+fi
+
+#Start awslog services
+
+if [ -f /etc/lsb-release ]; then
+    service awslogs stop
+    service awslogs start
+    apt-get install sysv-rc-conf -y
+    sysv-rc-conf awslogs on
+else
+    
+    yum install ec2-metadata -y
+    export CWG=`/opt/aws/bin/ec2-metadata | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g'`
+    echo "log_group_name = $CWG" >> /tmp/groupname.txt
+
+cat <<'EOF' >> ~/cloudwatchlog.conf
+
+[/var/log/bastion]
+datetime_format = %b %d %H:%M:%S
+file = /var/log/bastion/.bastion.log
+buffer_duration = 5000
+log_stream_name = {instance_id}
+initial_position = start_of_file
+EOF
+
+    cat ~/cloudwatchlog.conf >> /etc/awslogs/awslogs.conf
+    cat /tmp/groupname.txt >> /etc/awslogs/awslogs.conf
+    yum install ec2-metadata -y
+    export TMPREGION=`cat /etc/awslogs/awscli.conf | grep region`
+    export Region=`/opt/aws/bin/ec2-metadata | grep placement | rev | cut -c 2- | rev | sed 's/placement\: //g'`
+    sed -i.back "s/$TMPREGION/region = $Region/g" /etc/awslogs/awscli.conf
+    service awslogs stop
+    service awslogs start
+    chkconfig awslogs on
+fi
+#Run security updates
+
+cat <<'EOF' >> ~/mycron
+0 0 * * * yum -y update --security
+EOF
+crontab ~/mycron
+rm ~/mycron
