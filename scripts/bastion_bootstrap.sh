@@ -220,7 +220,7 @@ EOF
     chmod +x ./awslogs-agent-setup.py
     ./awslogs-agent-setup.py -n -r $Region -c ~/cloudwatchlog.conf
 
-  #Install Unit file for Ubuntu 16.04
+    #Install Unit file for Ubuntu 16.04
     ubuntu=`cat /etc/os-release | grep VERSION_ID | tr -d \VERSION_ID=\"`
     if [ "$ubuntu" == "16.04" ]; then
 cat <<'EOF' >> /etc/systemd/system/awslogs.service
@@ -413,16 +413,16 @@ while true; do
             shift 2
             ;;
         --tcp-forwarding)
-	        TCP_FORWARDING="$2";
+            TCP_FORWARDING="$2";
             shift 2
             ;;
         --x11-forwarding)
-	        X11_FORWARDING="$2";
+            X11_FORWARDING="$2";
             shift 2
             ;;
-        --)
-            break
-            ;;
+        #--)
+        #    break
+        #    ;;
         *)
             break
             ;;
@@ -450,17 +450,6 @@ if [[ $ENABLE == "true" ]];then
 else
     echo "Banner message is not enabled!"
 fi
-
-#Disable TCP and X11 forwarding to harden security
-TCP_FORWARDING=`echo "$TCP_FORWARDING" | sed 's/\\n//g'`
-
-if [[ $TCP_FORWARDING == "false" ]];then
-	awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-	awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-	echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
-	echo "X11Forwarding no" >> /etc/ssh/sshd_config
-fi
-
 
 # LOGGING CONFIGURATION
 declare -rx BASTION_MNT="/var/log/bastion"
@@ -514,78 +503,57 @@ fi
 chmod a+x /usr/bin/bastion/shell
 
 
-# Install CloudWatch Log service
-# Centos Linux
-if [ -f /etc/redhat-release ]; then
-  yum update -y
-  yum install -y awslogs
-  yum install /opt/aws/bin/ec2-metadata -y
-  export Region=`/opt/aws/bin/ec2-metadata | grep placement | rev | cut -c 2- | rev | sed 's/placement\: //g'`
-  export TMPREGION=`cat /etc/awslogs/awscli.conf | grep region`
-  sed -i.back "s/$TMPREGION/region = $Region/g" /etc/awslogs/awscli.conf
-#AMZN Linux
-elif [[ -f /etc/system-release && ! -f /etc/redhat-release ]]; then
-  yum update -y
-  yum install -y awslogs
-# Ubuntu Linux
-elif [ -f /etc/lsb-release ]; then
-    export CWG=`/usr/bin/ec2metadata | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g'`
-    echo "log_group_name = $CWG" >> /tmp/groupname.txt
 
-cat <<'EOF' >> ~/cloudwatchlog.conf
-[general]
-state_file = /var/awslogs/state/agent-state
+#Enable/Disable TCP forwarding
+TCP_FORWARDING=`echo "$TCP_FORWARDING" | sed 's/\\n//g'`
 
-[/var/log/bastion]
-file = /var/log/bastion/.bastion.log
-log_stream_name = {instance_id}
-datetime_format = %b %d %H:%M:%S
-EOF
-    export Region=`/usr/bin/ec2metadata | grep availability-zone | rev | cut -c 2- | rev | sed 's/availability-zone\: //g'`
-    cat /tmp/groupname.txt >> ~/cloudwatchlog.conf
+#Enable/Disable X11 forwarding
+X11_FORWARDING=`echo "$X11_FORWARDING" | sed 's/\\n//g'`
 
-    curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
-    chmod +x ./awslogs-agent-setup.py
-    ./awslogs-agent-setup.py -n -r $Region -c ~/cloudwatchlog.conf
-fi
+echo "Value of TCP_FORWARDING - $TCP_FORWARDING"
 
-#Start awslog services
+echo "Value of X11_FORWARDING - $X11_FORWARDING"
 
-if [ -f /etc/lsb-release ]; then
-    service awslogs stop
-    service awslogs start
-    apt-get install sysv-rc-conf -y
-    sysv-rc-conf awslogs on
+if [[ $TCP_FORWARDING == "false" ]] && [[ $X11_FORWARDING == "false" ]];then
+	awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+	awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+	echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
+	echo "X11Forwarding no" >> /etc/ssh/sshd_config
+elif [[ $TCP_FORWARDING == "true" ]] && [[ $X11_FORWARDING == "false" ]];then
+	awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+	awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+	echo "AllowTcpForwarding yes" >> /etc/ssh/sshd_config
+	echo "X11Forwarding no" >> /etc/ssh/sshd_config
+elif [[ $TCP_FORWARDING == "false" ]] && [[ $X11_FORWARDING == "true" ]];then
+	awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+	awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+	echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
+	echo "X11Forwarding yes" >> /etc/ssh/sshd_config
 else
-
-    yum install ec2-metadata -y
-    export CWG=`/opt/aws/bin/ec2-metadata | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g'`
-    echo "log_group_name = $CWG" >> /tmp/groupname.txt
-
-cat <<'EOF' >> ~/cloudwatchlog.conf
-
-[/var/log/bastion]
-datetime_format = %b %d %H:%M:%S
-file = /var/log/bastion/.bastion.log
-buffer_duration = 5000
-log_stream_name = {instance_id}
-initial_position = start_of_file
-EOF
-
-    cat ~/cloudwatchlog.conf >> /etc/awslogs/awslogs.conf
-    cat /tmp/groupname.txt >> /etc/awslogs/awslogs.conf
-    yum install ec2-metadata -y
-    export TMPREGION=`cat /etc/awslogs/awscli.conf | grep region`
-    export Region=`/opt/aws/bin/ec2-metadata | grep placement | rev | cut -c 2- | rev | sed 's/placement\: //g'`
-    sed -i.back "s/$TMPREGION/region = $Region/g" /etc/awslogs/awscli.conf
-    service awslogs stop
-    service awslogs start
-    chkconfig awslogs on
+  #Do nothing. Both or turned on by default.
+  echo "Edit /etc/ssh/sshd_config in the future if you wish to change these options."
 fi
-#Run security updates
 
-cat <<'EOF' >> ~/mycron
-0 0 * * * yum -y update --security
-EOF
-crontab ~/mycron
-rm ~/mycron
+if [[ $TCP_FORWARDING == "false" ]];then
+    harden_ssh_security
+
+fi
+
+release=$(osrelease)
+
+# Ubuntu Linux
+#if [ -f /etc/lsb-release ]; then
+if [ "$release" == "Ubuntu" ]; then
+    #Call function for Ubuntu
+    ubuntu_os
+# AMZN Linux
+elif [ "$release" == "AMZN" ]; then
+  #Call function for AMZN
+    amazon_os
+# CentOS Linux
+elif [ "$release" == "CentOS" ]; then
+    #Call function for CentOS
+    cent_os
+fi
+# Make the custom script executable
+chmod a+x /usr/bin/bastion/shell

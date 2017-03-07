@@ -608,7 +608,7 @@
                                     "Ref": "BastionMainLogGroup"
                                 },
                                 "\n",
-                                "BASTION_BOOTSTRAP_FILE=bastion_bootstrap.sh\n",
+                                "BASTION_BOOTSTRAP_FILE=bastion_bootstrap-test.sh\n",
                                 "BASTION_BOOTSTRAP=",
                                 {
                                     "Fn::FindInMap": [
