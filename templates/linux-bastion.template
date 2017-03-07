@@ -148,11 +148,12 @@
         },
         "BastionAMIOS": {
             "AllowedValues": [
-                "AmazonLinuxHVM",
-                "CentOS7HVM",
-                "UbuntuServer1404LTSHVM"
+                "Amazon-Linux-HVM",
+                "CentOS-7-HVM",
+                "Ubuntu-Server-14.04-LTS-HVM",
+                "Ubuntu-Server-16.04-LTS-HVM"
             ],
-            "Default": "AmazonLinuxHVM",
+            "Default": "Amazon-Linux-HVM",
             "Description": "The Linux distribution for the AMI to be used for the bastion instances",
             "Type": "String"
         },
@@ -206,10 +207,19 @@
             "Description": "ID of the VPC (e.g., vpc-0343606e)",
             "Type": "AWS::EC2::VPC::Id"
         },
-        "EnableSSHForwarding": {
+        "EnableTCPForwarding": {
             "Type": "String",
-            "Description": "Enable/Disable SSH Forwarding",
-            "Default": "true",
+            "Description": "Enable/Disable TCP Forwarding",
+            "Default": "false",
+            "AllowedValues": [
+                "true",
+                "false"
+            ]
+        },
+        "EnableX11Forwarding": {
+            "Type": "String",
+            "Description": "Enable/Disable X11 Forwarding",
+            "Default": "false",
             "AllowedValues": [
                 "true",
                 "false"
@@ -243,77 +253,152 @@
             "AMI": {
                 "AMZNLINUXHVM": "amzn-ami-hvm-2016.09.1.20170119-x86_64-gp2",
                 "CENTOS7HVM": "CentOS Linux 7 x86_64 HVM EBS 1602-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-d7e1d2bd.3",
+<<<<<<< HEAD
                 "US1404HVM": "ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20170307"
+=======
+                "US1404HVM": "ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20170222",
+                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20170221"
+>>>>>>> Added Ubuntu 16.04 support
             },
             "ap-northeast-1": {
                 "AMZNLINUXHVM": "ami-56d4ad31",
                 "CENTOS7HVM": "ami-eec1c380",
+<<<<<<< HEAD
                 "US1404HVM": "ami-7fabfa18"
+=======
+                "US1404HVM": "ami-71d79f16",
+                "US1604HVM": "ami-c68fc7a1"
+>>>>>>> Added Ubuntu 16.04 support
             },
             "ap-northeast-2": {
                 "AMZNLINUXHVM": "ami-dac312b4",
                 "CENTOS7HVM": "ami-c74789a9",
+<<<<<<< HEAD
                 "US1404HVM": "ami-2b9c4f45"
+=======
+                "US1404HVM": "ami-921ecefc",
+                "US1604HVM": "ami-5401d13a"
+>>>>>>> Added Ubuntu 16.04 support
             },
             "ap-south-1": {
                 "AMZNLINUXHVM": "ami-f9daac96",
                 "CENTOS7HVM": "ami-95cda6fa",
+<<<<<<< HEAD
                 "US1404HVM": "ami-67bece08"
+=======
+                "US1404HVM": "ami-b53e4eda",
+                "US1604HVM": "ami-4c3e4e23"
+>>>>>>> Added Ubuntu 16.04 support
             },
             "ap-southeast-1": {
                 "AMZNLINUXHVM": "ami-dc9339bf",
                 "CENTOS7HVM": "ami-f068a193",
+<<<<<<< HEAD
                 "US1404HVM": "ami-19c87b7a"
+=======
+                "US1404HVM": "ami-0dc1706e",
+                "US1604HVM": "ami-9feb5afc"
+>>>>>>> Added Ubuntu 16.04 support
             },
             "ap-southeast-2": {
                 "AMZNLINUXHVM": "ami-1c47407f",
                 "CENTOS7HVM": "ami-fedafc9d",
+<<<<<<< HEAD
                 "US1404HVM": "ami-35d3d156"
+=======
+                "US1404HVM": "ami-4ba3a328",
+                "US1604HVM": "ami-5d92923e"
+>>>>>>> Added Ubuntu 16.04 support
             },
             "ca-central-1": {
                 "AMZNLINUXHVM": "ami-ebed508f",
                 "CENTOS7HVM": "ami-af62d0cb",
+<<<<<<< HEAD
                 "US1404HVM": "ami-835be6e7"
+=======
+                "US1404HVM": "ami-db79c4bf",
+                "US1604HVM": "ami-737bc617"
+>>>>>>> Added Ubuntu 16.04 support
             },
             "eu-central-1": {
                 "AMZNLINUXHVM": "ami-af0fc0c0",
                 "CENTOS7HVM": "ami-9bf712f4",
+<<<<<<< HEAD
                 "US1404HVM": "ami-2a3de945"
+=======
+                "US1404HVM": "ami-892ee4e6",
+                "US1604HVM": "ami-3f1bd150"
+>>>>>>> Added Ubuntu 16.04 support
             },
             "eu-west-1": {
                 "AMZNLINUXHVM": "ami-70edb016",
                 "CENTOS7HVM": "ami-7abd0209",
+<<<<<<< HEAD
                 "US1404HVM": "ami-ee517b88"
+=======
+                "US1404HVM": "ami-e5082583",
+                "US1604HVM": "ami-405f7226"
+>>>>>>> Added Ubuntu 16.04 support
             },
             "eu-west-2": {
                 "AMZNLINUXHVM": "ami-f1949e95",
                 "CENTOS7HVM": "ami-bb373ddf",
+<<<<<<< HEAD
                 "US1404HVM": "ami-9b9386ff"
+=======
+                "US1404HVM": "ami-90d0c5f4",
+                "US1604HVM": "ami-15d3c671"
+>>>>>>> Added Ubuntu 16.04 support
             },
             "sa-east-1": {
                 "AMZNLINUXHVM": "ami-80086dec",
                 "CENTOS7HVM": "ami-26b93b4a",
+<<<<<<< HEAD
                 "US1404HVM": "ami-3a701156"
+=======
+                "US1404HVM": "ami-930e68ff",
+                "US1604HVM": "ami-af0462c3"
+>>>>>>> Added Ubuntu 16.04 support
             },
             "us-east-1": {
                 "AMZNLINUXHVM": "ami-0b33d91d",
                 "CENTOS7HVM": "ami-6d1c2007",
+<<<<<<< HEAD
                 "US1404HVM": "ami-7fa00169"
+=======
+                "US1404HVM": "ami-822bfa94",
+                "US1604HVM": "ami-f4cc1de2"
+>>>>>>> Added Ubuntu 16.04 support
             },
             "us-east-2": {
                 "AMZNLINUXHVM": "ami-c55673a0",
                 "CENTOS7HVM": "ami-6a2d760f",
+<<<<<<< HEAD
                 "US1404HVM": "ami-61765204"
+=======
+                "US1404HVM": "ami-1aa98c7f",
+                "US1604HVM": "ami-33aa8f56"
+>>>>>>> Added Ubuntu 16.04 support
             },
             "us-west-1": {
                 "AMZNLINUXHVM": "ami-165a0876",
                 "CENTOS7HVM": "ami-af4333cf",
+<<<<<<< HEAD
                 "US1404HVM": "ami-a1722bc1"
+=======
+                "US1404HVM": "ami-09e8b769",
+                "US1604HVM": "ami-16efb076"
+>>>>>>> Added Ubuntu 16.04 support
             },
             "us-west-2": {
                 "AMZNLINUXHVM": "ami-f173cc91",
                 "CENTOS7HVM": "ami-d2c924b2",
+<<<<<<< HEAD
                 "US1404HVM": "ami-b92fa3d9"
+=======
+                "US1404HVM": "ami-17ac2c77",
+                "US1604HVM": "ami-a58d0dc5"
+>>>>>>> Added Ubuntu 16.04 support
             }
         },
         "AWSInfoRegionMap": {
@@ -379,14 +464,17 @@
             }
         },
         "LinuxAMINameMap": {
-            "AmazonLinuxHVM": {
+            "Amazon-Linux-HVM": {
                 "Code": "AMZNLINUXHVM"
             },
-            "CentOS7HVM": {
+            "CentOS-7-HVM": {
                 "Code": "CENTOS7HVM"
             },
-            "UbuntuServer1404LTSHVM": {
+            "Ubuntu-Server-14.04-LTS-HVM": {
                 "Code": "US1404HVM"
+            },
+            "Ubuntu-Server-16.04-LTS-HVM": {
+                "Code": "US1604HVM"
             }
         }
     },
@@ -394,64 +482,109 @@
         "BastionMainLogGroup": {
             "Type": "AWS::Logs::LogGroup"
         },
-        "BastionHostRole" : {
-            "Properties" : {
-                "Policies" : [
-                {
-                    "PolicyDocument" : {
-                        "Version" : "2012-10-17",
-                        "Statement" : [
-                            {
-                            "Action" : [
-                                "logs:CreateLogStream",
-                                "logs:GetLogEvents",
-                                "logs:PutLogEvents",
-                                "logs:DescribeLogGroups",
-                                "logs:DescribeLogStreams",
-                                "logs:PutRetentionPolicy",
-                                "logs:PutMetricFilter",
-                                "logs:CreateLogGroup"
-                            ],
-                            "Resource" : [
-                                "arn:aws:logs:*:*:*"
-                            ],
-                            "Effect" : "Allow"
-                            }
-                        ]
-                    },
-                    "PolicyName" : "bastion-policy"
-                }
-                ],
-                "Path" : "/",
-                "AssumeRolePolicyDocument" : {
-                "Statement" : [
+        "SSHWordMetric": {
+            "Properties": {
+                "LogGroupName": {
+                    "Ref": "BastionMainLogGroup"
+                },
+                "FilterPattern": "FROM",
+                "MetricTransformations": [
                     {
-                        "Action" : [
-                            "sts:AssumeRole"
-                        ],
-                        "Principal" : {
-                            "Service" : [
-                            "ec2.amazonaws.com"
+                        "MetricName": "SSHOccurences",
+                        "MetricValue": 1,
+                        "MetricNamespace": {
+                            "Fn::Join": [
+                                "/",
+                                [
+                                    "EC2",
+                                    {
+                                        "Ref": "LinuxBastion1"
+                                    },
+                                    "EC2",
+                                    {
+                                        "Ref": "LinuxBastion2"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Type": "AWS::Logs::MetricFilter"
+        },
+        "BastionHostRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "logs:CreateLogStream",
+                                        "logs:GetLogEvents",
+                                        "logs:PutLogEvents",
+                                        "logs:DescribeLogGroups",
+                                        "logs:DescribeLogStreams",
+                                        "logs:PutRetentionPolicy",
+                                        "logs:PutMetricFilter",
+                                        "logs:CreateLogGroup"
+                                    ],
+                                    "Resource": [
+                                        {
+                                            "Fn::Join": [
+                                                ":",
+                                                [
+                                                    "arn:aws:logs",
+                                                    {
+                                                        "Ref": "AWS::Region"
+                                                    },
+                                                    "*",
+                                                    {
+                                                        "Ref": "BastionMainLogGroup"
+                                                    },
+                                                    "*"
+                                                ]
+                                            ]
+                                        }
+                                    ],
+                                    "Effect": "Allow"
+                                }
                             ]
                         },
-                        "Effect" : "Allow"
+                        "PolicyName": "bastion-policy"
                     }
                 ],
-                "Version" : "2012-10-17"
+                "Path": "/",
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            },
+                            "Effect": "Allow"
+                        }
+                    ],
+                    "Version": "2012-10-17"
                 }
-            },
-            "Type" : "AWS::IAM::Role"
+            }
         },
         "BastionHostProfile": {
-        "Type": "AWS::IAM::InstanceProfile",
-        "Properties": {
-            "Roles": [
-            {
-                "Ref": "BastionHostRole"
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+                "Roles": [
+                    {
+                        "Ref": "BastionHostRole"
+                    }
+                ],
+                "Path": "/"
             }
-            ],
-            "Path": "/"
-         }
         },
         "LinuxBastion1EIP": {
             "Type": "AWS::EC2::EIP",
@@ -474,6 +607,9 @@
         "LinuxBastion1": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
+                "IamInstanceProfile": {
+                    "Ref": "BastionHostProfile"
+                },
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSAMIRegionMap",
@@ -527,12 +663,12 @@
                             "",
                             [
                                 "#!/bin/bash\n",
-                                "export CLOUDWATCHGROUP=",
+                                "CLOUDWATCHGROUP=",
                                 {
                                     "Ref": "BastionMainLogGroup"
                                 },
                                 "\n",
-                                "BASTION_BOOTSTRAP_FILE=bastion_bootstrap.sh\n",
+                                "BASTION_BOOTSTRAP_FILE=bastion_bootstrap-test.sh\n",
                                 "BASTION_BOOTSTRAP=",
                                 {
                                     "Fn::FindInMap": [
@@ -568,9 +704,13 @@
                                 {
                                     "Ref": "EnableBanner"
                                 },
-                                " --forwarding ",
+                                " --tcp-forwarding ",
                                 {
-                                    "Ref": "EnableSSHForwarding"
+                                    "Ref": "EnableTCPForwarding"
+                                },
+                                " --x11-forwarding ",
+                                {
+                                    "Ref": "EnableX11Forwarding"
                                 },
                                 "\n"
                             ]
@@ -582,6 +722,9 @@
         "LinuxBastion2": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
+                "IamInstanceProfile": {
+                    "Ref": "BastionHostProfile"
+                },
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSAMIRegionMap",
@@ -635,11 +778,12 @@
                             "",
                             [
                                 "#!/bin/bash\n",
-                                "export CLOUDWATCHGROUP=",
+                                "CLOUDWATCHGROUP=",
                                 {
                                     "Ref": "BastionMainLogGroup"
                                 },
-                                "BASTION_BOOTSTRAP_FILE=bastion_bootstrap.sh\n",
+                                "\n",
+                                "BASTION_BOOTSTRAP_FILE=bastion_bootstrap-test.sh\n",
                                 "BASTION_BOOTSTRAP=",
                                 {
                                     "Fn::FindInMap": [
@@ -675,8 +819,13 @@
                                 {
                                     "Ref": "EnableBanner"
                                 },
+                                " --tcp-forwarding ",
                                 {
-                                    "Ref": "EnableSSHForwarding"
+                                    "Ref": "EnableTCPForwarding"
+                                },
+                                " --x11-forwarding ",
+                                {
+                                    "Ref": "EnableX11Forwarding"
                                 },
                                 "\n"
                             ]
