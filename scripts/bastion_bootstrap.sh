@@ -420,9 +420,9 @@ while true; do
             X11_FORWARDING="$2";
             shift 2
             ;;
-        #--)
-        #    break
-        #    ;;
+        --)
+            break
+            ;;
         *)
             break
             ;;
@@ -473,82 +473,25 @@ echo "Value of TCP_FORWARDING - $TCP_FORWARDING"
 echo "Value of X11_FORWARDING - $X11_FORWARDING"
 
 if [[ $TCP_FORWARDING == "false" ]];then
-	awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-	echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
+    awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+    echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
     harden_ssh_security
 fi
 
 if [[ $X11_FORWARDING == "false" ]];then
-	awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-	echo "X11Forwarding no" >> /etc/ssh/sshd_config
+    awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+    echo "X11Forwarding no" >> /etc/ssh/sshd_config
 fi
 
 release=$(osrelease)
 
 # Ubuntu Linux
-#if [ -f /etc/lsb-release ]; then
 if [ "$release" == "Ubuntu" ]; then
     #Call function for Ubuntu
     ubuntu_os
 # AMZN Linux
 elif [ "$release" == "AMZN" ]; then
-  #Call function for AMZN
-    amazon_os
-# CentOS Linux
-elif [ "$release" == "CentOS" ]; then
-    #Call function for CentOS
-    cent_os
-fi
-# Make the custom script executable
-chmod a+x /usr/bin/bastion/shell
-
-
-
-#Enable/Disable TCP forwarding
-TCP_FORWARDING=`echo "$TCP_FORWARDING" | sed 's/\\n//g'`
-
-#Enable/Disable X11 forwarding
-X11_FORWARDING=`echo "$X11_FORWARDING" | sed 's/\\n//g'`
-
-echo "Value of TCP_FORWARDING - $TCP_FORWARDING"
-
-echo "Value of X11_FORWARDING - $X11_FORWARDING"
-
-if [[ $TCP_FORWARDING == "false" ]] && [[ $X11_FORWARDING == "false" ]];then
-	awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-	awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-	echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
-	echo "X11Forwarding no" >> /etc/ssh/sshd_config
-elif [[ $TCP_FORWARDING == "true" ]] && [[ $X11_FORWARDING == "false" ]];then
-	awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-	awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-	echo "AllowTcpForwarding yes" >> /etc/ssh/sshd_config
-	echo "X11Forwarding no" >> /etc/ssh/sshd_config
-elif [[ $TCP_FORWARDING == "false" ]] && [[ $X11_FORWARDING == "true" ]];then
-	awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-	awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-	echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
-	echo "X11Forwarding yes" >> /etc/ssh/sshd_config
-else
-  #Do nothing. Both or turned on by default.
-  echo "Edit /etc/ssh/sshd_config in the future if you wish to change these options."
-fi
-
-if [[ $TCP_FORWARDING == "false" ]];then
-    harden_ssh_security
-
-fi
-
-release=$(osrelease)
-
-# Ubuntu Linux
-#if [ -f /etc/lsb-release ]; then
-if [ "$release" == "Ubuntu" ]; then
-    #Call function for Ubuntu
-    ubuntu_os
-# AMZN Linux
-elif [ "$release" == "AMZN" ]; then
-  #Call function for AMZN
+    #Call function for AMZN
     amazon_os
 # CentOS Linux
 elif [ "$release" == "CentOS" ]; then
