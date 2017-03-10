@@ -17,6 +17,14 @@
                 },
                 {
                     "Label": {
+                        "default": "Auto-Scaling Configuration"
+                    },
+                    "Parameters": [
+                        "MinNumberOfHostsPerAZ"
+                    ]
+                },
+                {
+                    "Label": {
                         "default": "Amazon EC2 Configuration"
                     },
                     "Parameters": [
@@ -86,6 +94,9 @@
                 },
                 "RemoteAccessCIDR": {
                     "default": "Allowed Bastion External Access CIDR"
+                },
+                "MinNumberOfHostsPerAZ": {
+                     "default": "1"
                 },
                 "VPCID": {
                     "default": "VPC ID"
@@ -172,8 +183,14 @@
             "Type": "String"
         },
         "KeyPairName": {
-            "Description": "Public/private key pair",
+            "Description": "Enter a Public/private key pair. If you do not have one in this region, please create it before continuing",
             "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "MinNumberOfHostsPerAZ": {
+              "AllowedValues": ["1", "2", "3", "4"],
+              "Default": "1",
+              "Description": "Enter the minimum Bastion Hosts to start with per AZ.",
+              "Type": "String"
         },
         "PublicSubnet1ID": {
             "Description": "ID of the public subnet 1 that you want to provision the first bastion into (e.g., subnet-a0246dcd)",
@@ -243,7 +260,7 @@
                             }
                         ]
                     },
-                    "AssertDescription": "All subnets must in the VPC"
+                    "AssertDescription": "All subnets must exist in the VPC"
                 }
             ]
         }
@@ -418,140 +435,195 @@
             }
         }
     },
+    "Conditions" : {
+         "EIPSELECT1" : {"Fn::Equals" : [{"Ref" : "MinNumberOfHostsPerAZ"}, "1"]},
+         "EIPSELECT2" : {"Fn::Equals" : [{"Ref" : "MinNumberOfHostsPerAZ"}, "2"]},
+         "EIPSELECT3" : {"Fn::Equals" : [{"Ref" : "MinNumberOfHostsPerAZ"}, "3"]},
+         "EIPSELECT4" : {"Fn::Equals" : [{"Ref" : "MinNumberOfHostsPerAZ"}, "4"]}
+    },
     "Resources": {
-        "BastionMainLogGroup": {
-            "Type": "AWS::Logs::LogGroup"
+        "BastionMainLogGroup" : {
+            "Type" : "AWS::Logs::LogGroup"
         },
-        "SSHWordMetric": {
-            "Properties": {
-                "LogGroupName": {
-                    "Ref": "BastionMainLogGroup"
+        "SSHWordMetric" : {
+            "Properties" : {
+                "LogGroupName" : {
+                "Ref" : "BastionMainLogGroup"
                 },
-                "FilterPattern": "FROM",
-                "MetricTransformations": [
-                    {
-                        "MetricName": "SSHOccurences",
-                        "MetricValue": 1,
-                        "MetricNamespace": {
-                            "Fn::Join": [
-                                "/",
-                                [
-                                    "EC2",
-                                    {
-                                        "Ref": "LinuxBastion1"
-                                    },
-                                    "EC2",
-                                    {
-                                        "Ref": "LinuxBastion2"
-                                    }
-                                ]
-                            ]
+                "FilterPattern" : "FROM",
+                "MetricTransformations" : [
+                {
+                    "MetricName" : "SSHOccurences",
+                    "MetricValue" : 1,
+                    "MetricNamespace" : {
+                        "Fn::Join" : [
+                            "/",
+                            [
+                        "EC2",
+                        {
+                            "Ref" : "Bastion1InstanceType"
+                        },
+                        "EC2",
+                        {
+                            "Ref" : "Bastion1InstanceType"
                         }
+                            ]
+                        ]
                     }
+                }
                 ]
             },
-            "Type": "AWS::Logs::MetricFilter"
+            "Type" : "AWS::Logs::MetricFilter"
         },
-        "BastionHostRole": {
-            "Type": "AWS::IAM::Role",
-            "Properties": {
-                "Policies": [
+        "BastionHostRole" : {
+            "Type" : "AWS::IAM::Role",
+            "Properties" : {
+                "Policies" : [
+                {
+                    "PolicyDocument" : {
+                        "Version" : "2012-10-17",
+                        "Statement" : [
+                            {
+                            "Action" : [
+                                "logs:CreateLogStream",
+                                "logs:GetLogEvents",
+                                "logs:PutLogEvents",
+                                "logs:DescribeLogGroups",
+                                "logs:DescribeLogStreams",
+                                "logs:PutRetentionPolicy",
+                                "logs:PutMetricFilter",
+                                "logs:CreateLogGroup"
+                            ],
+                            "Resource" : [
+                              {
+                                "Fn::Join" : [
+                                ":",
+                                ["arn:aws:logs",
+                                {"Ref": "AWS::Region"},
+                                "*",
+                                {"Ref": "BastionMainLogGroup"},
+                                "*"]
+                                ]
+                              }
+
+                            ],
+                            "Effect" : "Allow"
+                            },
+                            {
+                            "Action" : [
+                                "ec2:AllocateAddress",
+                                "ec2:AssociateAddress",
+                                "ec2:DescribeAddresses",
+                                "ec2:DescribeInstances",
+                                "ec2:DescribeImages",
+                                "ec2:DisassociateAddress"
+                            ],
+                            "Resource" : [
+                              "*"
+                            ],
+                            "Effect" : "Allow"
+                            }
+                        ]
+                    },
+                    "PolicyName" : "bastion-policy"
+                }
+                ],
+                "Path" : "/",
+                "AssumeRolePolicyDocument" : {
+                "Statement" : [
                     {
-                        "PolicyDocument": {
-                            "Version": "2012-10-17",
-                            "Statement": [
-                                {
-                                    "Action": [
-                                        "logs:CreateLogStream",
-                                        "logs:GetLogEvents",
-                                        "logs:PutLogEvents",
-                                        "logs:DescribeLogGroups",
-                                        "logs:DescribeLogStreams",
-                                        "logs:PutRetentionPolicy",
-                                        "logs:PutMetricFilter",
-                                        "logs:CreateLogGroup"
-                                    ],
-                                    "Resource": [
-                                        {
-                                            "Fn::Join": [
-                                                ":",
-                                                [
-                                                    "arn:aws:logs",
-                                                    {
-                                                        "Ref": "AWS::Region"
-                                                    },
-                                                    "*",
-                                                    {
-                                                        "Ref": "BastionMainLogGroup"
-                                                    },
-                                                    "*"
-                                                ]
-                                            ]
-                                        }
-                                    ],
-                                    "Effect": "Allow"
-                                }
+                        "Action" : [
+                            "sts:AssumeRole"
+                        ],
+                        "Principal" : {
+                            "Service" : [
+                            "ec2.amazonaws.com"
                             ]
                         },
-                        "PolicyName": "bastion-policy"
+                        "Effect" : "Allow"
                     }
                 ],
-                "Path": "/",
-                "AssumeRolePolicyDocument": {
-                    "Statement": [
-                        {
-                            "Action": [
-                                "sts:AssumeRole"
-                            ],
-                            "Principal": {
-                                "Service": [
-                                    "ec2.amazonaws.com"
-                                ]
-                            },
-                            "Effect": "Allow"
-                        }
-                    ],
-                    "Version": "2012-10-17"
+                "Version" : "2012-10-17"
                 }
             }
         },
         "BastionHostProfile": {
-            "Type": "AWS::IAM::InstanceProfile",
-            "Properties": {
-                "Roles": [
-                    {
-                        "Ref": "BastionHostRole"
-                    }
-                ],
-                "Path": "/"
+        "Type": "AWS::IAM::InstanceProfile",
+        "Properties": {
+            "Roles": [
+            {
+                "Ref": "BastionHostRole"
+            }
+            ],
+            "Path": "/"
+         }
+        },
+    "BastionEIP1A": {
+         "Type": "AWS::EC2::EIP",
+         "Condition": "EIPSELECT1"
+        },
+    "BastionEIP2A": {
+         "Type": "AWS::EC2::EIP",
+         "Condition": "EIPSELECT2"
+        },
+    "BastionEIP2B": {
+         "Type": "AWS::EC2::EIP",
+         "Condition": "EIPSELECT2"
+        },
+    "BastionEIP3A": {
+         "Type": "AWS::EC2::EIP",
+         "Condition": "EIPSELECT3"
+        },
+    "BastionEIP3B": {
+         "Type": "AWS::EC2::EIP",
+         "Condition": "EIPSELECT3"
+        },
+    "BastionEIP3C": {
+         "Type": "AWS::EC2::EIP",
+         "Condition": "EIPSELECT3"
+        },
+    "BastionEIP4A": {
+         "Type": "AWS::EC2::EIP",
+         "Condition": "EIPSELECT4"
+        },
+    "BastionEIP4B": {
+         "Type": "AWS::EC2::EIP",
+         "Condition": "EIPSELECT4"
+        },
+    "BastionEIP4C": {
+         "Type": "AWS::EC2::EIP",
+         "Condition": "EIPSELECT4"
+        },
+    "BastionEIP4D": {
+         "Type": "AWS::EC2::EIP",
+         "Condition": "EIPSELECT4"
+        },
+        "AutoScalingServerGroup" : {
+            "Type" : "AWS::AutoScaling::AutoScalingGroup",
+            "Properties" : {
+            "LaunchConfigurationName" : { "Ref" : "LaunchConfig" },
+            "VPCZoneIdentifier" : [{ "Ref" : "PublicSubnet1ID" }, { "Ref" : "PublicSubnet2ID" }],
+            "MinSize" : {"Ref": "MinNumberOfHostsPerAZ"},
+            "MaxSize" : {"Ref": "MinNumberOfHostsPerAZ"},
+            "Cooldown" : "300",
+            "DesiredCapacity" : {"Ref": "MinNumberOfHostsPerAZ"},
+            "Tags" : [ {
+                    "Key" : "Name",
+                    "Value" : "Auto Scaling Instances",
+                    "PropagateAtLaunch" : "true"
+                    }, {
+                    "Key" : "Reference",
+                    "Value" : "Created from Cloudformation Stack",
+                    "PropagateAtLaunch" : "true"
+                    } ]
             }
         },
-        "LinuxBastion1EIP": {
-            "Type": "AWS::EC2::EIP",
-            "Properties": {
-                "Domain": "vpc",
-                "InstanceId": {
-                    "Ref": "LinuxBastion1"
-                }
-            }
-        },
-        "LinuxBastion2EIP": {
-            "Type": "AWS::EC2::EIP",
-            "Properties": {
-                "Domain": "vpc",
-                "InstanceId": {
-                    "Ref": "LinuxBastion2"
-                }
-            }
-        },
-        "LinuxBastion1": {
-            "Type": "AWS::EC2::Instance",
-            "Properties": {
-                "IamInstanceProfile": {
-                    "Ref": "BastionHostProfile"
-                },
-                "ImageId": {
-                    "Fn::FindInMap": [
+        "LaunchConfig" : {
+            "Type" : "AWS::AutoScaling::LaunchConfiguration",
+            "Properties" : {
+            "KeyName" : { "Ref" : "KeyPairName" },
+            "IamInstanceProfile": { "Ref": "BastionHostProfile"},
+            "ImageId" : {                     "Fn::FindInMap": [
                         "AWSAMIRegionMap",
                         {
                             "Ref": "AWS::Region"
@@ -566,50 +638,23 @@
                             ]
                         }
                     ]
-                },
-                "InstanceType": {
-                    "Ref": "Bastion1InstanceType"
-                },
-                "NetworkInterfaces": [
-                    {
-                        "AssociatePublicIpAddress": true,
-                        "DeleteOnTermination": "true",
-                        "DeviceIndex": 0,
-                        "SubnetId": {
-                            "Ref": "PublicSubnet1ID"
-                        },
-                        "PrivateIpAddress": {
-                            "Ref": "Bastion1PrivateIP"
-                        },
-                        "GroupSet": [
-                            {
-                                "Ref": "BastionSecurityGroup"
-                            }
-                        ]
-                    }
-                ],
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "LinuxBastion1"
-                    }
-                ],
-                "KeyName": {
-                    "Ref": "KeyPairName"
-                },
-                "UserData": {
+            },
+            "SecurityGroups" : [ { "Ref" : "BastionSecurityGroup" } ],
+            "InstanceType" : { "Ref" : "Bastion1InstanceType" },
+            "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
                             "",
                             [
-                                "#!/bin/bash\n",
+                               "#!/bin/bash\n",
                                 "CLOUDWATCHGROUP=",
                                 {
                                     "Ref": "BastionMainLogGroup"
                                 },
                                 "\n",
-                                "BASTION_BOOTSTRAP_FILE=bastion_bootstrap.sh\n",
-                                "BASTION_BOOTSTRAP=",
+                                "BASTION_BOOTSTRAP_FILE=bastion_bootstrap-test.sh\n",
+                                "EIP_SCRIPT=get_eip.sh\n",
+                                "BASTION_EIP=",
                                 {
                                     "Fn::FindInMap": [
                                         "AWSInfoRegionMap",
@@ -628,102 +673,15 @@
                                     "Ref": "QSS3KeyPrefix"
                                 },
                                 "/scripts/",
-                                "${BASTION_BOOTSTRAP_FILE}",
+                                "${EIP_SCRIPT}",
                                 "\n",
-                                "echo ${BASTION_BOOTSTRAP}",
+                                "echo ${BASTION_EIP}",
                                 "\n",
-                                "curl -s ${BASTION_BOOTSTRAP} > ${BASTION_BOOTSTRAP_FILE} ",
+                                "curl -s ${BASTION_EIP} > ${EIP_SCRIPT} ",
                                 "\n",
-                                "chmod +x ${BASTION_BOOTSTRAP_FILE}\n",
-                                "./${BASTION_BOOTSTRAP_FILE} ",
-                                " --banner ",
-                                {
-                                    "Ref": "BastionBanner"
-                                },
-                                " --enable ",
-                                {
-                                    "Ref": "EnableBanner"
-                                },
-                                " --tcp-forwarding ",
-                                {
-                                    "Ref": "EnableTCPForwarding"
-                                },
-                                " --x11-forwarding ",
-                                {
-                                    "Ref": "EnableX11Forwarding"
-                                },
-                                "\n"
-                            ]
-                        ]
-                    }
-                }
-            }
-        },
-        "LinuxBastion2": {
-            "Type": "AWS::EC2::Instance",
-            "Properties": {
-                "IamInstanceProfile": {
-                    "Ref": "BastionHostProfile"
-                },
-                "ImageId": {
-                    "Fn::FindInMap": [
-                        "AWSAMIRegionMap",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": [
-                                "LinuxAMINameMap",
-                                {
-                                    "Ref": "BastionAMIOS"
-                                },
-                                "Code"
-                            ]
-                        }
-                    ]
-                },
-                "InstanceType": {
-                    "Ref": "Bastion2InstanceType"
-                },
-                "NetworkInterfaces": [
-                    {
-                        "AssociatePublicIpAddress": true,
-                        "DeleteOnTermination": "true",
-                        "DeviceIndex": 0,
-                        "SubnetId": {
-                            "Ref": "PublicSubnet2ID"
-                        },
-                        "PrivateIpAddress": {
-                            "Ref": "Bastion2PrivateIP"
-                        },
-                        "GroupSet": [
-                            {
-                                "Ref": "BastionSecurityGroup"
-                            }
-                        ]
-                    }
-                ],
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "LinuxBastion2"
-                    }
-                ],
-                "KeyName": {
-                    "Ref": "KeyPairName"
-                },
-                "UserData": {
-                    "Fn::Base64": {
-                        "Fn::Join": [
-                            "",
-                            [
-                                "#!/bin/bash\n",
-                                "CLOUDWATCHGROUP=",
-                                {
-                                    "Ref": "BastionMainLogGroup"
-                                },
+                                "chmod +x ${EIP_SCRIPT}\n",
+                                "./${EIP_SCRIPT} ",
                                 "\n",
-                                "BASTION_BOOTSTRAP_FILE=bastion_bootstrap.sh\n",
                                 "BASTION_BOOTSTRAP=",
                                 {
                                     "Fn::FindInMap": [
@@ -803,35 +761,59 @@
         }
     },
     "Outputs": {
-        "LinuxBastion1PublicDNSName": {
-            "Value": {
-                "Fn::GetAtt": [
-                    "LinuxBastion1",
-                    "PublicDnsName"
-                ]
-            },
-            "Description": "Public DNS name of the Linux Bastion 1 in Avalability Zone 1"
+        "AutoScalingGroup" : {
+            "Description" : "Auto Scaling Group Reference ID",
+            "Value" : { "Ref" : "AutoScalingServerGroup" }
         },
-        "LinuxBastion1ElasticIP": {
-            "Value": {
-                "Ref": "LinuxBastion1EIP"
-            },
-            "Description": "Elastic IP address of the Linux Bastion 1 in Avalability Zone 1"
+        "EIP1A": {
+             "Description": "Elastic IP for Bastion",
+             "Value": {"Ref": "BastionEIP1A"},
+             "Condition": "EIPSELECT1"
         },
-        "LinuxBastion2PublicDNSName": {
-            "Value": {
-                "Fn::GetAtt": [
-                    "LinuxBastion2",
-                    "PublicDnsName"
-                ]
-            },
-            "Description": "Public DNS name of the Linux Bastion 2 in Avalability Zone 2"
+        "EIP2A": {
+             "Description": "Elastic IP for Bastion",
+             "Value": {"Ref": "BastionEIP2A"},
+             "Condition": "EIPSELECT2"
         },
-        "LinuxBastion2ElasticIP": {
-            "Value": {
-                "Ref": "LinuxBastion2EIP"
-            },
-            "Description": "Elastic IP address of the Linux Bastion 2 in Avalability Zone 2"
+        "EIP2B": {
+             "Description": "Elastic IP for Bastion",
+             "Value": {"Ref": "BastionEIP2B"},
+              "Condition": "EIPSELECT2"
+        },
+        "EIP3A": {
+             "Description": "Elastic IP for Bastion",
+             "Value": {"Ref": "BastionEIP3A"},
+             "Condition": "EIPSELECT3"
+        },
+        "EIP3B": {
+             "Description": "Elastic IP for Bastion",
+             "Value": {"Ref": "BastionEIP3B"},
+             "Condition": "EIPSELECT3"
+        },
+        "EIP3C": {
+             "Description": "Elastic IP for Bastion",
+             "Value": {"Ref": "BastionEIP3C"},
+              "Condition": "EIPSELECT3"
+        },
+        "EIP4A": {
+             "Description": "Elastic IP for Bastion",
+             "Value": {"Ref": "BastionEIP4A"},
+             "Condition": "EIPSELECT4"
+        },
+        "EIP4B": {
+             "Description": "Elastic IP for Bastion",
+             "Value": {"Ref": "BastionEIP4B"},
+             "Condition": "EIPSELECT4"
+        },
+        "EIP4C": {
+             "Description": "Elastic IP for Bastion",
+             "Value": {"Ref": "BastionEIP4C"},
+              "Condition": "EIPSELECT4"
+        },
+        "EIP4D": {
+             "Description": "Elastic IP for Bastion",
+             "Value": {"Ref": "BastionEIP4D"},
+              "Condition": "EIPSELECT4"
         },
         "CloudWatchLogs": {
             "Value": {
