@@ -130,7 +130,7 @@ function request_eip() {
 
 function call_request_eip() {
   WAIT=$(shuf -i 1-30 -n 1)
-  sleep "WAIT"
+  sleep "$WAIT"
   request_eip
 }
 
