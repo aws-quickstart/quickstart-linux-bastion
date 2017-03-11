@@ -415,6 +415,9 @@
                     "KeyPairName": {
                         "Ref": "KeyPairName"
                     },
+                    "NumBastionHosts": {
+                        "Ref": "NumBastionHosts"
+                    },
                     "PublicSubnet1ID": {
                         "Fn::GetAtt": [
                             "VPCStack",
