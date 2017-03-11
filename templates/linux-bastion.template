@@ -464,7 +464,7 @@
         "BastionMainLogGroup": {
             "Type": "AWS::Logs::LogGroup"
         },
-        "SSHWordMetric": {
+        "SSHMetricFilter": {
             "Type": "AWS::Logs::MetricFilter",
             "Properties": {
                 "LogGroupName": {
