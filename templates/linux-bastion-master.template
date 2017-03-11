@@ -24,12 +24,8 @@
                     },
                     "Parameters": [
                         "KeyPairName",
-                        "NATInstanceType",
                         "BastionAMIOS",
-                        "Bastion1InstanceType",
-                        "Bastion1PrivateIP",
-                        "Bastion2InstanceType",
-                        "Bastion2PrivateIP"
+                        "BastionInstanceType"
                     ]
                 },
                 {
@@ -37,8 +33,11 @@
                         "default": "Linux Bastion Configuration"
                     },
                     "Parameters": [
+                        "NumBastionHosts",
                         "EnableBanner",
-                        "BastionBanner"
+                        "BastionBanner",
+                        "EnableTCPForwarding",
+                        "EnableX11Forwarding"
                     ]
                 },
                 {
@@ -55,32 +54,29 @@
                 "AvailabilityZones": {
                     "default": "Availability Zones"
                 },
-                "Bastion1InstanceType": {
-                    "default": "Bastion 1 Instance Type"
-                },
-                "Bastion1PrivateIP": {
-                    "default": "Bastion 1 Private IP Address"
-                },
-                "Bastion2InstanceType": {
-                    "default": "Bastion 2 Instance Type"
-                },
-                "Bastion2PrivateIP": {
-                    "default": "Bastion 2 Private IP Address"
-                },
                 "BastionAMIOS": {
                     "default": "Bastion AMI Operating System"
                 },
                 "BastionBanner": {
                     "default": "Bastion Banner"
                 },
+                "BastionInstanceType": {
+                    "default": "Bastion Instance Type"
+                },
                 "EnableBanner": {
                     "default": "Enable Banner"
+                },
+                "EnableTCPForwarding": {
+                    "default": "Enable TCP Forwarding"
+                },
+                "EnableX11Forwarding": {
+                    "default": "Enable X11 Forwarding"
                 },
                 "KeyPairName": {
                     "default": "Key Pair Name"
                 },
-                "NATInstanceType": {
-                    "default": "NAT Instance Type"
+                "NumBastionHosts": {
+                    "default": "Number of Bastion Hosts"
                 },
                 "PrivateSubnet1CIDR": {
                     "default": "Private Subnet 1 CIDR"
@@ -114,72 +110,6 @@
             "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved and only 2 AZs are used for this deployment.",
             "Type": "List<AWS::EC2::AvailabilityZone::Name>"
         },
-        "Bastion1InstanceType": {
-            "Description": "Amazon EC2 instance type for the first bastion instance",
-            "Type": "String",
-            "Default": "t2.micro",
-            "AllowedValues": [
-                "t2.nano",
-                "t2.micro",
-                "t2.small",
-                "t2.medium",
-                "t2.large",
-                "m3.large",
-                "m3.xlarge",
-                "m3.2xlarge",
-                "m4.large",
-                "m4.xlarge",
-                "m4.2xlarge",
-                "m4.4xlarge"
-            ]
-        },
-        "Bastion1PrivateIP": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
-            "ConstraintDescription": "IP address parameter must be in the form x.x.x.x",
-            "Default": "10.0.128.5",
-            "Description": "Fixed private IP for the first bastion located in Availability Zone 1",
-            "Type": "String"
-        },
-        "Bastion2InstanceType": {
-            "Description": "Amazon EC2 instance type for the second bastion instance",
-            "Type": "String",
-            "Default": "t2.micro",
-            "AllowedValues": [
-                "t2.nano",
-                "t2.micro",
-                "t2.small",
-                "t2.medium",
-                "t2.large",
-                "m3.large",
-                "m3.xlarge",
-                "m3.2xlarge",
-                "m4.large",
-                "m4.xlarge",
-                "m4.2xlarge",
-                "m4.4xlarge"
-            ]
-        },
-        "Bastion2PrivateIP": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
-            "ConstraintDescription": "IP address parameter must be in the form x.x.x.x",
-            "Default": "10.0.144.5",
-            "Description": "Fixed private IP for the second bastion located in Availability Zone 2",
-            "Type": "String"
-        },
-        "BastionBanner": {
-            "Default": "https://s3.amazonaws.com/quickstart-reference/linux/bastion/latest/scripts/banner_message.txt",
-            "Description": "Banner text to display upon login",
-            "Type": "String"
-        },
-        "EnableBanner": {
-            "AllowedValues": [
-                "true",
-                "false"
-            ],
-            "Default": "false",
-            "Description": "To include a banner to be displayed when connecting via SSH to the bastion, set this parameter to true",
-            "Type": "String"
-        },
         "BastionAMIOS": {
             "AllowedValues": [
                 "Amazon-Linux-HVM",
@@ -191,23 +121,70 @@
             "Description": "The Linux distribution for the AMI to be used for the bastion instances",
             "Type": "String"
         },
-        "KeyPairName": {
-            "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
-            "Type": "AWS::EC2::KeyPair::KeyName"
+        "BastionBanner": {
+            "Default": "https://s3.amazonaws.com/quickstart-reference/linux/bastion/latest/scripts/banner_message.txt",
+            "Description": "Banner text to display upon login",
+            "Type": "String"
         },
-        "NATInstanceType": {
+        "BastionInstanceType": {
+            "Description": "Amazon EC2 instance type for the bastion instances",
+            "Type": "String",
+            "Default": "t2.micro",
             "AllowedValues": [
                 "t2.nano",
                 "t2.micro",
                 "t2.small",
                 "t2.medium",
                 "t2.large",
-                "m3.medium",
                 "m3.large",
-                "m4.large"
+                "m3.xlarge",
+                "m3.2xlarge",
+                "m4.large",
+                "m4.xlarge",
+                "m4.2xlarge",
+                "m4.4xlarge"
+            ]
+        },
+        "EnableBanner": {
+            "AllowedValues": [
+                "true",
+                "false"
             ],
-            "Default": "t2.small",
-            "Description": "Amazon EC2 instance type for the NAT Instances. This is only used if the region does not support NAT gateways.",
+            "Default": "false",
+            "Description": "To include a banner to be displayed when connecting via SSH to the bastion, set this parameter to true",
+            "Type": "String"
+        },
+        "EnableTCPForwarding": {
+            "Type": "String",
+            "Description": "Enable/Disable TCP Forwarding",
+            "Default": "false",
+            "AllowedValues": [
+                "true",
+                "false"
+            ]
+        },
+        "EnableX11Forwarding": {
+            "Type": "String",
+            "Description": "Enable/Disable X11 Forwarding",
+            "Default": "false",
+            "AllowedValues": [
+                "true",
+                "false"
+            ]
+        },
+        "KeyPairName": {
+            "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "NumBastionHosts": {
+            "AllowedValues": [
+                "1",
+                "2",
+                "3",
+                "4"
+            ],
+            "Default": "1",
+            "Description": "Enter the number of bastion hosts to create",
             "Type": "String"
         },
         "PrivateSubnet1CIDR": {
@@ -370,9 +347,6 @@
                     "KeyPairName": {
                         "Ref": "KeyPairName"
                     },
-                    "NATInstanceType": {
-                        "Ref": "NATInstanceType"
-                    },
                     "NumberOfAZs": "2",
                     "PrivateSubnet1ACIDR": {
                         "Ref": "PrivateSubnet1CIDR"
@@ -420,26 +394,23 @@
                     ]
                 },
                 "Parameters": {
-                    "Bastion1InstanceType": {
-                        "Ref": "Bastion1InstanceType"
-                    },
-                    "Bastion1PrivateIP": {
-                        "Ref": "Bastion1PrivateIP"
-                    },
-                    "Bastion2InstanceType": {
-                        "Ref": "Bastion2InstanceType"
-                    },
-                    "Bastion2PrivateIP": {
-                        "Ref": "Bastion2PrivateIP"
-                    },
                     "BastionAMIOS": {
                         "Ref": "BastionAMIOS"
                     },
                     "BastionBanner": {
                         "Ref": "BastionBanner"
                     },
+                    "BastionInstanceType": {
+                        "Ref": "BastionInstanceType"
+                    },
                     "EnableBanner": {
                         "Ref": "EnableBanner"
+                    },
+                    "EnableTCPForwarding": {
+                        "Ref": "EnableTCPForwarding"
+                    },
+                    "EnableX11Forwarding": {
+                        "Ref": "EnableX11Forwarding"
                     },
                     "KeyPairName": {
                         "Ref": "KeyPairName"
