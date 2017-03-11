@@ -68,12 +68,12 @@ function harden_ssh_security () {
     mkdir -p /var/log/bastion
     mkdir -p /usr/bin/bastion
 
-    
+
     touch /tmp/messages
     chmod 770 /tmp/messages
     log_file_location="${bastion_mnt}/${bastion_log}"
     log_shadow_file_location="${bastion_mnt}/.${bastion_log}"
-    
+
 
 cat <<'EOF' >> /usr/bin/bastion/shell
 bastion_mnt="/var/log/bastion"
@@ -104,7 +104,7 @@ EOF
     echo "SSH_Hardening - cat file"
     chmod a+rx /usr/bin/bastion/shell
     echo "SSH_Hardening - End"
-    
+
     echo "${FUNCNAME[0]} Ended"
 }
 
@@ -220,7 +220,7 @@ EOF
     chmod +x ./awslogs-agent-setup.py
     ./awslogs-agent-setup.py -n -r $Region -c ~/cloudwatchlog.conf
 
-  #Install Unit file for Ubuntu 16.04
+    #Install Unit file for Ubuntu 16.04
     ubuntu=`cat /etc/os-release | grep VERSION_ID | tr -d \VERSION_ID=\"`
     if [ "$ubuntu" == "16.04" ]; then
 cat <<'EOF' >> /etc/systemd/system/awslogs.service
@@ -413,11 +413,11 @@ while true; do
             shift 2
             ;;
         --tcp-forwarding)
-	        TCP_FORWARDING="$2";
+            TCP_FORWARDING="$2";
             shift 2
             ;;
         --x11-forwarding)
-	        X11_FORWARDING="$2";
+            X11_FORWARDING="$2";
             shift 2
             ;;
         --)
@@ -473,26 +473,25 @@ echo "Value of TCP_FORWARDING - $TCP_FORWARDING"
 echo "Value of X11_FORWARDING - $X11_FORWARDING"
 
 if [[ $TCP_FORWARDING == "false" ]];then
-	awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-	echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
+    awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+    echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
     harden_ssh_security
 fi
 
 if [[ $X11_FORWARDING == "false" ]];then
-	awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-	echo "X11Forwarding no" >> /etc/ssh/sshd_config
+    awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+    echo "X11Forwarding no" >> /etc/ssh/sshd_config
 fi
 
 release=$(osrelease)
 
 # Ubuntu Linux
-#if [ -f /etc/lsb-release ]; then
 if [ "$release" == "Ubuntu" ]; then
     #Call function for Ubuntu
     ubuntu_os
 # AMZN Linux
 elif [ "$release" == "AMZN" ]; then
-  #Call function for AMZN
+    #Call function for AMZN
     amazon_os
 # CentOS Linux
 elif [ "$release" == "CentOS" ]; then
@@ -501,5 +500,3 @@ elif [ "$release" == "CentOS" ]; then
 fi
 # Make the custom script executable
 chmod a+x /usr/bin/bastion/shell
-
-
