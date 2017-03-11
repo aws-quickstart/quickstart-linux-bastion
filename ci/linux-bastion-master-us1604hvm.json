@@ -21,7 +21,7 @@
     },
     {
         "ParameterKey": "BastionAMIOS",
-        "ParameterValue": "CentOS-7-HVM"
+        "ParameterValue": "Ubuntu-Server-16.04-LTS-HVM"
     },
     {
         "ParameterKey": "KeyPairName",

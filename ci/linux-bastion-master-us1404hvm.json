@@ -1,7 +1,7 @@
 [
     {
         "ParameterKey": "AvailabilityZones",
-        "ParameterValue": "$[alfred_genaz_2]"
+        "ParameterValue": "$[alfred_getaz_2]"
     },
     {
         "ParameterKey": "Bastion1InstanceType",
@@ -21,11 +21,11 @@
     },
     {
         "ParameterKey": "BastionAMIOS",
-        "ParameterValue": "UbuntuServer1404LTSHVM"
+        "ParameterValue": "Ubuntu-Server-14.04-LTS-HVM"
     },
     {
         "ParameterKey": "KeyPairName",
-        "ParameterValue": "cikey"
+        "ParameterValue": "$[alfred_getkeypair]"
     },
     {
         "ParameterKey": "NATInstanceType",

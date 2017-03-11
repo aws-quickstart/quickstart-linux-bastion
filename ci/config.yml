@@ -28,3 +28,6 @@ tests:
   us1404hvm:
     parameter_input: linux-bastion-master-us1404hvm.json
     template_file: linux-bastion-master.template
+  us1604hvm:
+    parameter_input: linux-bastion-master-us1604hvm.json
+    template_file: linux-bastion-master.template
