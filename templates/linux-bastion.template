@@ -598,11 +598,11 @@
             "Type": "AWS::EC2::EIP",
             "Condition": "4BastionCondition"
         },
-        "AutoScalingGroup": {
+        "BastionAutoScalingGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
             "Properties": {
                 "LaunchConfigurationName": {
-                    "Ref": "LaunchConfig"
+                    "Ref": "BastionLaunchConfiguration"
                 },
                 "VPCZoneIdentifier": [
                     {
@@ -629,10 +629,113 @@
                         "PropagateAtLaunch": "true"
                     }
                 ]
+            },
+            "CreationPolicy": {
+                "ResourceSignal": {
+                    "Count": {
+                        "Ref": "NumBastionHosts"
+                    },
+                    "Timeout": "PT30M"
+                }
             }
         },
-        "LaunchConfig": {
+        "BastionLaunchConfiguration": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                    "config": {
+                        "files": {
+                            "/tmp/get_eip.sh": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "/",
+                                        [
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "AWSInfoRegionMap",
+                                                    {
+                                                        "Ref": "AWS::Region"
+                                                    },
+                                                    "QuickStartS3URL"
+                                                ]
+                                            },
+                                            {
+                                                "Ref": "QSS3BucketName"
+                                            },
+                                            {
+                                                "Ref": "QSS3KeyPrefix"
+                                            },
+                                            "scripts/get_eip.sh"
+                                        ]
+                                    ]
+                                },
+                                "mode": "000550",
+                                "owner": "root",
+                                "group": "root"
+                            },
+                            "/tmp/bastion_bootstrap.sh": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "/",
+                                        [
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "AWSInfoRegionMap",
+                                                    {
+                                                        "Ref": "AWS::Region"
+                                                    },
+                                                    "QuickStartS3URL"
+                                                ]
+                                            },
+                                            {
+                                                "Ref": "QSS3BucketName"
+                                            },
+                                            {
+                                                "Ref": "QSS3KeyPrefix"
+                                            },
+                                            "scripts/bastion_bootstrap.sh"
+                                        ]
+                                    ]
+                                },
+                                "mode": "000550",
+                                "owner": "root",
+                                "group": "root"
+                            }
+                        },
+                        "commands": {
+                            "a-get-eip": {
+                                "command": "./tmp/get_eip.sh"
+                            },
+                            "b-bootstrap": {
+                                "command": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "./tmp/bastion_bootstrap.sh",
+                                            " --banner ",
+                                            {
+                                                "Ref": "BastionBanner"
+                                            },
+                                            " --enable ",
+                                            {
+                                                "Ref": "EnableBanner"
+                                            },
+                                            " --tcp-forwarding ",
+                                            {
+                                                "Ref": "EnableTCPForwarding"
+                                            },
+                                            " --x11-forwarding ",
+                                            {
+                                                "Ref": "EnableX11Forwarding"
+                                            }
+                                        ]
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             "Properties": {
                 "KeyName": {
                     "Ref": "KeyPairName"
@@ -671,62 +774,40 @@
                             "",
                             [
                                 "#!/bin/bash\n",
+                                "PATH=$PATH:/usr/local/bin\n",
+                                "which pip &> /dev/null\n",
+                                "if [ $? -ne 0 ] ; then\n",
+                                "[ `which yum` ] && $(yum install -y epel-release; yum install -y python-pip)\n",
+                                "[ `which apt-get` ] && apt-get -y update && apt-get -y install python-pip\n",
+                                "fi\n",
+                                "pip install --upgrade pip\n",
+                                "pip install awscli --ignore-installed six\n",
+                                "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
                                 "CLOUDWATCHGROUP=",
                                 {
                                     "Ref": "BastionMainLogGroup"
                                 },
                                 "\n",
-                                "BASTION_SCRIPTS_LOCATION=",
+                                "cfn-init -v ",
+                                " --stack ",
                                 {
-                                    "Fn::Join": [
-                                        "/",
-                                        [
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "AWSInfoRegionMap",
-                                                    {
-                                                        "Ref": "AWS::Region"
-                                                    },
-                                                    "QuickStartS3URL"
-                                                ]
-                                            },
-                                            {
-                                                "Ref": "QSS3BucketName"
-                                            },
-                                            {
-                                                "Ref": "QSS3KeyPrefix"
-                                            }
-                                        ]
-                                    ]
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --resource BastionLaunchConfiguration",
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
                                 },
                                 "\n",
-                                "BASTION_BOOTSTRAP_FILE=bastion_bootstrap.sh\n",
-                                "EIP_SCRIPT_FILE=get_eip.sh\n",
-                                "BASTION_EIP=${BASTION_SCRIPTS_LOCATION}/${EIP_SCRIPT_FILE}\n",
-                                "echo ${BASTION_EIP}\n",
-                                "curl -s ${BASTION_EIP} > ${EIP_SCRIPT_FILE}\n",
-                                "chmod +x ${EIP_SCRIPT_FILE}\n",
-                                "./${EIP_SCRIPT_FILE}\n",
-                                "BASTION_BOOTSTRAP=${BASTION_SCRIPTS_LOCATION}/${BASTION_BOOTSTRAP_FILE}\n",
-                                "echo ${BASTION_BOOTSTRAP}\n",
-                                "curl -s ${BASTION_BOOTSTRAP} > ${BASTION_BOOTSTRAP_FILE}\n",
-                                "chmod +x ${BASTION_BOOTSTRAP_FILE}\n",
-                                "./${BASTION_BOOTSTRAP_FILE}",
-                                " --banner ",
+                                "cfn-signal -e $? ",
+                                " --stack ",
                                 {
-                                    "Ref": "BastionBanner"
+                                    "Ref": "AWS::StackName"
                                 },
-                                " --enable ",
+                                " --resource BastionAutoScalingGroup ",
+                                " --region ",
                                 {
-                                    "Ref": "EnableBanner"
-                                },
-                                " --tcp-forwarding ",
-                                {
-                                    "Ref": "EnableTCPForwarding"
-                                },
-                                " --x11-forwarding ",
-                                {
-                                    "Ref": "EnableX11Forwarding"
+                                    "Ref": "AWS::Region"
                                 },
                                 "\n"
                             ]
@@ -764,10 +845,10 @@
         }
     },
     "Outputs": {
-        "AutoScalingGroup": {
+        "BastionAutoScalingGroup": {
             "Description": "Auto Scaling Group Reference ID",
             "Value": {
-                "Ref": "AutoScalingGroup"
+                "Ref": "BastionAutoScalingGroup"
             }
         },
         "EIP1": {
