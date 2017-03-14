@@ -641,34 +641,6 @@
                 "AWS::CloudFormation::Init": {
                     "config": {
                         "files": {
-                            "/tmp/get_eip.sh": {
-                                "source": {
-                                    "Fn::Join": [
-                                        "/",
-                                        [
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "AWSInfoRegionMap",
-                                                    {
-                                                        "Ref": "AWS::Region"
-                                                    },
-                                                    "QuickStartS3URL"
-                                                ]
-                                            },
-                                            {
-                                                "Ref": "QSS3BucketName"
-                                            },
-                                            {
-                                                "Ref": "QSS3KeyPrefix"
-                                            },
-                                            "scripts/get_eip.sh"
-                                        ]
-                                    ]
-                                },
-                                "mode": "000550",
-                                "owner": "root",
-                                "group": "root"
-                            },
                             "/tmp/bastion_bootstrap.sh": {
                                 "source": {
                                     "Fn::Join": [
@@ -689,7 +661,7 @@
                                             {
                                                 "Ref": "QSS3KeyPrefix"
                                             },
-                                            "scripts/bastion_bootstrap.sh"
+                                            "scripts/bastion_bootstrap-test.sh"
                                         ]
                                     ]
                                 },
@@ -699,9 +671,6 @@
                             }
                         },
                         "commands": {
-                            "a-get-eip": {
-                                "command": "./tmp/get_eip.sh"
-                            },
                             "b-bootstrap": {
                                 "command": {
                                     "Fn::Join": [
@@ -770,15 +739,62 @@
                             "",
                             [
                                 "#!/bin/bash\n",
-                                "PATH=$PATH:/usr/local/bin\n",
+                                "PATH=$PATH:/usr/local/bin:/usr/bin:/bin\n",
                                 "which pip &> /dev/null\n",
                                 "if [ $? -ne 0 ] ; then\n",
                                 "[ `which yum` ] && $(yum install -y epel-release; yum install -y python-pip)\n",
                                 "[ `which apt-get` ] && apt-get -y update && apt-get -y install python-pip\n",
                                 "fi\n",
-                                "pip install --upgrade pip\n",
-                                "pip install awscli --ignore-installed six\n",
-                                "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
+                                "OS=`cat /etc/os-release | grep '^NAME=' | sed 's/NAME=//g' | sed 's/\"//g'`\n",
+                                "if [[ \"$OS\" == \"Amazon Linux AMI\" ]]; then\n",
+                                "source /etc/profile.d/aws-apitools-common.sh\n",
+                                "else\n",
+                                "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz",
+                                "\n",
+                                "fi\n",
+                                "EIP_LIST=",
+                                "\"",
+                                {
+                                    "Fn::If": [
+                                        "1BastionCondition",
+                                        {
+                                            "Ref": "EIP1"
+                                        },
+                                        "Null"
+                                    ]
+                                },
+                                ",",
+                                {
+                                    "Fn::If": [
+                                        "2BastionCondition",
+                                        {
+                                            "Ref": "EIP2"
+                                        },
+                                        "Null"
+                                    ]
+                                },
+                                ",",
+                                {
+                                    "Fn::If": [
+                                        "3BastionCondition",
+                                        {
+                                            "Ref": "EIP3"
+                                        },
+                                        "Null"
+                                    ]
+                                },
+                                ",",
+                                {
+                                    "Fn::If": [
+                                        "4BastionCondition",
+                                        {
+                                            "Ref": "EIP4"
+                                        },
+                                        "Null"
+                                    ]
+                                },
+                                "\"",
+                                "\n",
                                 "CLOUDWATCHGROUP=",
                                 {
                                     "Ref": "BastionMainLogGroup"

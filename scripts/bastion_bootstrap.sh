@@ -68,12 +68,12 @@ function harden_ssh_security () {
     mkdir -p /var/log/bastion
     mkdir -p /usr/bin/bastion
 
-
+    
     touch /tmp/messages
     chmod 770 /tmp/messages
     log_file_location="${bastion_mnt}/${bastion_log}"
     log_shadow_file_location="${bastion_mnt}/.${bastion_log}"
-
+    
 
 cat <<'EOF' >> /usr/bin/bastion/shell
 bastion_mnt="/var/log/bastion"
@@ -104,7 +104,7 @@ EOF
     echo "SSH_Hardening - cat file"
     chmod a+rx /usr/bin/bastion/shell
     echo "SSH_Hardening - End"
-
+    
     echo "${FUNCNAME[0]} Ended"
 }
 
@@ -220,7 +220,7 @@ EOF
     chmod +x ./awslogs-agent-setup.py
     ./awslogs-agent-setup.py -n -r $Region -c ~/cloudwatchlog.conf
 
-    #Install Unit file for Ubuntu 16.04
+  #Install Unit file for Ubuntu 16.04
     ubuntu=`cat /etc/os-release | grep VERSION_ID | tr -d \VERSION_ID=\"`
     if [ "$ubuntu" == "16.04" ]; then
 cat <<'EOF' >> /etc/systemd/system/awslogs.service
@@ -381,6 +381,141 @@ EOF
 
 }
 
+#Added code for EIP
+function install_awscli() {
+    release=$(osrelease)
+    if [ "$release" == "Ubuntu" ]; then
+          if [ ! -f /bin/aws ]; then
+              echo "Installing awscli..."
+              apt install awscli -y            
+          else
+              echo "Installed. Nothing to do."
+          fi
+        
+
+    # AMZN Linux
+    elif [ "$release" == "AMZN" ]; then
+        source /etc/profile.d/aws-apitools-common.sh
+        [ -z "$EC2_HOME" ] && EC2_HOME="/opt/aws/apitools/ec2"
+        export EC2_HOME
+          which ec2-describe-addresses
+          if [ "$?" -eq 1 ]; then
+              echo "Installing awscli..."
+              yum -y install python
+              pip install awscli            
+          else
+              echo "Installed. Nothing to do."
+          fi
+    # CentOS Linux
+    elif [ "$release" == "CentOS" ]; then
+          if [ ! -f /bin/aws ]; then
+              echo "Insalling Python"
+              yum -y update
+              yum -y install python
+              echo "Installing awscli..."
+              curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+              python get-pip.py
+              pip install awscli        
+          else
+              echo "Installed. Nothing to do."
+          fi                    
+    fi
+}
+
+function request_eip() {
+    #Create a variable to hold path to the awscli program. The name is different based on OS.
+    release=$(osrelease)
+    export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
+
+    #Check if EIP already assigned.
+    ALLOC=1
+    ZERO=0
+    INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
+    ASSIGNED=$(aws ec2 describe-addresses --region $Region --output text | grep $INSTANCE_IP | wc -l)
+    if [ "$ASSIGNED" -gt "$ZERO" ]; then
+        echo "Already assigned an EIP."
+        exit 0;
+    fi
+
+    aws ec2 describe-addresses --region $Region --output text > /query.txt
+    #Ensure we are only using EIPs from our Stack
+    line=`curl http://169.254.169.254/latest/user-data/ | grep EIP_LIST`
+    IFS=$':' DIRS=(${line//$','/:})       # Replace tabs with colons.
+
+    for (( i=0 ; i<${#DIRS[@]} ; i++ )); do
+        EIP=`echo ${DIRS[i]} | sed 's/\"//g' | sed 's/EIP_LIST=//g'`
+        if [ $EIP != "Null" ]; then
+            #echo "$i: $EIP"
+            grep "$EIP" /query.txt >> /query2.txt;
+        fi
+    done
+    mv /query2.txt /query.txt
+
+
+    AVAILABLE_EIPs=`cat /query.txt | wc -l`
+
+    if [ "$AVAILABLE_EIPs" -gt "$ZERO" ]; then
+        FIELD_COUNT="5"
+        INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+        echo "Running associate_eip_now"
+        while read name;
+        do
+            #EIP_ENTRY=$(echo $name | grep eip | wc -l)
+            EIP_ENTRY=$(echo $name | grep eni | wc -l)
+            echo "EIP: $EIP_ENTRY"
+            if [ "$EIP_ENTRY" -eq 1 ]; then
+                echo "Already associated with an instance"
+                echo ""
+            else
+                export EIP=`echo "$name" | sed 's/[\s]+/,/g' | awk {'print $4'}`
+                EIPALLOC=`echo $name | awk {'print $2'}`
+                echo "NAME: $name"
+                echo "EIP: $EIP"
+                echo "EIPALLOC: $EIPALLOC"
+                aws ec2 associate-address --instance-id $INSTANCE_ID --allocation-id $EIPALLOC --region $Region
+            fi
+        done < /query.txt
+    else
+        echo "None available in this Region"
+        exit 1
+    fi
+
+    #Retry
+    INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
+    ASSIGNED=$(aws ec2 describe-addresses --region $Region --output text | grep $INSTANCE_IP | wc -l)
+    if [ "$ASSIGNED" -eq 1 ]; then
+        echo "Already assigned an EIP"
+        exit 0;
+    fi
+    while [ "$ASSIGNED" -eq "$ZERO" ]
+    do
+        sleep 3
+        request_eip
+        INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
+        ASSIGNED=$(aws ec2 describe-addresses --region $Region --output text | grep $INSTANCE_IP | wc -l)
+    done
+    exit 0
+}
+
+function call_request_eip() {
+    #Install awscli program if it isn't installed.
+    install_awscli
+
+    Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
+    ZERO=0
+    INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
+    ASSIGNED=$(aws ec2 describe-addresses --region $Region --output text | grep $INSTANCE_IP | wc -l)
+    if [ "$ASSIGNED" -gt "$ZERO" ]; then
+        echo "Already assigned an EIP."
+        exit 0;
+    fi
+    WAIT=$(shuf -i 1-30 -n 1)
+    sleep "$WAIT"
+    request_eip
+    exit 0
+}
+
+
 
 ##################################### End Function Definitions
 
@@ -413,11 +548,11 @@ while true; do
             shift 2
             ;;
         --tcp-forwarding)
-            TCP_FORWARDING="$2";
+	        TCP_FORWARDING="$2";
             shift 2
             ;;
         --x11-forwarding)
-            X11_FORWARDING="$2";
+	        X11_FORWARDING="$2";
             shift 2
             ;;
         --)
@@ -473,25 +608,26 @@ echo "Value of TCP_FORWARDING - $TCP_FORWARDING"
 echo "Value of X11_FORWARDING - $X11_FORWARDING"
 
 if [[ $TCP_FORWARDING == "false" ]];then
-    awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-    echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
+	awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+	echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
     harden_ssh_security
 fi
 
 if [[ $X11_FORWARDING == "false" ]];then
-    awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-    echo "X11Forwarding no" >> /etc/ssh/sshd_config
+	awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+	echo "X11Forwarding no" >> /etc/ssh/sshd_config
 fi
 
 release=$(osrelease)
 
 # Ubuntu Linux
+#if [ -f /etc/lsb-release ]; then
 if [ "$release" == "Ubuntu" ]; then
     #Call function for Ubuntu
     ubuntu_os
 # AMZN Linux
 elif [ "$release" == "AMZN" ]; then
-    #Call function for AMZN
+  #Call function for AMZN
     amazon_os
 # CentOS Linux
 elif [ "$release" == "CentOS" ]; then
@@ -500,3 +636,6 @@ elif [ "$release" == "CentOS" ]; then
 fi
 # Make the custom script executable
 chmod a+x /usr/bin/bastion/shell
+
+call_request_eip
+
