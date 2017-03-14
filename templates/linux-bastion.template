@@ -449,7 +449,7 @@
                 "LogGroupName": {
                     "Ref": "BastionMainLogGroup"
                 },
-                "FilterPattern": "ON,FROM,USER,PWD",
+                "FilterPattern": "ON FROM USER PWD",
                 "MetricTransformations": [
                     {
                         "MetricName": "SSHCommandCount",
