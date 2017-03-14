@@ -1,8 +1,7 @@
 #!/bin/bash -e
-# Bastion Bootstraping
-# authors: tonynv@amazon.com, sancard@amazon.com
-# date Nov,9,2016
-# NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you must install GNU getopt and mod the checkos fuction so its supported
+# Bastion Bootstrapping
+# authors: tonynv@amazon.com, sancard@amazon.com, ianhill@amazon.com
+# NOTE: This requires GNU getopt. On Mac OS X and FreeBSD you must install GNU getopt and mod the checkos function so that it's supported
 
 
 # Configuration
@@ -68,12 +67,12 @@ function harden_ssh_security () {
     mkdir -p /var/log/bastion
     mkdir -p /usr/bin/bastion
 
-    
+
     touch /tmp/messages
     chmod 770 /tmp/messages
     log_file_location="${bastion_mnt}/${bastion_log}"
     log_shadow_file_location="${bastion_mnt}/.${bastion_log}"
-    
+
 
 cat <<'EOF' >> /usr/bin/bastion/shell
 bastion_mnt="/var/log/bastion"
@@ -104,7 +103,7 @@ EOF
     echo "SSH_Hardening - cat file"
     chmod a+rx /usr/bin/bastion/shell
     echo "SSH_Hardening - End"
-    
+
     echo "${FUNCNAME[0]} Ended"
 }
 
@@ -220,7 +219,7 @@ EOF
     chmod +x ./awslogs-agent-setup.py
     ./awslogs-agent-setup.py -n -r $Region -c ~/cloudwatchlog.conf
 
-  #Install Unit file for Ubuntu 16.04
+    #Install Unit file for Ubuntu 16.04
     ubuntu=`cat /etc/os-release | grep VERSION_ID | tr -d \VERSION_ID=\"`
     if [ "$ubuntu" == "16.04" ]; then
 cat <<'EOF' >> /etc/systemd/system/awslogs.service
@@ -387,11 +386,11 @@ function install_awscli() {
     if [ "$release" == "Ubuntu" ]; then
           if [ ! -f /bin/aws ]; then
               echo "Installing awscli..."
-              apt install awscli -y            
+              apt install awscli -y
           else
               echo "Installed. Nothing to do."
           fi
-        
+
 
     # AMZN Linux
     elif [ "$release" == "AMZN" ]; then
@@ -402,7 +401,7 @@ function install_awscli() {
           if [ "$?" -eq 1 ]; then
               echo "Installing awscli..."
               yum -y install python
-              pip install awscli            
+              pip install awscli
           else
               echo "Installed. Nothing to do."
           fi
@@ -415,10 +414,10 @@ function install_awscli() {
               echo "Installing awscli..."
               curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
               python get-pip.py
-              pip install awscli        
+              pip install awscli
           else
               echo "Installed. Nothing to do."
-          fi                    
+          fi
     fi
 }
 
@@ -499,7 +498,7 @@ function request_eip() {
 
 function call_request_eip() {
     #Install awscli program if it isn't installed.
-    install_awscli
+    #install_awscli
 
     Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
     ZERO=0
@@ -507,7 +506,7 @@ function call_request_eip() {
     ASSIGNED=$(aws ec2 describe-addresses --region $Region --output text | grep $INSTANCE_IP | wc -l)
     if [ "$ASSIGNED" -gt "$ZERO" ]; then
         echo "Already assigned an EIP."
-        exit 0;
+        exit 0
     fi
     WAIT=$(shuf -i 1-30 -n 1)
     sleep "$WAIT"
@@ -548,11 +547,11 @@ while true; do
             shift 2
             ;;
         --tcp-forwarding)
-	        TCP_FORWARDING="$2";
+            TCP_FORWARDING="$2";
             shift 2
             ;;
         --x11-forwarding)
-	        X11_FORWARDING="$2";
+            X11_FORWARDING="$2";
             shift 2
             ;;
         --)
@@ -608,26 +607,25 @@ echo "Value of TCP_FORWARDING - $TCP_FORWARDING"
 echo "Value of X11_FORWARDING - $X11_FORWARDING"
 
 if [[ $TCP_FORWARDING == "false" ]];then
-	awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-	echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
+    awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+    echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
     harden_ssh_security
 fi
 
 if [[ $X11_FORWARDING == "false" ]];then
-	awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-	echo "X11Forwarding no" >> /etc/ssh/sshd_config
+    awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+    echo "X11Forwarding no" >> /etc/ssh/sshd_config
 fi
 
 release=$(osrelease)
 
 # Ubuntu Linux
-#if [ -f /etc/lsb-release ]; then
 if [ "$release" == "Ubuntu" ]; then
     #Call function for Ubuntu
     ubuntu_os
 # AMZN Linux
 elif [ "$release" == "AMZN" ]; then
-  #Call function for AMZN
+    #Call function for AMZN
     amazon_os
 # CentOS Linux
 elif [ "$release" == "CentOS" ]; then
@@ -638,4 +636,3 @@ fi
 chmod a+x /usr/bin/bastion/shell
 
 call_request_eip
-

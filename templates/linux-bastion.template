@@ -397,27 +397,6 @@
         }
     },
     "Conditions": {
-        "1BastionCondition": {
-            "Fn::Or": [
-                {
-                    "Fn::Equals": [
-                        {
-                            "Ref": "NumBastionHosts"
-                        },
-                        "1"
-                    ]
-                },
-                {
-                    "Condition": "2BastionCondition"
-                },
-                {
-                    "Condition": "3BastionCondition"
-                },
-                {
-                    "Condition": "4BastionCondition"
-                }
-            ]
-        },
         "2BastionCondition": {
             "Fn::Or": [
                 {
@@ -566,19 +545,30 @@
         },
         "EIP1": {
             "Type": "AWS::EC2::EIP",
-            "Condition": "1BastionCondition"
+            "Properties": {
+                "Domain": "vpc"
+            }
         },
         "EIP2": {
             "Type": "AWS::EC2::EIP",
-            "Condition": "2BastionCondition"
+            "Condition": "2BastionCondition",
+            "Properties": {
+                "Domain": "vpc"
+            }
         },
         "EIP3": {
             "Type": "AWS::EC2::EIP",
-            "Condition": "3BastionCondition"
+            "Condition": "3BastionCondition",
+            "Properties": {
+                "Domain": "vpc"
+            }
         },
         "EIP4": {
             "Type": "AWS::EC2::EIP",
-            "Condition": "4BastionCondition"
+            "Condition": "4BastionCondition",
+            "Properties": {
+                "Domain": "vpc"
+            }
         },
         "BastionAutoScalingGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
@@ -725,29 +715,18 @@
                             "",
                             [
                                 "#!/bin/bash\n",
-                                "PATH=$PATH:/usr/local/bin:/usr/bin:/bin\n",
+                                "PATH=$PATH:/usr/local/bin\n",
                                 "which pip &> /dev/null\n",
                                 "if [ $? -ne 0 ] ; then\n",
-                                "[ `which yum` ] && $(yum install -y epel-release; yum install -y python-pip)\n",
-                                "[ `which apt-get` ] && apt-get -y update && apt-get -y install python-pip\n",
+                                "    [ `which yum` ] && $(yum install -y epel-release; yum install -y python-pip)\n",
+                                "    [ `which apt-get` ] && apt-get -y update && apt-get -y install python-pip\n",
                                 "fi\n",
-                                "OS=`cat /etc/os-release | grep '^NAME=' | sed 's/NAME=//g' | sed 's/\"//g'`\n",
-                                "if [[ \"$OS\" == \"Amazon Linux AMI\" ]]; then\n",
-                                "source /etc/profile.d/aws-apitools-common.sh\n",
-                                "else\n",
-                                "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz",
-                                "\n",
-                                "fi\n",
-                                "EIP_LIST=",
-                                "\"",
+                                "pip install --upgrade pip\n",
+                                "pip install awscli --ignore-installed six\n",
+                                "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
+                                "EIP_LIST=\"",
                                 {
-                                    "Fn::If": [
-                                        "1BastionCondition",
-                                        {
-                                            "Ref": "EIP1"
-                                        },
-                                        "Null"
-                                    ]
+                                    "Ref": "EIP1"
                                 },
                                 ",",
                                 {
@@ -779,31 +758,26 @@
                                         "Null"
                                     ]
                                 },
-                                "\"",
-                                "\n",
+                                "\"\n",
                                 "CLOUDWATCHGROUP=",
                                 {
                                     "Ref": "BastionMainLogGroup"
                                 },
                                 "\n",
-                                "cfn-init -v ",
-                                " --stack ",
+                                "cfn-init -v --stack ",
                                 {
                                     "Ref": "AWS::StackName"
                                 },
-                                " --resource BastionLaunchConfiguration",
-                                " --region ",
+                                " --resource BastionLaunchConfiguration --region ",
                                 {
                                     "Ref": "AWS::Region"
                                 },
                                 "\n",
-                                "cfn-signal -e $? ",
-                                " --stack ",
+                                "cfn-signal -e $? --stack ",
                                 {
                                     "Ref": "AWS::StackName"
                                 },
-                                " --resource BastionAutoScalingGroup ",
-                                " --region ",
+                                " --resource BastionAutoScalingGroup --region ",
                                 {
                                     "Ref": "AWS::Region"
                                 },
