@@ -470,30 +470,16 @@
                 "LogGroupName": {
                     "Ref": "BastionMainLogGroup"
                 },
-                "FilterPattern": "FROM",
+                "FilterPattern": "ON,FROM,USER,PWD",
                 "MetricTransformations": [
                     {
-                        "MetricName": "SSHOccurences",
+                        "MetricName": "SSHCommandCount",
                         "MetricValue": 1,
-                        "MetricNamespace": {
-                            "Fn::Join": [
-                                "/",
-                                [
-                                    "EC2",
-                                    {
-                                        "Ref": "BastionInstanceType"
-                                    },
-                                    "EC2",
-                                    {
-                                        "Ref": "BastionInstanceType"
-                                    }
-                                ]
-                            ]
-                        }
+                        "MetricNamespace": "Bastion/SSH"
                     }
                 ]
             }
-        },
+        },        
         "BastionHostRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
