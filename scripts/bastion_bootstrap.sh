@@ -14,7 +14,7 @@ unamestr=`uname`
 if [[ "$unamestr" == 'Linux' ]]; then
     platform='linux'
 else
-    echo "[WARINING] This script is not supported on MacOS or freebsd"
+    echo "[WARNING] This script is not supported on MacOS or freebsd"
     exit 1
 fi
 echo "${FUNCNAME[0]} Ended"
@@ -24,8 +24,8 @@ function usage () {
     echo "$0 <usage>"
     echo " "
     echo "options:"
-    echo -e "--help \t show options for this script"
-    echo -e "--banner \t Bastion Message"
+    echo -e "--help \t Show options for this script"
+    echo -e "--banner \t Enable or Disable Bastion Message"
     echo -e "--enable \t SSH Banner"
     echo -e "--tcp-forwarding \t Enable or Disable TCP Forwarding"
     echo -e "--x11-forwarding \t Enable or Disable X11 Forwarding"
@@ -115,13 +115,12 @@ function amazon_os () {
 cat <<'EOF' >> /etc/bashrc
 #Added by linux bastion bootstrap
 declare -rx IP=$(echo $SSH_CLIENT | awk '{print $1}')
-declare -rx TIME=$(date)
 EOF
 
     echo " declare -rx BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
 
 cat <<'EOF' >> /etc/bashrc
-declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: $(date)   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
     chown root:ec2-user  ${BASTION_MNT}
     chown root:ec2-user  ${BASTION_LOGFILE}
@@ -181,13 +180,12 @@ function ubuntu_os () {
 cat <<'EOF' >> /etc/bash.bashrc
 #Added by linux bastion bootstrap
 declare -rx IP=$(who am i --ips|awk '{print $5}')
-declare -rx TIME=$(date)
 EOF
 
     echo " declare -rx BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bash.bashrc
 
 cat <<'EOF' >> /etc/bash.bashrc
-declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: $(date)   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
     chown root:ubuntu ${BASTION_MNT}
     chown root:ubuntu  ${BASTION_LOGFILE}
@@ -272,7 +270,7 @@ EOF
     echo "declare -rx BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
 
 cat <<'EOF' >> /etc/bashrc
-declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: $(date)   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
     chown root:centos ${BASTION_MNT}
     chown root:centos /usr/bin/script
@@ -295,7 +293,7 @@ cat <<'EOF' >> ~/cloudwatchlog.conf
 [general]
 state_file = /var/awslogs/state/agent-state
 use_gzip_http_content_encoding = true
-loggin_config_file = /var/awslogs/etc/awslogs.conf
+logging_config_file = /var/awslogs/etc/awslogs.conf
 
 [/var/log/bastion]
 datetime_format = %Y-%m-%d %H:%M:%S
@@ -380,47 +378,6 @@ EOF
 
 }
 
-#Added code for EIP
-function install_awscli() {
-    release=$(osrelease)
-    if [ "$release" == "Ubuntu" ]; then
-          if [ ! -f /bin/aws ]; then
-              echo "Installing awscli..."
-              apt install awscli -y
-          else
-              echo "Installed. Nothing to do."
-          fi
-
-
-    # AMZN Linux
-    elif [ "$release" == "AMZN" ]; then
-        source /etc/profile.d/aws-apitools-common.sh
-        [ -z "$EC2_HOME" ] && EC2_HOME="/opt/aws/apitools/ec2"
-        export EC2_HOME
-          which ec2-describe-addresses
-          if [ "$?" -eq 1 ]; then
-              echo "Installing awscli..."
-              yum -y install python
-              pip install awscli
-          else
-              echo "Installed. Nothing to do."
-          fi
-    # CentOS Linux
-    elif [ "$release" == "CentOS" ]; then
-          if [ ! -f /bin/aws ]; then
-              echo "Insalling Python"
-              yum -y update
-              yum -y install python
-              echo "Installing awscli..."
-              curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
-              python get-pip.py
-              pip install awscli
-          else
-              echo "Installed. Nothing to do."
-          fi
-    fi
-}
-
 function request_eip() {
     #Create a variable to hold path to the awscli program. The name is different based on OS.
     release=$(osrelease)
@@ -497,9 +454,6 @@ function request_eip() {
 }
 
 function call_request_eip() {
-    #Install awscli program if it isn't installed.
-    #install_awscli
-
     Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
     ZERO=0
     INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
