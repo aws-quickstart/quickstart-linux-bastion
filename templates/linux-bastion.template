@@ -661,7 +661,7 @@
                                             {
                                                 "Ref": "QSS3KeyPrefix"
                                             },
-                                            "scripts/bastion_bootstrap-test.sh"
+                                            "scripts/bastion_bootstrap.sh"
                                         ]
                                     ]
                                 },
