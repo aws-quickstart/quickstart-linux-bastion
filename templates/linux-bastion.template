@@ -454,7 +454,17 @@
                     {
                         "MetricName": "SSHCommandCount",
                         "MetricValue": 1,
-                        "MetricNamespace": "Bastion/SSH"
+                        "MetricNamespace": {
+                            "Fn::Join": [
+                                "/",
+                                [
+                                    "AWSQuickStart",
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    }
+                                ]
+                            ]
+                        }
                     }
                 ]
             }
