@@ -1,8 +1,7 @@
 #!/bin/bash -e
-# Bastion Bootstraping
-# authors: tonynv@amazon.com, sancard@amazon.com
-# date Nov,9,2016
-# NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD you must install GNU getopt and mod the checkos fuction so its supported
+# Bastion Bootstrapping
+# authors: tonynv@amazon.com, sancard@amazon.com, ianhill@amazon.com
+# NOTE: This requires GNU getopt. On Mac OS X and FreeBSD you must install GNU getopt and mod the checkos function so that it's supported
 
 
 # Configuration
@@ -15,7 +14,7 @@ unamestr=`uname`
 if [[ "$unamestr" == 'Linux' ]]; then
     platform='linux'
 else
-    echo "[WARINING] This script is not supported on MacOS or freebsd"
+    echo "[WARNING] This script is not supported on MacOS or freebsd"
     exit 1
 fi
 echo "${FUNCNAME[0]} Ended"
@@ -25,8 +24,8 @@ function usage () {
     echo "$0 <usage>"
     echo " "
     echo "options:"
-    echo -e "--help \t show options for this script"
-    echo -e "--banner \t Bastion Message"
+    echo -e "--help \t Show options for this script"
+    echo -e "--banner \t Enable or Disable Bastion Message"
     echo -e "--enable \t SSH Banner"
     echo -e "--tcp-forwarding \t Enable or Disable TCP Forwarding"
     echo -e "--x11-forwarding \t Enable or Disable X11 Forwarding"
@@ -68,12 +67,12 @@ function harden_ssh_security () {
     mkdir -p /var/log/bastion
     mkdir -p /usr/bin/bastion
 
-    
+
     touch /tmp/messages
     chmod 770 /tmp/messages
     log_file_location="${bastion_mnt}/${bastion_log}"
     log_shadow_file_location="${bastion_mnt}/.${bastion_log}"
-    
+
 
 cat <<'EOF' >> /usr/bin/bastion/shell
 bastion_mnt="/var/log/bastion"
@@ -104,7 +103,7 @@ EOF
     echo "SSH_Hardening - cat file"
     chmod a+rx /usr/bin/bastion/shell
     echo "SSH_Hardening - End"
-    
+
     echo "${FUNCNAME[0]} Ended"
 }
 
@@ -116,13 +115,12 @@ function amazon_os () {
 cat <<'EOF' >> /etc/bashrc
 #Added by linux bastion bootstrap
 declare -rx IP=$(echo $SSH_CLIENT | awk '{print $1}')
-declare -rx TIME=$(date)
 EOF
 
     echo " declare -rx BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
 
 cat <<'EOF' >> /etc/bashrc
-declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: $(date)   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
     chown root:ec2-user  ${BASTION_MNT}
     chown root:ec2-user  ${BASTION_LOGFILE}
@@ -182,13 +180,12 @@ function ubuntu_os () {
 cat <<'EOF' >> /etc/bash.bashrc
 #Added by linux bastion bootstrap
 declare -rx IP=$(who am i --ips|awk '{print $5}')
-declare -rx TIME=$(date)
 EOF
 
     echo " declare -rx BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bash.bashrc
 
 cat <<'EOF' >> /etc/bash.bashrc
-declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: $(date)   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
     chown root:ubuntu ${BASTION_MNT}
     chown root:ubuntu  ${BASTION_LOGFILE}
@@ -220,7 +217,7 @@ EOF
     chmod +x ./awslogs-agent-setup.py
     ./awslogs-agent-setup.py -n -r $Region -c ~/cloudwatchlog.conf
 
-  #Install Unit file for Ubuntu 16.04
+    #Install Unit file for Ubuntu 16.04
     ubuntu=`cat /etc/os-release | grep VERSION_ID | tr -d \VERSION_ID=\"`
     if [ "$ubuntu" == "16.04" ]; then
 cat <<'EOF' >> /etc/systemd/system/awslogs.service
@@ -273,7 +270,7 @@ EOF
     echo "declare -rx BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
 
 cat <<'EOF' >> /etc/bashrc
-declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: ${TIME}   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: $(date)   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
     chown root:centos ${BASTION_MNT}
     chown root:centos /usr/bin/script
@@ -296,7 +293,7 @@ cat <<'EOF' >> ~/cloudwatchlog.conf
 [general]
 state_file = /var/awslogs/state/agent-state
 use_gzip_http_content_encoding = true
-loggin_config_file = /var/awslogs/etc/awslogs.conf
+logging_config_file = /var/awslogs/etc/awslogs.conf
 
 [/var/log/bastion]
 datetime_format = %Y-%m-%d %H:%M:%S
@@ -381,6 +378,97 @@ EOF
 
 }
 
+function request_eip() {
+    #Create a variable to hold path to the awscli program. The name is different based on OS.
+    release=$(osrelease)
+    export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
+
+    #Check if EIP already assigned.
+    ALLOC=1
+    ZERO=0
+    INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
+    ASSIGNED=$(aws ec2 describe-addresses --region $Region --output text | grep $INSTANCE_IP | wc -l)
+    if [ "$ASSIGNED" -gt "$ZERO" ]; then
+        echo "Already assigned an EIP."
+        exit 0;
+    fi
+
+    aws ec2 describe-addresses --region $Region --output text > /query.txt
+    #Ensure we are only using EIPs from our Stack
+    line=`curl http://169.254.169.254/latest/user-data/ | grep EIP_LIST`
+    IFS=$':' DIRS=(${line//$','/:})       # Replace tabs with colons.
+
+    for (( i=0 ; i<${#DIRS[@]} ; i++ )); do
+        EIP=`echo ${DIRS[i]} | sed 's/\"//g' | sed 's/EIP_LIST=//g'`
+        if [ $EIP != "Null" ]; then
+            #echo "$i: $EIP"
+            grep "$EIP" /query.txt >> /query2.txt;
+        fi
+    done
+    mv /query2.txt /query.txt
+
+
+    AVAILABLE_EIPs=`cat /query.txt | wc -l`
+
+    if [ "$AVAILABLE_EIPs" -gt "$ZERO" ]; then
+        FIELD_COUNT="5"
+        INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+        echo "Running associate_eip_now"
+        while read name;
+        do
+            #EIP_ENTRY=$(echo $name | grep eip | wc -l)
+            EIP_ENTRY=$(echo $name | grep eni | wc -l)
+            echo "EIP: $EIP_ENTRY"
+            if [ "$EIP_ENTRY" -eq 1 ]; then
+                echo "Already associated with an instance"
+                echo ""
+            else
+                export EIP=`echo "$name" | sed 's/[\s]+/,/g' | awk {'print $4'}`
+                EIPALLOC=`echo $name | awk {'print $2'}`
+                echo "NAME: $name"
+                echo "EIP: $EIP"
+                echo "EIPALLOC: $EIPALLOC"
+                aws ec2 associate-address --instance-id $INSTANCE_ID --allocation-id $EIPALLOC --region $Region
+            fi
+        done < /query.txt
+    else
+        echo "None available in this Region"
+        exit 1
+    fi
+
+    #Retry
+    INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
+    ASSIGNED=$(aws ec2 describe-addresses --region $Region --output text | grep $INSTANCE_IP | wc -l)
+    if [ "$ASSIGNED" -eq 1 ]; then
+        echo "Already assigned an EIP"
+        exit 0;
+    fi
+    while [ "$ASSIGNED" -eq "$ZERO" ]
+    do
+        sleep 3
+        request_eip
+        INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
+        ASSIGNED=$(aws ec2 describe-addresses --region $Region --output text | grep $INSTANCE_IP | wc -l)
+    done
+    exit 0
+}
+
+function call_request_eip() {
+    Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
+    ZERO=0
+    INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
+    ASSIGNED=$(aws ec2 describe-addresses --region $Region --output text | grep $INSTANCE_IP | wc -l)
+    if [ "$ASSIGNED" -gt "$ZERO" ]; then
+        echo "Already assigned an EIP."
+        exit 0
+    fi
+    WAIT=$(shuf -i 1-30 -n 1)
+    sleep "$WAIT"
+    request_eip
+    exit 0
+}
+
+
 
 ##################################### End Function Definitions
 
@@ -413,11 +501,11 @@ while true; do
             shift 2
             ;;
         --tcp-forwarding)
-	        TCP_FORWARDING="$2";
+            TCP_FORWARDING="$2";
             shift 2
             ;;
         --x11-forwarding)
-	        X11_FORWARDING="$2";
+            X11_FORWARDING="$2";
             shift 2
             ;;
         --)
@@ -473,26 +561,25 @@ echo "Value of TCP_FORWARDING - $TCP_FORWARDING"
 echo "Value of X11_FORWARDING - $X11_FORWARDING"
 
 if [[ $TCP_FORWARDING == "false" ]];then
-	awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-	echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
+    awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+    echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
     harden_ssh_security
 fi
 
 if [[ $X11_FORWARDING == "false" ]];then
-	awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-	echo "X11Forwarding no" >> /etc/ssh/sshd_config
+    awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+    echo "X11Forwarding no" >> /etc/ssh/sshd_config
 fi
 
 release=$(osrelease)
 
 # Ubuntu Linux
-#if [ -f /etc/lsb-release ]; then
 if [ "$release" == "Ubuntu" ]; then
     #Call function for Ubuntu
     ubuntu_os
 # AMZN Linux
 elif [ "$release" == "AMZN" ]; then
-  #Call function for AMZN
+    #Call function for AMZN
     amazon_os
 # CentOS Linux
 elif [ "$release" == "CentOS" ]; then
@@ -502,4 +589,4 @@ fi
 # Make the custom script executable
 chmod a+x /usr/bin/bastion/shell
 
-
+call_request_eip
