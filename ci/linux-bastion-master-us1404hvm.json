@@ -4,32 +4,16 @@
         "ParameterValue": "$[alfred_getaz_2]"
     },
     {
-        "ParameterKey": "Bastion1InstanceType",
-        "ParameterValue": "t2.micro"
-    },
-    {
-        "ParameterKey": "Bastion1PrivateIP",
-        "ParameterValue": "10.0.128.5"
-    },
-    {
-        "ParameterKey": "Bastion2InstanceType",
-        "ParameterValue": "t2.micro"
-    },
-    {
-        "ParameterKey": "Bastion2PrivateIP",
-        "ParameterValue": "10.0.144.5"
-    },
-    {
         "ParameterKey": "BastionAMIOS",
         "ParameterValue": "Ubuntu-Server-14.04-LTS-HVM"
     },
     {
-        "ParameterKey": "KeyPairName",
-        "ParameterValue": "$[alfred_getkeypair]"
+        "ParameterKey": "BastionInstanceType",
+        "ParameterValue": "t2.micro"
     },
     {
-        "ParameterKey": "NATInstanceType",
-        "ParameterValue": "t2.small"
+        "ParameterKey": "KeyPairName",
+        "ParameterValue": "$[alfred_getkeypair]"
     },
     {
         "ParameterKey": "PrivateSubnet1CIDR",
