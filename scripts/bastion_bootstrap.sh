@@ -143,15 +143,14 @@ cat <<'EOF' >> ~/cloudwatchlog.conf
 [/var/log/bastion]
 datetime_format = %b %d %H:%M:%S
 buffer_duration = 5000
-log_stream_name = bastion
+log_stream_name = {instance_id}
 initial_position = start_of_file
 EOF
 
-    export STREAM_NAME=`cat /etc/awslogs/awslogs.conf | grep ^log_stream_name | head -1`
-    export TMPGROUP=`cat /etc/awslogs/awslogs.conf | grep ^log_group_name`
-    export TMPGROUP=`echo $TMPGROUP | sed 's/\//\\\\\//g'`
-    sed -i.back "s/$STREAM_NAME/log_stream_name = messages/g" /etc/awslogs/awslogs.conf
-    sed -i.back "s/$TMPGROUP/log_group_name = $CWG/g" /etc/awslogs/awslogs.conf
+    LINE=$(cat -n /etc/awslogs/awslogs.conf | grep '\[\/var\/log\/messages\]' | awk {'print $1'})
+    END_LINE=$(echo $(($LINE-1)))
+    head -$END_LINE /etc/awslogs/awslogs.conf > /tmp/awslogs.conf
+    cat /tmp/awslogs.conf > /etc/awslogs/awslogs.conf
     cat ~/cloudwatchlog.conf >> /etc/awslogs/awslogs.conf
     cat /tmp/groupname.txt >> /etc/awslogs/awslogs.conf
     export TMPREGION=`cat /etc/awslogs/awscli.conf | grep region`
@@ -205,7 +204,7 @@ cat <<'EOF' >> ~/cloudwatchlog.conf
 state_file = /var/awslogs/state/agent-state
 
 [/var/log/bastion]
-log_stream_name = bastion
+log_stream_name = {instance_id}
 datetime_format = %b %d %H:%M:%S
 EOF
     export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
@@ -299,7 +298,7 @@ logging_config_file = /var/awslogs/etc/awslogs.conf
 datetime_format = %Y-%m-%d %H:%M:%S
 file = /var/log/messages
 buffer_duration = 5000
-log_stream_name = bastion
+log_stream_name = {instance_id}
 initial_position = start_of_file
 EOF
         export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
@@ -348,7 +347,7 @@ cat <<'EOF' >> ~/cloudwatchlog.conf
 [/var/log/bastion]
 datetime_format = %b %d %H:%M:%S
 buffer_duration = 5000
-log_stream_name = bastion
+log_stream_name = {instance_id}
 initial_position = start_of_file
 EOF
         export TMPGROUP=`cat /etc/awslogs/awslogs.conf | grep ^log_group_name`

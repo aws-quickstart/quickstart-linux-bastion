@@ -106,7 +106,7 @@
             "Type": "String"
         },
         "BastionBanner": {
-            "Default": "https://s3.amazonaws.com/quickstart-reference/linux/bastion/latest/scripts/banner_message.txt",
+            "Default": "https://s3.amazonaws.com/quickstart-development-ianhill/linux/bastion/latest/scripts/banner_message.txt",
             "Description": "Banner text to display upon login",
             "Type": "String"
         },
@@ -182,7 +182,7 @@
         "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
-            "Default": "quickstart-reference",
+            "Default": "quickstart-development-ianhill",
             "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
             "Type": "String"
         },
@@ -468,7 +468,7 @@
                     }
                 ]
             }
-        },        
+        },
         "BastionHostRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
@@ -725,14 +725,15 @@
                             "",
                             [
                                 "#!/bin/bash\n",
-                                "PATH=$PATH:/usr/local/bin\n",
+                                "export PATH=$PATH:/usr/local/bin\n",
                                 "which pip &> /dev/null\n",
                                 "if [ $? -ne 0 ] ; then\n",
-                                "    [ `which yum` ] && $(yum install -y epel-release; yum install -y python-pip)\n",
+                                "echo \"PIP NOT INSTALLED\"\n",
+                                "    [ `which yum` ] && $(yum install -y epel-release; yum install -y python-pip) && echo \"PIP INSTALLED\"\n",
                                 "    [ `which apt-get` ] && apt-get -y update && apt-get -y install python-pip\n",
                                 "fi\n",
-                                "pip install --upgrade pip\n",
-                                "pip install awscli --ignore-installed six\n",
+                                "pip install --upgrade pip &> /dev/null\n",
+                                "pip install awscli --ignore-installed six &> /dev/null\n",
                                 "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
                                 "EIP_LIST=\"",
                                 {
