@@ -103,6 +103,7 @@ EOF
     # Make the custom script executable
     chmod a+x /usr/bin/bastion/shell
 
+    release=$(osrelease)
     if [ "$release" == "CentOS" ]; then
         semanage fcontext -a -t ssh_exec_t /usr/bin/bastion/shell
     fi
@@ -475,7 +476,6 @@ function call_request_eip() {
 
 # Call checkos to ensure platform is Linux
 checkos
-release=$(osrelease)
 
 ## set an initial value
 SSH_BANNER="LINUX BASTION"
@@ -573,6 +573,7 @@ if [[ $X11_FORWARDING == "false" ]];then
     echo "X11Forwarding no" >> /etc/ssh/sshd_config
 fi
 
+release=$(osrelease)
 # Ubuntu Linux
 if [ "$release" == "Ubuntu" ]; then
     #Call function for Ubuntu
