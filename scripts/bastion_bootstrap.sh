@@ -429,7 +429,7 @@ function request_eip() {
                 fi
             done < /query.txt
         else
-            echo "[ERROR] Elastic IPs available in this region"
+            echo "[ERROR] No Elastic IPs available in this region"
             exit 1
         fi
 
