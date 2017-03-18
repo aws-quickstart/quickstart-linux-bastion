@@ -585,6 +585,9 @@ elif [ "$release" == "AMZN" ]; then
 elif [ "$release" == "CentOS" ]; then
     #Call function for CentOS
     cent_os
+else
+    echo "[ERROR] Unsupported Linux Bastion OS"
+    exit 1
 fi
 
 call_request_eip
