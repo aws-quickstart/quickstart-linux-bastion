@@ -39,7 +39,6 @@ function chkstatus () {
         echo "Script [FAILED]" >&2
         exit 1
     fi
-    echo "${FUNCNAME[0]} Ended"
 }
 
 function osrelease () {
@@ -53,7 +52,6 @@ function osrelease () {
     else
         echo "Operating System Not Found"
     fi
-    echo "${FUNCNAME[0]} Ended"
 }
 
 function harden_ssh_security () {
