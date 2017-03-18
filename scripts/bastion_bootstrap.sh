@@ -53,7 +53,7 @@ function osrelease () {
     else
         echo "Operating System Not Found"
     fi
-    echo "${FUNCNAME[0]} Ended" >> /var/log/cloud-init-output.log
+    echo "${FUNCNAME[0]} Ended"
 }
 
 function harden_ssh_security () {
@@ -100,9 +100,12 @@ exit 1
 fi
 EOF
 
-    echo "SSH_Hardening - cat file"
-    chmod a+rx /usr/bin/bastion/shell
-    echo "SSH_Hardening - End"
+    # Make the custom script executable
+    chmod a+x /usr/bin/bastion/shell
+
+    if [ "$release" == "CentOS" ]; then
+        semanage fcontext -a -t ssh_exec_t /usr/bin/bastion/shell
+    fi
 
     echo "${FUNCNAME[0]} Ended"
 }
@@ -372,7 +375,6 @@ cat <<'EOF' >> ~/mycron
 EOF
     crontab ~/mycron
     rm ~/mycron
-    semanage fcontext -a -t ssh_exec_t /usr/bin/bastion/shell
     echo "${FUNCNAME[0]}"
 
 }
@@ -473,6 +475,7 @@ function call_request_eip() {
 
 # Call checkos to ensure platform is Linux
 checkos
+release=$(osrelease)
 
 ## set an initial value
 SSH_BANNER="LINUX BASTION"
@@ -570,8 +573,6 @@ if [[ $X11_FORWARDING == "false" ]];then
     echo "X11Forwarding no" >> /etc/ssh/sshd_config
 fi
 
-release=$(osrelease)
-
 # Ubuntu Linux
 if [ "$release" == "Ubuntu" ]; then
     #Call function for Ubuntu
@@ -585,7 +586,5 @@ elif [ "$release" == "CentOS" ]; then
     #Call function for CentOS
     cent_os
 fi
-# Make the custom script executable
-chmod a+x /usr/bin/bastion/shell
 
 call_request_eip
