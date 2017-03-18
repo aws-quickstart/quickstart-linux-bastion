@@ -9,15 +9,15 @@ PROGRAM='Linux Bastion'
 
 ##################################### Functions Definitions
 function checkos () {
-platform='unknown'
-unamestr=`uname`
-if [[ "$unamestr" == 'Linux' ]]; then
-    platform='linux'
-else
-    echo "[WARNING] This script is not supported on MacOS or freebsd"
-    exit 1
-fi
-echo "${FUNCNAME[0]} Ended"
+    platform='unknown'
+    unamestr=`uname`
+    if [[ "$unamestr" == 'Linux' ]]; then
+        platform='linux'
+    else
+        echo "[WARNING] This script is not supported on MacOS or freebsd"
+        exit 1
+    fi
+    echo "${FUNCNAME[0]} Ended"
 }
 
 function usage () {
@@ -174,7 +174,6 @@ EOF
     crontab ~/mycron
     rm ~/mycron
     echo "${FUNCNAME[0]} Ended"
-
 }
 
 function ubuntu_os () {
@@ -376,8 +375,7 @@ cat <<'EOF' >> ~/mycron
 EOF
     crontab ~/mycron
     rm ~/mycron
-    echo "${FUNCNAME[0]}"
-
+    echo "${FUNCNAME[0]} Ended"
 }
 
 function request_eip() {
@@ -452,6 +450,7 @@ function request_eip() {
         INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
         ASSIGNED=$(aws ec2 describe-addresses --region $Region --output text | grep $INSTANCE_IP | wc -l)
     done
+    echo "${FUNCNAME[0]} Ended"
     exit 0
 }
 
@@ -467,6 +466,7 @@ function call_request_eip() {
     WAIT=$(shuf -i 1-30 -n 1)
     sleep "$WAIT"
     request_eip
+    echo "${FUNCNAME[0]} Ended"
     exit 0
 }
 
