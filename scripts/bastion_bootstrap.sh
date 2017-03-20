@@ -159,14 +159,12 @@ EOF
     export TMPREGION=`cat /etc/awslogs/awscli.conf | grep region`
     export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
     sed -i.back "s/$TMPREGION/region = $Region/g" /etc/awslogs/awscli.conf
-    sleep 3
-    service awslogs stop
-    sleep 3
-    service awslogs start
+
+    #Restart awslogs service
+    service awslogs restart
     chkconfig awslogs on
 
     #Run security updates
-
 cat <<'EOF' >> ~/mycron
 0 0 * * * yum -y update --security
 EOF
@@ -239,9 +237,8 @@ WantedBy=multi-user.target
 EOF
     fi
 
-    #Start awslog services
-    service awslogs stop
-    service awslogs start
+    #Restart awslogs service
+    service awslogs restart
     export DEBIAN_FRONTEND=noninteractive
     apt-get install sysv-rc-conf -y
     sysv-rc-conf awslogs on
@@ -251,7 +248,6 @@ EOF
     service ssh start
 
     #Run security updates
-
     apt-get install unattended-upgrades
 cat <<'EOF' >> ~/mycron
 0 0 * * * unattended-upgrades -d
@@ -303,14 +299,12 @@ buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
 EOF
-        export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
-        cat /tmp/groupname.txt >> ~/cloudwatchlog.conf
+    export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
+    cat /tmp/groupname.txt >> ~/cloudwatchlog.conf
 
-        curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
-        chmod +x ./awslogs-agent-setup.py
-        ./awslogs-agent-setup.py -n -r $Region -c ~/cloudwatchlog.conf
-
-
+    curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
+    chmod +x ./awslogs-agent-setup.py
+    ./awslogs-agent-setup.py -n -r $Region -c ~/cloudwatchlog.conf
 cat <<'EOF' >> /etc/systemd/system/awslogs.service
 [Unit]
 Description=The CloudWatch Logs agent
@@ -326,12 +320,8 @@ ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --pidf
 
 [Install]
 WantedBy=multi-user.target
-
 EOF
-
-        service awslogs stop
-        sleep 3
-        service awslogs start
+        service awslogs restart
         chkconfig awslogs on
     else
         chown root:centos /var/log/bastion
@@ -367,8 +357,8 @@ EOF
         service awslogs start
         chkconfig awslogs on
     fi
-#Run security updates
 
+    #Run security updates
 cat <<'EOF' >> ~/mycron
 0 0 * * * yum -y update --security
 EOF
