@@ -457,6 +457,16 @@ function call_request_eip() {
     echo "${FUNCNAME[0]} Ended"
 }
 
+function prevent_process_snooping() {
+    # Prevent bastion host users from viewing processes owned by other
+    # users, because the log file name is one of the "script"
+    # execution parameters.
+    mount -o remount,rw,hidepid=2 /proc
+    awk '!/proc/' /etc/fstab > temp && mv temp /etc/fstab
+    echo "proc /proc proc defaults,hidepid=2 0 0" >> /etc/fstab
+    echo "${FUNCNAME[0]} Ended"
+}
+
 ##################################### End Function Definitions
 
 # Call checkos to ensure platform is Linux
@@ -575,6 +585,8 @@ else
     echo "[ERROR] Unsupported Linux Bastion OS"
     exit 1
 fi
+
+prevent_process_snooping
 
 call_request_eip
 
