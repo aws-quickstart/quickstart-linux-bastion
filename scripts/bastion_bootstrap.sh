@@ -86,11 +86,9 @@ DATE_TIME_WHOAMI="`whoami`:`date "+%Y-%m-%d %H:%M:%S"`"
 LOG_ORIGINAL_COMMAND=`echo "$DATE_TIME_WHOAMI:$SSH_ORIGINAL_COMMAND"`
 echo "$LOG_ORIGINAL_COMMAND" >> "${bastion_mnt}/${bastion_log}"
 log_dir="/var/log/bastion/"
-# Wrap an interactive shell into "script" to record the SSH session - commented
-#script -qf --timing=$log_file_location /var/log/bastion/bastion.data --command=/bin/bash
 script -qf /tmp/messages --command=/bin/bash
 else
-# The "script" program could be circumvented with some commands
+# The "script" program could be circumvented with some commands 
 # (e.g. bash, nc). Therefore, I intentionally prevent users
 # from supplying commands.
 
@@ -368,7 +366,6 @@ EOF
 }
 
 function request_eip() {
-    #Create a variable to hold path to the awscli program. The name is different based on OS.
     release=$(osrelease)
     export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
 
@@ -454,6 +451,15 @@ function call_request_eip() {
         sleep "$WAIT"
         request_eip
     fi
+    echo "${FUNCNAME[0]} Ended"
+}
+
+function prevent_process_snooping() {
+    # Prevent bastion host users from viewing processes owned by other users.
+
+    mount -o remount,rw,hidepid=2 /proc
+    awk '!/proc/' /etc/fstab > temp && mv temp /etc/fstab
+    echo "proc /proc proc defaults,hidepid=2 0 0" >> /etc/fstab
     echo "${FUNCNAME[0]} Ended"
 }
 
@@ -575,6 +581,8 @@ else
     echo "[ERROR] Unsupported Linux Bastion OS"
     exit 1
 fi
+
+prevent_process_snooping
 
 call_request_eip
 
