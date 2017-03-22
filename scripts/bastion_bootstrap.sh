@@ -458,9 +458,8 @@ function call_request_eip() {
 }
 
 function prevent_process_snooping() {
-    # Prevent bastion host users from viewing processes owned by other
-    # users, because the log file name is one of the "script"
-    # execution parameters.
+    # Prevent bastion host users from viewing processes owned by other users.
+
     mount -o remount,rw,hidepid=2 /proc
     awk '!/proc/' /etc/fstab > temp && mv temp /etc/fstab
     echo "proc /proc proc defaults,hidepid=2 0 0" >> /etc/fstab
