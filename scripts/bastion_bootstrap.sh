@@ -191,6 +191,7 @@ EOF
     chmod 662 ${BASTION_LOGFILE_SHADOW}
     chattr +a ${BASTION_LOGFILE}
     chattr +a ${BASTION_LOGFILE_SHADOW}
+    touch /tmp/messages
     chown root:ubuntu /tmp/messages
     #Install CloudWatch logs on Ubuntu
     export CWG=`curl http://169.254.169.254/latest/user-data/ | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g'`
@@ -271,6 +272,7 @@ EOF
     chown root:centos /usr/bin/script
     chown root:centos  /var/log/bastion/bastion.log
     chmod 770 /var/log/bastion/bastion.log
+    touch /tmp/messages
     chown root:centos /tmp/messages
     restorecon -v /etc/ssh/sshd_config
     /bin/systemctl restart sshd.service
