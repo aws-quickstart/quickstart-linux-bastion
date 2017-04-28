@@ -608,7 +608,7 @@
                             "/tmp/bastion_bootstrap.sh": {
                                 "source": {
                                     "Fn::Sub": [
-                                        "https://${S3Region}.amazonaws.com/quickstart-reference/linux/bastion/latest/scripts/bastion_bootstrap.sh",
+                                        "https://${QSS3BucketName}.${S3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh",
                                         {
                                             "S3Region": {
                                                 "Fn::If": [
