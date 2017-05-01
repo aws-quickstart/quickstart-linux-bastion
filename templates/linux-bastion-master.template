@@ -361,7 +361,7 @@
                         "Ref": "QSS3BucketName"
                     },
                     "QSS3KeyPrefix": {
-                         "Fn::Sub": "${QSS3KeyPrefix}submodules/quickstart-linux-bastion/"
+                         "Ref": "QSS3KeyPrefix"
                     },
                     "RemoteAccessCIDR": {
                         "Ref": "RemoteAccessCIDR"
