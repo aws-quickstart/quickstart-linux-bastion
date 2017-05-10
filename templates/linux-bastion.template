@@ -608,9 +608,9 @@
                             "/tmp/bastion_bootstrap.sh": {
                                 "source": {
                                     "Fn::Sub": [
-                                        "https://${QSS3BucketName}.${S3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh",
+                                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh",
                                         {
-                                            "S3Region": {
+                                            "QSS3Region": {
                                                 "Fn::If": [
                                                     "GovCloudCondition",
                                                     "s3-us-gov-west-1",

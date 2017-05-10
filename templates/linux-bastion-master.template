@@ -259,9 +259,9 @@
             "Properties": {
                 "TemplateURL": {
                     "Fn::Sub": [
-                        "https://${QSS3BucketName}.${S3Region}.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template",
+                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template",
                         {
-                            "S3Region": {
+                            "QSS3Region": {
                                 "Fn::If": [
                                     "GovCloudCondition",
                                     "s3-us-gov-west-1",
@@ -308,9 +308,9 @@
             "Properties": {
                 "TemplateURL": {
                     "Fn::Sub": [
-                        "https://${QSS3BucketName}.${S3Region}.amazonaws.com/${QSS3KeyPrefix}templates/linux-bastion.template",
+                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}templates/linux-bastion.template",
                         {
-                            "S3Region": {
+                            "QSS3Region": {
                                 "Fn::If": [
                                     "GovCloudCondition",
                                     "s3-us-gov-west-1",
