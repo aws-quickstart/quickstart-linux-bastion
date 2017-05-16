@@ -602,6 +602,19 @@
         "BastionLaunchConfiguration": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "Metadata": {
+                "AWS::CloudFormation::Authentication": {
+                    "S3AccessCreds": {
+                        "type": "S3",
+                        "roleName": {
+                            "Ref": "BastionHostRole"
+                        },
+                        "buckets": [
+                            {
+                                "Ref": "QSS3BucketName"
+                            }
+                        ]
+                    }
+                },
                 "AWS::CloudFormation::Init": {
                     "config": {
                         "files": {
@@ -622,7 +635,8 @@
                                 },
                                 "mode": "000550",
                                 "owner": "root",
-                                "group": "root"
+                                "group": "root",
+                                "authentication": "S3AccessCreds"
                             }
                         },
                         "commands": {
