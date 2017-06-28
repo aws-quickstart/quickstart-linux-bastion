@@ -30,6 +30,16 @@
                 },
                 {
                     "Label": {
+                        "default": "Elastic Load Balancing Configuration"
+                    },
+                    "Parameters": [
+                        "UseELB",
+                        "ELBRotationScheduleUp",
+                        "ELBRotationScheduleDown",
+                    ]
+                },
+                {
+                    "Label": {
                         "default": "Linux Bastion Configuration"
                     },
                     "Parameters": [
@@ -56,6 +66,15 @@
                 },
                 "BastionAMIOS": {
                     "default": "Bastion AMI Operating System"
+                },
+                "UseELB": {
+                    "default": "Elastic Load Balancing"
+                },
+                "ELBRotationScheduleUp": {
+                    "default": "Rotation Start"
+                },
+                "ELBRotationScheduleDown": {
+                    "default": "Rotation Finsh"
                 },
                 "BastionBanner": {
                     "default": "Bastion Banner"
@@ -144,6 +163,25 @@
                 "m4.2xlarge",
                 "m4.4xlarge"
             ]
+        },
+        "UseELB": {
+            "AllowedValues": [
+                "true",
+                "false"
+            ],
+            "Default": "false",
+            "Description": "ELB provides single name but multiple IPs. EIPs will be used if false",
+            "Type": "String"
+        },
+        "ELBRotationScheduleUp": {
+            "Default": "",
+            "Description": "Cron schedule to add an additional bastion to start a rotation event",
+            "Type": "String"
+        },
+        "ELBRotationScheduleDown": {
+            "Default": "",
+            "Description": "Cron schedule to add an additional bastion to complete a rotation event",
+            "Type": "String"
         },
         "EnableBanner": {
             "AllowedValues": [
@@ -371,6 +409,15 @@
                             "VPCStack",
                             "Outputs.VPCID"
                         ]
+                    },
+                    "UseELB": {
+                        "Ref": "UseELB"
+                    },
+                    "ELBRotationScheduleUp": {
+                        "Ref": "ELBRotationScheduleUp"
+                    },
+                    "ELBRotationScheduleDown": {
+                        "Ref": "ELBRotationScheduleDown"
                     }
                 }
             }

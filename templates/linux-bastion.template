@@ -27,6 +27,16 @@
                 },
                 {
                     "Label": {
+                        "default": "Elastic Load Balancing Configuration"
+                    },
+                    "Parameters": [
+                        "UseELB",
+                        "ELBRotationScheduleUp",
+                        "ELBRotationScheduleDown",
+                    ]
+                },
+                {
+                    "Label": {
                         "default": "Linux Bastion Configuration"
                     },
                     "Parameters": [
@@ -50,6 +60,15 @@
             "ParameterLabels": {
                 "BastionAMIOS": {
                     "default": "Bastion AMI Operating System"
+                },
+                "UseELB": {
+                    "default": "Elastic Load Balancing"
+                },
+                "ELBRotationScheduleUp": {
+                    "default": "Rotation Start"
+                },
+                "ELBRotationScheduleDown": {
+                    "default": "Rotation Finsh"
                 },
                 "BastionBanner": {
                     "default": "Bastion Banner"
@@ -127,6 +146,25 @@
             ],
             "Default": "t2.micro",
             "Description": "Amazon EC2 instance type for the bastion instances",
+            "Type": "String"
+        },
+        "UseELB": {
+            "AllowedValues": [
+                "true",
+                "false"
+            ],
+            "Default": "false",
+            "Description": "ELB provides single name but multiple IPs. EIPs will be used if false",
+            "Type": "String"
+        },
+        "ELBRotationScheduleUp": {
+            "Default": "",
+            "Description": "Cron schedule to add an additional bastion to start a rotation event",
+            "Type": "String"
+        },
+        "ELBRotationScheduleDown": {
+            "Default": "",
+            "Description": "Cron schedule to add an additional bastion to complete a rotation event",
             "Type": "String"
         },
         "EnableBanner": {
@@ -332,56 +370,58 @@
             "Ubuntu-Server-16.04-LTS-HVM": {
                 "Code": "US1604HVM"
             }
+        },
+        "AdditionHack" : {
+            "1" : {"AddOne" : "2"},
+            "2" : {"AddOne" : "3"},
+            "3" : {"AddOne" : "4"},
+            "4" : {"AddOne" : "5"}
         }
     },
     "Conditions": {
         "2BastionCondition": {
-            "Fn::Or": [
-                {
-                    "Fn::Equals": [
-                        {
-                            "Ref": "NumBastionHosts"
-                        },
-                        "2"
-                    ]
-                },
-                {
-                    "Condition": "3BastionCondition"
-                },
-                {
-                    "Condition": "4BastionCondition"
-                }
+            "Fn::And": [
+              {"Condition": "UseElasticIPs"},
+              {
+                "Fn::Or": [
+                  {"Fn::Equals": [{"Ref": "NumBastionHosts"},"2"]},
+                  {"Condition": "3BastionCondition"},
+                  {"Condition": "4BastionCondition"}
+                ]
+              }
             ]
         },
         "3BastionCondition": {
-            "Fn::Or": [
-                {
-                    "Fn::Equals": [
-                        {
-                            "Ref": "NumBastionHosts"
-                        },
-                        "3"
-                    ]
-                },
-                {
-                    "Condition": "4BastionCondition"
-                }
+            "Fn::And": [
+              {"Condition": "UseElasticIPs"},
+              {
+                "Fn::Or": [
+                  {"Fn::Equals": [{"Ref": "NumBastionHosts"},"3"]},
+                  {"Condition": "4BastionCondition"}
+                ]
+              }
             ]
         },
         "4BastionCondition": {
-            "Fn::Equals": [
-                {
-                    "Ref": "NumBastionHosts"
-                },
-                "4"
+            "Fn::And": [
+              {"Condition": "UseElasticIPs"},
+              {"Fn::Equals": [{"Ref": "NumBastionHosts"},"4"]}
             ]
         },
         "GovCloudCondition": {
-            "Fn::Equals": [
-                {
-                    "Ref": "AWS::Region"
-                },
-                "us-gov-west-1"
+            "Fn::Equals": [{"Ref": "AWS::Region"},"us-gov-west-1"]
+        },
+        "UseElasticLoadBalancer": {
+            "Fn::Equals": [{"Ref": "UseELB"},"true"]
+        },
+        "UseElasticIPs": {
+            "Fn::Equals": [{"Ref": "UseELB"},"false"]
+        },
+        "UseELBScheduledRotation": {
+            "Fn::And": [
+              { "Fn::Equals": [{"Ref": "UseELB"},"true"] },
+              { "Fn::Not": ["Fn::Equals": [{"Ref": "ELBRotationScheduleUp"}, ""]] },
+              { "Fn::Not": ["Fn::Equals": [{"Ref": "ELBRotationScheduleDown"}, ""]] }
             ]
         }
     },
@@ -415,9 +455,118 @@
                 ]
             }
         },
-        "BastionHostRole": {
-            "Type": "AWS::IAM::Role",
+        "QuickStartS3Policy": {
+           "Type": "AWS::IAM::ManagedPolicy",
+           "Properties" : {
+              "PolicyDocument" : {
+                 "Version": "2012-10-17",
+                "Statement": [
+                   {
+                       "Action": [ "s3:GetObject" ],
+                       "Resource": {
+                           "Fn::Sub": [
+                               "arn:${Partition}:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*",
+                               {
+                                   "Partition": {
+                                       "Fn::If": [
+                                           "GovCloudCondition",
+                                           "aws-us-gov",
+                                           "aws"
+                                       ]
+                                   }
+                               }
+                           ]
+                       },
+                       "Effect": "Allow"
+                   }
+               ]
+              }
+           }
+        },
+        "InstanceRoleDiscoveryPolicy": {
+            "Type": "AWS::IAM::ManagedPolicy",
             "Properties": {
+               "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                      {
+                        "Action": [
+                            "autoscaling:DescribeAutoScalingInstances",
+                            "ec2:ReplaceIamInstanceProfileAssociation",
+                            "ec2:DescribeIamInstanceProfileAssociations",
+                            "iam:ListInstanceProfiles"
+                        ],
+                        "Resource": [
+                            "*"
+                        ],
+                        "Effect": "Allow"
+                      }
+                  ]
+              }
+            }
+         },
+         "SwapRolePolicy": {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "Properties": {
+               "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                      {
+                        "Action": "iam:PassRole",
+                        "Resource": {"Fn::GetAtt" : ["BastionHostRole", "Arn"] },
+                        "Effect": "Allow"
+                      }
+                  ]
+              }
+            }
+         },
+        "CloudWatchLogsPolicy": {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "Properties": {
+               "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                      {
+                        "Action": [
+                            "logs:CreateLogStream",
+                            "logs:GetLogEvents",
+                            "logs:PutLogEvents",
+                            "logs:DescribeLogGroups",
+                            "logs:DescribeLogStreams",
+                            "logs:PutRetentionPolicy",
+                            "logs:PutMetricFilter",
+                            "logs:CreateLogGroup"
+                        ],
+                        "Resource": {
+                            "Fn::Sub": [
+                                "arn:${Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*",
+                                {
+                                    "Partition": {
+                                        "Fn::If": [
+                                            "GovCloudCondition",
+                                            "aws-us-gov",
+                                            "aws"
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        "Effect": "Allow"
+                      }
+                  ]
+              }
+            }
+         },
+        "BastionHostEIPInitRole": {
+            "Type": "AWS::IAM::Role",
+            "Condition": "UseElasticIPs",
+            "Properties": {
+                "ManagedPolicyArns": [
+                  { "Ref": "CloudWatchLogsPolicy" },
+                  { "Ref": "QuickStartS3Policy" },
+                  { "Ref": "SwapRolePolicy" },
+                  { "Ref": "InstanceRoleDiscoveryPolicy" }
+                ],
                 "Policies": [
                     {
                         "PolicyDocument": {
@@ -446,41 +595,6 @@
                             ]
                         },
                         "PolicyName": "aws-quick-start-s3-policy"
-                    },
-                    {
-                        "PolicyDocument": {
-                            "Version": "2012-10-17",
-                            "Statement": [
-                                {
-                                    "Action": [
-                                        "logs:CreateLogStream",
-                                        "logs:GetLogEvents",
-                                        "logs:PutLogEvents",
-                                        "logs:DescribeLogGroups",
-                                        "logs:DescribeLogStreams",
-                                        "logs:PutRetentionPolicy",
-                                        "logs:PutMetricFilter",
-                                        "logs:CreateLogGroup"
-                                    ],
-                                    "Resource": {
-                                        "Fn::Sub": [
-                                            "arn:${Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*",
-                                            {
-                                                "Partition": {
-                                                    "Fn::If": [
-                                                        "GovCloudCondition",
-                                                        "aws-us-gov",
-                                                        "aws"
-                                                    ]
-                                                }
-                                            }
-                                        ]
-                                    },
-                                    "Effect": "Allow"
-                                }
-                            ]
-                        },
-                        "PolicyName": "bastion-cloudwatch-logs-policy"
                     },
                     {
                         "PolicyDocument": {
@@ -520,6 +634,134 @@
                 }
             }
         },
+        "BastionHostELBInitRole": {
+            "Type": "AWS::IAM::Role",
+            "Condition": "UseElasticLoadBalancer",
+            "Properties": {
+                "ManagedPolicyArns": [
+                  { "Ref": "CloudWatchLogsPolicy" },
+                  { "Ref": "QuickStartS3Policy" },
+                  { "Ref": "SwapRolePolicy" },
+                  { "Ref": "InstanceRoleDiscoveryPolicy" }
+                ],
+                "Policies": [
+                    {
+                      "PolicyDocument": {
+                          "Version": "2012-10-17",
+                          "Statement": [
+                              {
+                                  "Action": [
+                                      "s3:ListBucket"
+                                  ],
+                                  "Resource": {
+                                      "Fn::Sub": [
+                                          "arn:${Partition}:s3:::${SSHServerCertBucket}",
+                                          {
+                                              "Partition": {
+                                                  "Fn::If": [
+                                                      "GovCloudCondition",
+                                                      "aws-us-gov",
+                                                      "aws"
+                                                  ]
+                                              }
+                                          }
+                                      ]
+                                  },
+                                  "Effect": "Allow"
+                              }
+                          ]
+                      },
+                      "PolicyName": "list-cert-bucket"
+                  },
+                  {
+                      "PolicyDocument": {
+                          "Version": "2012-10-17",
+                          "Statement": [
+                              {
+                                  "Action": [
+                                      "s3:GetObject",
+                                      "s3:PutObject"
+                                  ],
+                                  "Resource": {
+                                      "Fn::Sub": [
+                                          "arn:${Partition}:s3:::${SSHServerCertBucket}/*",
+                                          {
+                                              "Partition": {
+                                                  "Fn::If": [
+                                                      "GovCloudCondition",
+                                                      "aws-us-gov",
+                                                      "aws"
+                                                  ]
+                                              }
+                                          }
+                                      ]
+                                  },
+                                  "Effect": "Allow"
+                              }
+                          ]
+                      },
+                      "PolicyName": "update-cert-bucket"
+                  },
+                ],
+                "Path": "/",
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            },
+                            "Effect": "Allow"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            }
+        },
+        "BastionHostInitProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+                "Roles": [
+                    {
+                      "Fn::If": [
+                          "UseElasticIPs",
+                          { "Ref": "BastionHostEIPInitRole" },
+                          { "Ref": "BastionHostELBInitRole" }
+                      ]
+                    }
+                ],
+                "Path": "/"
+            }
+        },
+        "BastionHostRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "ManagedPolicyArns": [
+                  { "Ref": "CloudWatchLogsPolicy" }
+                ],
+                "Path": "/",
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            },
+                            "Effect": "Allow"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            }
+        },
         "BastionHostProfile": {
             "Type": "AWS::IAM::InstanceProfile",
             "Properties": {
@@ -528,11 +770,12 @@
                         "Ref": "BastionHostRole"
                     }
                 ],
-                "Path": "/"
+                "Path": { "Fn::Sub": "/${AWS::StackId}/bastion-host/" }
             }
         },
         "EIP1": {
             "Type": "AWS::EC2::EIP",
+            "Condition": "UseElasticIPs",
             "Properties": {
                 "Domain": "vpc"
             }
@@ -558,8 +801,51 @@
                 "Domain": "vpc"
             }
         },
+        "SSHServerCertBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Condition": "UseElasticLoadBalancer",
+            "DeletionPolicy": "Retain"
+        },
+        "BastionLoadBalancer": {
+          "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+          "Condition": "UseElasticLoadBalancer",
+          "Properties": {
+            "CrossZone": "true",
+            "ConnectionSettings": {
+              "IdleTimeout": "75"
+            },
+            "Subnets": [
+              {
+                "Ref": "PublicSubnet1ID"
+              },
+              {
+                "Ref": "PublicSubnet2ID"
+              }
+            ],
+            "SecurityGroups": [
+              {
+                "Ref": "ELBSecurityGroup"
+              }
+            ],
+            "Listeners": [
+              {
+                "InstancePort": "22",
+                "LoadBalancerPort": "22",
+                "Protocol": "TCP",
+                "InstanceProtocol": "TCP"
+              },
+              {
+                "InstancePort": "22",
+                "LoadBalancerPort": "443",
+                "Protocol": "TCP",
+                "InstanceProtocol": "TCP"
+              }
+            ]
+          }
+        },
         "BastionAutoScalingGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "Condition": "UseElasticIPs",
             "Properties": {
                 "LaunchConfigurationName": {
                     "Ref": "BastionLaunchConfiguration"
@@ -599,6 +885,80 @@
                 }
             }
         },
+        "BastionELBAutoScalingGroup": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "Condition": "UseElasticLoadBalancer",
+            "Properties": {
+                "LaunchConfigurationName": {
+                    "Ref": "BastionLaunchConfiguration"
+                },
+                "LoadBalancerNames": [
+                    {
+                        "Ref": "BastionLoadBalancer"
+                    }
+                ],
+                "VPCZoneIdentifier": [
+                    {
+                        "Ref": "PublicSubnet1ID"
+                    },
+                    {
+                        "Ref": "PublicSubnet2ID"
+                    }
+                ],
+                "MinSize": {
+                    "Ref": "NumBastionHosts"
+                },
+                "MaxSize": {
+                    "Ref": "NumBastionHosts"
+                },
+                "Cooldown": "300",
+                "DesiredCapacity": {
+                    "Ref": "NumBastionHosts"
+                },
+                "TerminationPolicies": [
+                    "OldestInstance"
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "LinuxBastion",
+                        "PropagateAtLaunch": "true"
+                    }
+                ]
+            },
+            "CreationPolicy": {
+                "ResourceSignal": {
+                    "Count": {
+                        "Ref": "NumBastionHosts"
+                    },
+                    "Timeout": "PT30M"
+                }
+            }
+        },
+        "ScheduledActionUp": {
+            "Type": "AWS::AutoScaling::ScheduledAction",
+            "Condition": "UseELBScheduledRotation",
+            "Properties": {
+                "AutoScalingGroupName": {
+                    "Ref": "BastionELBAutoScalingGroup"
+                },
+                "MaxSize": { "Fn::FindInMap" : [ "AdditionHack", { "Ref" : "NumBastionHosts" }, "AddOne" ] },
+                "MinSize": { "Fn::FindInMap" : [ "AdditionHack", { "Ref" : "NumBastionHosts" }, "AddOne" ] },
+                "Recurrence": { "Ref": "ELBRotationScheduleUp" }
+            }
+        },
+        "ScheduledActionDown": {
+            "Type": "AWS::AutoScaling::ScheduledAction",
+            "Condition": "UseELBScheduledRotation",
+            "Properties": {
+                "AutoScalingGroupName": {
+                    "Ref": "BastionELBAutoScalingGroup"
+                },
+                "MaxSize": { "Ref" : "NumBastionHosts" },
+                "MinSize": { "Ref" : "NumBastionHosts" },
+                "Recurrence": { "Ref": "ELBRotationScheduleDown" }
+            }
+        },
         "BastionLaunchConfiguration": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "Metadata": {
@@ -606,7 +966,11 @@
                     "S3AccessCreds": {
                         "type": "S3",
                         "roleName": {
-                            "Ref": "BastionHostRole"
+                          "Fn::If": [
+                              "UseElasticIPs",
+                              { "Ref": "BastionHostEIPInitRole" },
+                              { "Ref": "BastionHostELBInitRole" }
+                          ]
                         },
                         "buckets": [
                             {
@@ -654,6 +1018,18 @@
                                             {
                                                 "Ref": "EnableBanner"
                                             },
+                                            " --ssh-server-cert-bucket ",
+                                            {
+                                              "Fn::If": [
+                                                "UseElasticLoadBalancer",
+                                                {"Ref": "SSHServerCertBucket"},
+                                                "NO_S3_BUCKET_USED"
+                                              ]
+                                            },
+                                            " --stack-id ",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            },
                                             " --tcp-forwarding ",
                                             {
                                                 "Ref": "EnableTCPForwarding"
@@ -675,7 +1051,7 @@
                     "Ref": "KeyPairName"
                 },
                 "IamInstanceProfile": {
-                    "Ref": "BastionHostProfile"
+                    "Ref": "BastionHostInitProfile"
                 },
                 "ImageId": {
                     "Fn::FindInMap": [
@@ -696,7 +1072,11 @@
                 },
                 "SecurityGroups": [
                     {
-                        "Ref": "BastionSecurityGroup"
+                      "Fn::If": [
+                          "UseElasticIPs",
+                          { "Ref": "BastionEIPSecurityGroup" },
+                          { "Ref": "BastionELBSecurityGroup" }
+                      ]
                     }
                 ],
                 "InstanceType": {
@@ -720,7 +1100,13 @@
                                 "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
                                 "EIP_LIST=\"",
                                 {
-                                    "Ref": "EIP1"
+                                    "Fn::If": [
+                                        "UseElasticIPs",
+                                        {
+                                            "Ref": "EIP1"
+                                        },
+                                        "Null"
+                                    ]
                                 },
                                 ",",
                                 {
@@ -771,7 +1157,13 @@
                                 {
                                     "Ref": "AWS::StackName"
                                 },
-                                " --resource BastionAutoScalingGroup --region ",
+                                " --resource ",
+                                {
+                                  "Fn::If": [
+                                    "UseElasticIPs", "BastionAutoScalingGroup", "BastionELBAutoScalingGroup"
+                                  ]
+                                },
+                                " --region ",
                                 {
                                     "Ref": "AWS::Region"
                                 },
@@ -782,8 +1174,9 @@
                 }
             }
         },
-        "BastionSecurityGroup": {
+        "BastionEIPSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
+            "Condition": "UseElasticIPs",
             "Properties": {
                 "GroupDescription": "Enables SSH Access to Bastion Hosts",
                 "VpcId": {
@@ -797,11 +1190,49 @@
                         "CidrIp": {
                             "Ref": "RemoteAccessCIDR"
                         }
+                    }
+                ]
+            }
+        },
+        "BastionELBSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Condition": "UseElasticLoadBalancer",
+            "Properties": {
+                "GroupDescription": "Enables SSH Access to Bastion Hosts",
+                "VpcId": {
+                    "Ref": "VPCID"
+                },
+                "SecurityGroupIngress": [
+                    {
+                      "IpProtocol": "tcp",
+                      "FromPort": "22",
+                      "ToPort": "22",
+                      "SourceSecurityGroupId": {"Fn::GetAtt" : ["ELBSecurityGroup", "GroupId"]}
+                    }
+                ]
+            }
+        },
+        "ELBSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Condition": "UseElasticLoadBalancer",
+            "Properties": {
+                "GroupDescription": "Enables SSH Access to ELB",
+                "VpcId": {
+                    "Ref": "VPCID"
+                },
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
                     },
                     {
-                        "IpProtocol": "icmp",
-                        "FromPort": "-1",
-                        "ToPort": "-1",
+                        "IpProtocol": "tcp",
+                        "FromPort": "443",
+                        "ToPort": "443",
                         "CidrIp": {
                             "Ref": "RemoteAccessCIDR"
                         }
@@ -811,14 +1242,16 @@
         }
     },
     "Outputs": {
-        "BastionAutoScalingGroup": {
-            "Description": "Auto Scaling Group Reference ID",
-            "Value": {
-                "Ref": "BastionAutoScalingGroup"
-            }
-        },
+        "LoadBalancerDNSName": {
+             "Description": "THe DNS name of the load balancer",
+             "Condition": "UseElasticLoadBalancer",
+             "Value": {
+                 "Fn::GetAtt": [ "BastionLoadBalancer", "DNSName" ]
+             }
+         },
         "EIP1": {
             "Description": "Elastic IP 1 for Bastion",
+            "Condition": "UseElasticIPs",
             "Value": {
                 "Ref": "EIP1"
             }
@@ -849,12 +1282,6 @@
                 "Ref": "BastionMainLogGroup"
             },
             "Description": "CloudWatch Logs GroupName. Your SSH logs will be stored here."
-        },
-        "BastionSecurityGroupID": {
-            "Value": {
-                "Ref": "BastionSecurityGroup"
-            },
-            "Description": "Bastion Security Group ID"
         }
     }
 }
