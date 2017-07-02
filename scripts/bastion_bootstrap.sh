@@ -466,7 +466,7 @@ function prevent_process_snooping() {
     echo "${FUNCNAME[0]} Ended"
 }
 
-function install_awscli_deps() {
+function install_awscli() {
     case $(osrelease) in
         "Ubuntu")
             ubuntu=`cat /etc/os-release | grep VERSION_ID | tr -d \VERSION_ID=\"`
@@ -509,7 +509,6 @@ function download_ssh_keys() {
 
 # So we don't get MITM attack warnings when connecting to different backend bastion hosts behind the ELB
 function sync_ssh_keys() {
-    install_awscli_deps
     if ssh_keys_not_present ; then
         # Return the name of the ASG of which this instance is a member
         ASG_NAME=$(aws autoscaling describe-auto-scaling-instances --instance-ids $INSTANCE_ID | jq --raw-output '.AutoScalingInstances[].AutoScalingGroupName')
@@ -668,6 +667,7 @@ else
 fi
 
 prevent_process_snooping
+install_awscli
 
 # Deployed using EIP(s) or behind an ELB?
 if [ "${SSH_SERVER_CERT_BUCKET}" == "NO_S3_BUCKET_USED" ]; then

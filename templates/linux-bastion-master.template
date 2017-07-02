@@ -180,7 +180,7 @@
         },
         "ELBRotationScheduleDown": {
             "Default": "",
-            "Description": "Cron schedule to add an additional bastion to complete a rotation event",
+            "Description": "Cron schedule to remove a bastion to complete a rotation event",
             "Type": "String"
         },
         "EnableBanner": {

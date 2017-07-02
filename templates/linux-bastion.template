@@ -164,7 +164,7 @@
         },
         "ELBRotationScheduleDown": {
             "Default": "",
-            "Description": "Cron schedule to add an additional bastion to complete a rotation event",
+            "Description": "Cron schedule to remove a bastion to complete a rotation event",
             "Type": "String"
         },
         "EnableBanner": {
@@ -833,68 +833,23 @@
                 "LoadBalancerPort": "22",
                 "Protocol": "TCP",
                 "InstanceProtocol": "TCP"
-              },
-              {
-                "InstancePort": "22",
-                "LoadBalancerPort": "443",
-                "Protocol": "TCP",
-                "InstanceProtocol": "TCP"
               }
             ]
           }
         },
         "BastionAutoScalingGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
-            "Condition": "UseElasticIPs",
-            "Properties": {
-                "LaunchConfigurationName": {
-                    "Ref": "BastionLaunchConfiguration"
-                },
-                "VPCZoneIdentifier": [
-                    {
-                        "Ref": "PublicSubnet1ID"
-                    },
-                    {
-                        "Ref": "PublicSubnet2ID"
-                    }
-                ],
-                "MinSize": {
-                    "Ref": "NumBastionHosts"
-                },
-                "MaxSize": {
-                    "Ref": "NumBastionHosts"
-                },
-                "Cooldown": "300",
-                "DesiredCapacity": {
-                    "Ref": "NumBastionHosts"
-                },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "LinuxBastion",
-                        "PropagateAtLaunch": "true"
-                    }
-                ]
-            },
-            "CreationPolicy": {
-                "ResourceSignal": {
-                    "Count": {
-                        "Ref": "NumBastionHosts"
-                    },
-                    "Timeout": "PT30M"
-                }
-            }
-        },
-        "BastionELBAutoScalingGroup": {
-            "Type": "AWS::AutoScaling::AutoScalingGroup",
-            "Condition": "UseElasticLoadBalancer",
             "Properties": {
                 "LaunchConfigurationName": {
                     "Ref": "BastionLaunchConfiguration"
                 },
                 "LoadBalancerNames": [
                     {
-                        "Ref": "BastionLoadBalancer"
+                        "Fn::If": [
+                            "UseElasticLoadBalancer",
+                            { "Ref": "BastionLoadBalancer" },
+                            { "Ref" : "AWS::NoValue" }
+                        ]
                     }
                 ],
                 "VPCZoneIdentifier": [
@@ -940,7 +895,7 @@
             "Condition": "UseELBScheduledRotation",
             "Properties": {
                 "AutoScalingGroupName": {
-                    "Ref": "BastionELBAutoScalingGroup"
+                    "Ref": "BastionAutoScalingGroup"
                 },
                 "MaxSize": { "Fn::FindInMap" : [ "AdditionHack", { "Ref" : "NumBastionHosts" }, "AddOne" ] },
                 "MinSize": { "Fn::FindInMap" : [ "AdditionHack", { "Ref" : "NumBastionHosts" }, "AddOne" ] },
@@ -952,7 +907,7 @@
             "Condition": "UseELBScheduledRotation",
             "Properties": {
                 "AutoScalingGroupName": {
-                    "Ref": "BastionELBAutoScalingGroup"
+                    "Ref": "BastionAutoScalingGroup"
                 },
                 "MaxSize": { "Ref" : "NumBastionHosts" },
                 "MinSize": { "Ref" : "NumBastionHosts" },
@@ -1072,11 +1027,7 @@
                 },
                 "SecurityGroups": [
                     {
-                      "Fn::If": [
-                          "UseElasticIPs",
-                          { "Ref": "BastionEIPSecurityGroup" },
-                          { "Ref": "BastionELBSecurityGroup" }
-                      ]
+                      "Ref": "BastionSecurityGroup"
                     }
                 ],
                 "InstanceType": {
@@ -1157,12 +1108,7 @@
                                 {
                                     "Ref": "AWS::StackName"
                                 },
-                                " --resource ",
-                                {
-                                  "Fn::If": [
-                                    "UseElasticIPs", "BastionAutoScalingGroup", "BastionELBAutoScalingGroup"
-                                  ]
-                                },
+                                " --resource BastionAutoScalingGroup",
                                 " --region ",
                                 {
                                     "Ref": "AWS::Region"
@@ -1174,9 +1120,8 @@
                 }
             }
         },
-        "BastionEIPSecurityGroup": {
+        "BastionSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
-            "Condition": "UseElasticIPs",
             "Properties": {
                 "GroupDescription": "Enables SSH Access to Bastion Hosts",
                 "VpcId": {
@@ -1188,26 +1133,38 @@
                         "FromPort": "22",
                         "ToPort": "22",
                         "CidrIp": {
-                            "Ref": "RemoteAccessCIDR"
+                            "Fn::If": [
+                                "UseElasticIPs",
+                                { "Ref": "RemoteAccessCIDR" },
+                                { "Ref" : "AWS::NoValue" }
+                            ]
+                        },
+                        "SourceSecurityGroupId": {
+                            "Fn::If": [
+                                "UseElasticLoadBalancer",
+                                { "Fn::GetAtt" : ["ELBSecurityGroup", "GroupId"] },
+                                { "Ref" : "AWS::NoValue" }
+                            ]
                         }
-                    }
-                ]
-            }
-        },
-        "BastionELBSecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup",
-            "Condition": "UseElasticLoadBalancer",
-            "Properties": {
-                "GroupDescription": "Enables SSH Access to Bastion Hosts",
-                "VpcId": {
-                    "Ref": "VPCID"
-                },
-                "SecurityGroupIngress": [
+                    },
                     {
-                      "IpProtocol": "tcp",
-                      "FromPort": "22",
-                      "ToPort": "22",
-                      "SourceSecurityGroupId": {"Fn::GetAtt" : ["ELBSecurityGroup", "GroupId"]}
+                        "IpProtocol": "icmp",
+                        "FromPort": "-1",
+                        "ToPort": "-1",
+                        "CidrIp": {
+                            "Fn::If": [
+                                "UseElasticIPs",
+                                { "Ref": "RemoteAccessCIDR" },
+                                { "Ref" : "AWS::NoValue" }
+                            ]
+                        },
+                        "SourceSecurityGroupId": {
+                            "Fn::If": [
+                                "UseElasticLoadBalancer",
+                                { "Fn::GetAtt" : ["ELBSecurityGroup", "GroupId"] },
+                                { "Ref" : "AWS::NoValue" }
+                            ]
+                        }
                     }
                 ]
             }
@@ -1228,14 +1185,6 @@
                         "CidrIp": {
                             "Ref": "RemoteAccessCIDR"
                         }
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "443",
-                        "ToPort": "443",
-                        "CidrIp": {
-                            "Ref": "RemoteAccessCIDR"
-                        }
                     }
                 ]
             }
@@ -1248,6 +1197,12 @@
              "Value": {
                  "Fn::GetAtt": [ "BastionLoadBalancer", "DNSName" ]
              }
+         },
+         "BastionAutoScalingGroup": {
+             "Description": "Auto Scaling Group Reference ID",
+             "Value": {
+                "Ref": "BastionAutoScalingGroup"
+              }
          },
         "EIP1": {
             "Description": "Elastic IP 1 for Bastion",
@@ -1282,6 +1237,12 @@
                 "Ref": "BastionMainLogGroup"
             },
             "Description": "CloudWatch Logs GroupName. Your SSH logs will be stored here."
+        },
+        "BastionSecurityGroupID": {
+            "Value": {
+                "Ref": "BastionSecurityGroup"
+            },
+            "Description": "Bastion Security Group ID"
         }
     }
 }
