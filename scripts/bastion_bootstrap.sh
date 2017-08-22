@@ -78,15 +78,22 @@ bastion_mnt="/var/log/bastion"
 bastion_log="bastion.log"
 # Check that the SSH client did not supply a command. Only SSH to instance should be allowed.
 export Allow_SSH="ssh"
-if [[ -z $SSH_ORIGINAL_COMMAND ]] || [[ $SSH_ORIGINAL_COMMAND =~ ^$Allow_SSH ]]; then
+export Allow_SCP="scp"
+if [[ -z $SSH_ORIGINAL_COMMAND ]] || [[ $SSH_ORIGINAL_COMMAND =~ ^$Allow_SSH ]] || [[ $SSH_ORIGINAL_COMMAND =~ ^$Allow_SCP ]]; then
 #Allow ssh to instance and log connection
+    if [ -z "$SSH_ORIGINAL_COMMAND" ]; then
+        /bin/bash
+        exit 0
+    else
+        $SSH_ORIGINAL_COMMAND
+    fi
 
 log_file=`echo "$log_shadow_file_location"`
 DATE_TIME_WHOAMI="`whoami`:`date "+%Y-%m-%d %H:%M:%S"`"
 LOG_ORIGINAL_COMMAND=`echo "$DATE_TIME_WHOAMI:$SSH_ORIGINAL_COMMAND"`
 echo "$LOG_ORIGINAL_COMMAND" >> "${bastion_mnt}/${bastion_log}"
 log_dir="/var/log/bastion/"
-script -qf /tmp/messages --command=/bin/bash
+ 
 else
 # The "script" program could be circumvented with some commands 
 # (e.g. bash, nc). Therefore, I intentionally prevent users
