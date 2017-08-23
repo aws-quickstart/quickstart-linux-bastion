@@ -27,6 +27,8 @@ function usage () {
     echo -e "--help \t Show options for this script"
     echo -e "--banner \t Enable or Disable Bastion Message"
     echo -e "--enable \t SSH Banner"
+    echo -e "--ssh-server-cert-bucket \t S3 bucket for SSH server certs"
+    echo -e "--stack-id \t ID used to track roles"
     echo -e "--tcp-forwarding \t Enable or Disable TCP Forwarding"
     echo -e "--x11-forwarding \t Enable or Disable X11 Forwarding"
 }
@@ -95,7 +97,7 @@ echo "$LOG_ORIGINAL_COMMAND" >> "${bastion_mnt}/${bastion_log}"
 log_dir="/var/log/bastion/"
  
 else
-# The "script" program could be circumvented with some commands 
+# The "script" program could be circumvented with some commands
 # (e.g. bash, nc). Therefore, I intentionally prevent users
 # from supplying commands.
 
@@ -405,7 +407,6 @@ function request_eip() {
 
         if [ "$AVAILABLE_EIPs" -gt "$ZERO" ]; then
             FIELD_COUNT="5"
-            INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
             echo "Running associate_eip_now"
             while read name;
             do
@@ -472,16 +473,89 @@ function prevent_process_snooping() {
     echo "${FUNCNAME[0]} Ended"
 }
 
+function install_awscli() {
+    case $(osrelease) in
+        "Ubuntu")
+            ubuntu=`cat /etc/os-release | grep VERSION_ID | tr -d \VERSION_ID=\"`
+            if [ "$ubuntu" == "16.04" ]; then
+                pip install awscli
+            else
+                # Avoid a libyaml incompatibility problem with latest awscli in 14.04
+                pip install awscli==1.11.110
+            fi
+             apt-get install -y jq
+        ;;
+        "AMZN")
+            yum install -y jq
+        ;;
+        "CentOS")
+            pip install awscli
+            yum install -y jq
+        ;;
+    esac
+    aws configure set region $(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev)
+    echo "${FUNCNAME[0]} Ended"
+}
+
+function ssh_keys_not_present() {
+    return $(aws s3 ls s3://${SSH_SERVER_CERT_BUCKET}/ssh/ssh_host_rsa_key | wc -l)
+}
+
+function download_ssh_keys() {
+    rm -f /etc/ssh/ssh_host*
+    aws s3api wait object-exists --bucket ${SSH_SERVER_CERT_BUCKET} --key ssh/ssh_host_rsa_key
+    aws s3 sync s3://${SSH_SERVER_CERT_BUCKET}/ssh/ /etc/ssh/ --include 'ssh_host*'
+    find /etc/ssh -name "*key" -exec chmod 600 {} \;
+    if [ $(osrelease) == "Ubuntu" ]; then
+        service ssh restart
+    else
+        service sshd restart
+    fi
+    echo "${FUNCNAME[0]} Ended"
+}
+
+# So we don't get MITM attack warnings when connecting to different backend bastion hosts behind the ELB
+function sync_ssh_keys() {
+    if ssh_keys_not_present ; then
+        # Return the name of the ASG of which this instance is a member
+        ASG_NAME=$(aws autoscaling describe-auto-scaling-instances --instance-ids $INSTANCE_ID | jq --raw-output '.AutoScalingInstances[].AutoScalingGroupName')
+        # Get all the instances within the auto scaling group, sort and pick the first one
+        LEAD_BASTION=$(aws autoscaling describe-auto-scaling-instances | jq --raw-output --arg ASG_NAME $ASG_NAME '.AutoScalingInstances[] | select(.AutoScalingGroupName == $ASG_NAME).InstanceId' | sort | head -1)
+        if [ "$INSTANCE_ID" = "$LEAD_BASTION" ] ; then
+            aws s3 cp /etc/ssh/ s3://${SSH_SERVER_CERT_BUCKET}/ssh/ --recursive --exclude '*' --include '*key*'
+        else
+            download_ssh_keys
+        fi
+    else
+        download_ssh_keys
+    fi
+    echo "${FUNCNAME[0]} Ended"
+}
+
+# Drop down from a more privileged init role to one that can just push logs
+function swap_roles() {
+    ASSOCIATION_ID=$(aws ec2 describe-iam-instance-profile-associations \
+        --filters "Name=instance-id,Values=${INSTANCE_ID}" | jq --raw-output '.IamInstanceProfileAssociations[0].AssociationId')
+
+    INSTANCE_PROFILE=$(aws iam list-instance-profiles \
+        --path-prefix "/${STACK_ID}/bastion-host/" | jq --raw-output '.InstanceProfiles[0].InstanceProfileName')
+
+    aws ec2 replace-iam-instance-profile-association \
+        --association-id $ASSOCIATION_ID \
+        --iam-instance-profile Name=${INSTANCE_PROFILE}
+}
+
 ##################################### End Function Definitions
 
 # Call checkos to ensure platform is Linux
 checkos
 
-## set an initial value
+## set some initial values
 SSH_BANNER="LINUX BASTION"
+INSTANCE_ID=$(curl --silent http://169.254.169.254/latest/meta-data/instance-id)
 
 # Read the options from cli input
-TEMP=`getopt -o h:  --long help,banner:,enable:,tcp-forwarding:,x11-forwarding: -n $0 -- "$@"`
+TEMP=`getopt -o h:  --long help,banner:,enable:,tcp-forwarding:,ssh-server-cert-bucket:,stack-id:,x11-forwarding: -n $0 -- "$@"`
 eval set -- "$TEMP"
 
 
@@ -500,6 +574,14 @@ while true; do
             ;;
         --enable)
             ENABLE="$2";
+            shift 2
+            ;;
+        --ssh-server-cert-bucket)
+            SSH_SERVER_CERT_BUCKET="$2";
+            shift 2
+            ;;
+        --stack-id)
+            STACK_ID="$2";
             shift 2
             ;;
         --tcp-forwarding)
@@ -592,7 +674,15 @@ else
 fi
 
 prevent_process_snooping
+install_awscli
 
-call_request_eip
+# Deployed using EIP(s) or behind an ELB?
+if [ "${SSH_SERVER_CERT_BUCKET}" == "NO_S3_BUCKET_USED" ]; then
+    call_request_eip
+else
+    sync_ssh_keys
+fi
+
+swap_roles
 
 echo "Bootstrap complete."
