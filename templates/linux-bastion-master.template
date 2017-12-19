@@ -307,7 +307,20 @@
             "DependsOn": "VPCStack",
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
-                "TemplateURL": "https://s3-us-west-2.amazonaws.com/bastion-aws-test/linux-bastion.template",
+                "TemplateURL": {
+                    "Fn::Sub": [
+                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}templates/linux-bastion.template",
+                            {
+                            "QSS3Region": {
+                                "Fn::If": [
+                                        "GovCloudCondition",
+                                        "s3-us-gov-west-1",
+                                        "s3"
+                                    ]
+                                }
+                            }
+                        ]
+                    },
                 "Parameters": {
                     "BastionAMIOS": {
                         "Ref": "BastionAMIOS"
