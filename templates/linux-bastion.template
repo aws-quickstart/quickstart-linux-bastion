@@ -288,6 +288,12 @@
                 "US1404HVM": "ami-7950491d",
                 "US1604HVM": "ami-22415846"
             },
+           "eu-west-3": {
+                "AMZNLINUXHVM": "ami-fe03b483",
+                "CENTOS7HVM": "ami-0c60d771",
+                "US1404HVM": "Not Available",
+                "US1604HVM": "ami-4262d53f"
+            },
             "sa-east-1": {
                 "AMZNLINUXHVM": "ami-1226647e",
                 "CENTOS7HVM": "ami-6b5c1b07",
