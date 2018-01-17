@@ -20,6 +20,36 @@ function checkos () {
     echo "${FUNCNAME[0]} Ended"
 }
 
+function setup_environment_variables()
+  REGION=$(curl 169.254.169.254/latest/meta-data/placement/availability-zone/)
+    #ex: us-east-1a => us-east-1
+  REGION=${REGION: :-1}
+
+  ETH0_MAC=$(/sbin/ip link show dev eth0 | /bin/egrep -o -i 'link/ether\ ([0-9a-z]{2}:){5}[0-9a-z]{2}' | /bin/sed -e 's,link/ether\ ,,g')
+
+  _userdata=$(curl http://169.254.169.254/latest/user-data/)
+
+  EIP_LIST=$(echo ${_userdata} | grep EIP_LIST)
+
+  CWG=$(echo ${_userdata} | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g')
+
+  # LOGGING CONFIGURATION
+  BASTION_MNT="/var/log/bastion"
+  BASTION_LOG="bastion.log"
+  echo "Setting up bastion session log in ${BASTION_MNT}/${BASTION_LOG}"
+  mkdir -p ${BASTION_MNT}
+  BASTION_LOGFILE="${BASTION_MNT}/${BASTION_LOG}"
+  BASTION_LOGFILE_SHADOW="${BASTION_MNT}/.${BASTION_LOG}"
+  touch ${BASTION_LOGFILE}
+  ln ${BASTION_LOGFILE} ${BASTION_LOGFILE_SHADOW}
+  mkdir -p /usr/bin/bastion
+  touch /tmp/messages
+  chmod 770 /tmp/messages
+  log_shadow_file_location="${bastion_mnt}/.${bastion_log}"
+
+  export REGION ETHO_MAC EIP_LIST CWG BASTION_MNT BASTION_LOG BASTION_LOGFILE BASTION_LOGFILE_SHADOW
+}
+
 function usage () {
     echo "$0 <usage>"
     echo " "
@@ -62,15 +92,7 @@ function harden_ssh_security () {
 
     # Make OpenSSH execute a custom script on logins
     echo -e "\nForceCommand /usr/bin/bastion/shell" >> /etc/ssh/sshd_config
-    # LOGGING CONFIGURATION
-    mkdir -p /var/log/bastion
-    mkdir -p /usr/bin/bastion
 
-
-    touch /tmp/messages
-    chmod 770 /tmp/messages
-    log_file_location="${bastion_mnt}/${bastion_log}"
-    log_shadow_file_location="${bastion_mnt}/.${bastion_log}"
 
 
 cat <<'EOF' >> /usr/bin/bastion/shell
@@ -93,9 +115,9 @@ DATE_TIME_WHOAMI="`whoami`:`date "+%Y-%m-%d %H:%M:%S"`"
 LOG_ORIGINAL_COMMAND=`echo "$DATE_TIME_WHOAMI:$SSH_ORIGINAL_COMMAND"`
 echo "$LOG_ORIGINAL_COMMAND" >> "${bastion_mnt}/${bastion_log}"
 log_dir="/var/log/bastion/"
- 
+
 else
-# The "script" program could be circumvented with some commands 
+# The "script" program could be circumvented with some commands
 # (e.g. bash, nc). Therefore, I intentionally prevent users
 # from supplying commands.
 
@@ -142,7 +164,6 @@ EOF
     #Install CloudWatch Log service on AMZN
     yum update -y
     yum install -y awslogs
-    export CWG=`curl http://169.254.169.254/latest/user-data/ | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g'`
     echo "file = $BASTION_LOGFILE_SHADOW" >> /tmp/groupname.txt
     echo "log_group_name = $CWG" >> /tmp/groupname.txt
 
@@ -162,8 +183,7 @@ EOF
     cat ~/cloudwatchlog.conf >> /etc/awslogs/awslogs.conf
     cat /tmp/groupname.txt >> /etc/awslogs/awslogs.conf
     export TMPREGION=`cat /etc/awslogs/awscli.conf | grep region`
-    export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
-    sed -i.back "s/$TMPREGION/region = $Region/g" /etc/awslogs/awscli.conf
+    sed -i.back "s/$TMPREGION/region = $REGION/g" /etc/awslogs/awscli.conf
 
     #Restart awslogs service
     service awslogs restart
@@ -201,7 +221,6 @@ EOF
     touch /tmp/messages
     chown root:ubuntu /tmp/messages
     #Install CloudWatch logs on Ubuntu
-    export CWG=`curl http://169.254.169.254/latest/user-data/ | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g'`
     echo "file = $BASTION_LOGFILE_SHADOW" >> /tmp/groupname.txt
     echo "log_group_name = $CWG" >> /tmp/groupname.txt
 
@@ -213,14 +232,13 @@ state_file = /var/awslogs/state/agent-state
 log_stream_name = {instance_id}
 datetime_format = %b %d %H:%M:%S
 EOF
-    export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
     cat /tmp/groupname.txt >> ~/cloudwatchlog.conf
 
     curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
     export DEBIAN_FRONTEND=noninteractive
     apt-get install -y python
     chmod +x ./awslogs-agent-setup.py
-    ./awslogs-agent-setup.py -n -r $Region -c ~/cloudwatchlog.conf
+    ./awslogs-agent-setup.py -n -r $REGION -c ~/cloudwatchlog.conf
 
     #Install Unit file for Ubuntu 16.04
     ubuntu=`cat /etc/os-release | grep VERSION_ID | tr -d \VERSION_ID=\"`
@@ -255,9 +273,7 @@ EOF
 
     #Run security updates
     apt-get install unattended-upgrades
-cat <<'EOF' >> ~/mycron
-0 0 * * * unattended-upgrades -d
-EOF
+    echo "0 0 * * * unattended-upgrades -d" >> ~/mycron
     crontab ~/mycron
     rm ~/mycron
     echo "${FUNCNAME[0]} Ended"
@@ -265,16 +281,14 @@ EOF
 
 function cent_os () {
     echo -e "\nDefaults env_keep += \"SSH_CLIENT\"" >>/etc/sudoers
-cat <<'EOF' >> /etc/bashrc
-#Added by linux bastion bootstrap
-declare -rx IP=$(echo $SSH_CLIENT | awk '{print $1}')
-EOF
+    echo -e "#Added by the Linux Bastion Bootstrap\ndeclare -rx IP=$(echo $SSH_CLIENT | awk '{print $1}')" >> /etc/bashrc
 
     echo "declare -rx BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
 
-cat <<'EOF' >> /etc/bashrc
-declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: $(date)   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+    cat <<- EOF >> /etc/bashrc
+    declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: $(date)   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
+
     chown root:centos ${BASTION_MNT}
     chown root:centos /usr/bin/script
     chown root:centos  /var/log/bastion/bastion.log
@@ -284,70 +298,63 @@ EOF
     restorecon -v /etc/ssh/sshd_config
     /bin/systemctl restart sshd.service
 
-
-
     # Install CloudWatch Log service on Centos Linux
-    export CWG=`curl http://169.254.169.254/latest/user-data/ | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g'`
     centos=`cat /etc/os-release | grep VERSION_ID | tr -d \VERSION_ID=\"`
     if [ "$centos" == "7" ]; then
         echo "file = $BASTION_LOGFILE_SHADOW" >> /tmp/groupname.txt
         echo "log_group_name = $CWG" >> /tmp/groupname.txt
 
-cat <<'EOF' >> ~/cloudwatchlog.conf
-[general]
-state_file = /var/awslogs/state/agent-state
-use_gzip_http_content_encoding = true
-logging_config_file = /var/awslogs/etc/awslogs.conf
+        cat <<- 'EOF' >> ~/cloudwatchlog.conf
+        [general]
+        state_file = /var/awslogs/state/agent-state
+        use_gzip_http_content_encoding = true
+        logging_config_file = /var/awslogs/etc/awslogs.conf
 
-[/var/log/bastion]
-datetime_format = %Y-%m-%d %H:%M:%S
-file = /var/log/messages
-buffer_duration = 5000
-log_stream_name = {instance_id}
-initial_position = start_of_file
-EOF
-    export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
-    cat /tmp/groupname.txt >> ~/cloudwatchlog.conf
+        [/var/log/bastion]
+        datetime_format = %Y-%m-%d %H:%M:%S
+        file = /var/log/messages
+        buffer_duration = 5000
+        log_stream_name = {instance_id}
+        initial_position = start_of_file
+'EOF'
+        cat /tmp/groupname.txt >> ~/cloudwatchlog.conf
 
-    curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
-    chmod +x ./awslogs-agent-setup.py
-    ./awslogs-agent-setup.py -n -r $Region -c ~/cloudwatchlog.conf
-cat <<'EOF' >> /etc/systemd/system/awslogs.service
-[Unit]
-Description=The CloudWatch Logs agent
-After=rc-local.service
+        curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
+        chmod +x ./awslogs-agent-setup.py
+        ./awslogs-agent-setup.py -n -r $REGION -c ~/cloudwatchlog.conf
+        cat <<- 'EOF' >> /etc/systemd/system/awslogs.service
+        [Unit]
+        Description=The CloudWatch Logs agent
+        After=rc-local.service
 
-[Service]
-Type=simple
-Restart=always
-KillMode=process
-TimeoutSec=infinity
-PIDFile=/var/awslogs/state/awslogs.pid
-ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --pidfile $PIDFILE --user awslogs --chuid awslogs &
+        [Service]
+        Type=simple
+        Restart=always
+        KillMode=process
+        TimeoutSec=infinity
+        PIDFile=/var/awslogs/state/awslogs.pid
+        ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --pidfile $PIDFILE --user awslogs --chuid awslogs &
 
-[Install]
-WantedBy=multi-user.target
-EOF
+        [Install]
+        WantedBy=multi-user.target
+'EOF'
         service awslogs restart
         chkconfig awslogs on
-    else
+  else
         chown root:centos /var/log/bastion
         yum update -y
         yum install -y awslogs
-        export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
         export TMPREGION=`cat /etc/awslogs/awscli.conf | grep region`
-        sed -i.back "s/$TMPREGION/region = $Region/g" /etc/awslogs/awscli.conf
-        export CWG=`curl http://169.254.169.254/latest/user-data/ | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g'`
+        sed -i.back "s/$TMPREGION/region = $REGION/g" /etc/awslogs/awscli.conf
         echo "file = $BASTION_LOGFILE_SHADOW" >> /tmp/groupname.txt
         echo "log_group_name = $CWG" >> /tmp/groupname.txt
 
-cat <<'EOF' >> ~/cloudwatchlog.conf
-
-[/var/log/bastion]
-datetime_format = %b %d %H:%M:%S
-buffer_duration = 5000
-log_stream_name = {instance_id}
-initial_position = start_of_file
+        cat <<'EOF' >> ~/cloudwatchlog.conf
+        [/var/log/bastion]
+        datetime_format = %b %d %H:%M:%S
+        buffer_duration = 5000
+        log_stream_name = {instance_id}
+        initial_position = start_of_file
 EOF
         export TMPGROUP=`cat /etc/awslogs/awslogs.conf | grep ^log_group_name`
         export TMPGROUP=`echo $TMPGROUP | sed 's/\//\\\\\//g'`
@@ -356,8 +363,7 @@ EOF
         cat /tmp/groupname.txt >> /etc/awslogs/awslogs.conf
         yum install ec2-metadata -y
         export TMPREGION=`cat /etc/awslogs/awscli.conf | grep region`
-        export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
-        sed -i.back "s/$TMPREGION/region = $Region/g" /etc/awslogs/awscli.conf
+        sed -i.back "s/$TMPREGION/region = $REGION/g" /etc/awslogs/awscli.conf
         sleep 3
         service awslogs stop
         sleep 3
@@ -366,9 +372,7 @@ EOF
     fi
 
     #Run security updates
-cat <<'EOF' >> ~/mycron
-0 0 * * * yum -y update --security
-EOF
+    echo "0 0 * * * yum -y update --security" > ~/mycron
     crontab ~/mycron
     rm ~/mycron
     echo "${FUNCNAME[0]} Ended"
@@ -376,17 +380,15 @@ EOF
 
 function request_eip() {
     release=$(osrelease)
-    export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
-
     #Check if EIP already assigned.
     ALLOC=1
     ZERO=0
     INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
-    ASSIGNED=$(aws ec2 describe-addresses --region $Region --output text | grep $INSTANCE_IP | wc -l)
+    ASSIGNED=$(aws ec2 describe-addresses --region $REGION --output text | grep $INSTANCE_IP | wc -l)
     if [ "$ASSIGNED" -gt "$ZERO" ]; then
         echo "Already assigned an EIP."
     else
-        aws ec2 describe-addresses --region $Region --output text > /query.txt
+        aws ec2 describe-addresses --region $REGION --output text > /query.txt
         #Ensure we are only using EIPs from our Stack
         line=`curl http://169.254.169.254/latest/user-data/ | grep EIP_LIST`
         IFS=$':' DIRS=(${line//$','/:})       # Replace tabs with colons.
@@ -421,7 +423,7 @@ function request_eip() {
                     echo "NAME: $name"
                     echo "EIP: $EIP"
                     echo "EIPALLOC: $EIPALLOC"
-                    aws ec2 associate-address --instance-id $INSTANCE_ID --allocation-id $EIPALLOC --region $Region
+                    aws ec2 associate-address --instance-id $INSTANCE_ID --allocation-id $EIPALLOC --region $REGION
                 fi
             done < /query.txt
         else
@@ -430,7 +432,7 @@ function request_eip() {
         fi
 
         INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
-        ASSIGNED=$(aws ec2 describe-addresses --region $Region --output text | grep $INSTANCE_IP | wc -l)
+        ASSIGNED=$(aws ec2 describe-addresses --region $REGION --output text | grep $INSTANCE_IP | wc -l)
         if [ "$ASSIGNED" -eq 1 ]; then
             echo "EIP successfully assigned."
         else
@@ -440,7 +442,7 @@ function request_eip() {
                 sleep 3
                 request_eip
                 INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
-                ASSIGNED=$(aws ec2 describe-addresses --region $Region --output text | grep $INSTANCE_IP | wc -l)
+                ASSIGNED=$(aws ec2 describe-addresses --region $REGION --output text | grep $INSTANCE_IP | wc -l)
             done
         fi
     fi
@@ -448,12 +450,16 @@ function request_eip() {
     echo "${FUNCNAME[0]} Ended"
 }
 
+function _query_public_v4_ips() {
+  PUBLIC_IP_ADDRESS=$(curl 169.254.169.254/latest/meta-data/public-ipv4/${ETH0_MAC}/public-ipv4s/)
+  return PUBLIC_IP_ADDRESS
+}
+
 function call_request_eip() {
-    Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
     ZERO=0
     INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
-    ASSIGNED=$(aws ec2 describe-addresses --region $Region --output text | grep $INSTANCE_IP | wc -l)
-    if [ "$ASSIGNED" -gt "$ZERO" ]; then
+    ASSIGNED=$(aws ec2 describe-addresses --region $REGION --output text | grep $INSTANCE_IP | wc -l)
+    if [ "$ASSIGNED" -gt 0 ]; then
         echo "Already assigned an EIP."
     else
         WAIT=$(shuf -i 1-30 -n 1)
@@ -476,6 +482,7 @@ function prevent_process_snooping() {
 
 # Call checkos to ensure platform is Linux
 checkos
+setup_environment_variables
 
 ## set an initial value
 SSH_BANNER="LINUX BASTION"
@@ -541,17 +548,6 @@ else
     echo "Banner message is not enabled!"
 fi
 
-# LOGGING CONFIGURATION
-declare -rx BASTION_MNT="/var/log/bastion"
-declare -rx BASTION_LOG="bastion.log"
-echo "Setting up bastion session log in ${BASTION_MNT}/${BASTION_LOG}"
-mkdir -p ${BASTION_MNT}
-declare -rx BASTION_LOGFILE="${BASTION_MNT}/${BASTION_LOG}"
-declare -rx BASTION_LOGFILE_SHADOW="${BASTION_MNT}/.${BASTION_LOG}"
-touch ${BASTION_LOGFILE}
-ln ${BASTION_LOGFILE} ${BASTION_LOGFILE_SHADOW}
-
-
 #Enable/Disable TCP forwarding
 TCP_FORWARDING=`echo "$TCP_FORWARDING" | sed 's/\\n//g'`
 
@@ -592,7 +588,6 @@ else
 fi
 
 prevent_process_snooping
-
 call_request_eip
 
 echo "Bootstrap complete."
