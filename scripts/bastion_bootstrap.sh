@@ -20,6 +20,12 @@ function checkos () {
     echo "${FUNCNAME[0]} Ended"
 }
 
+function setup_environment_variables(){
+  REGION=$(curl 169.254.169.254/latest/meta-data/placement/availability-zone/)
+  #ex: us-east-1a => us-east-1
+  export ${REGION: :-1}
+}
+
 function usage () {
     echo "$0 <usage>"
     echo " "
@@ -93,9 +99,9 @@ DATE_TIME_WHOAMI="`whoami`:`date "+%Y-%m-%d %H:%M:%S"`"
 LOG_ORIGINAL_COMMAND=`echo "$DATE_TIME_WHOAMI:$SSH_ORIGINAL_COMMAND"`
 echo "$LOG_ORIGINAL_COMMAND" >> "${bastion_mnt}/${bastion_log}"
 log_dir="/var/log/bastion/"
- 
+
 else
-# The "script" program could be circumvented with some commands 
+# The "script" program could be circumvented with some commands
 # (e.g. bash, nc). Therefore, I intentionally prevent users
 # from supplying commands.
 
@@ -162,8 +168,7 @@ EOF
     cat ~/cloudwatchlog.conf >> /etc/awslogs/awslogs.conf
     cat /tmp/groupname.txt >> /etc/awslogs/awslogs.conf
     export TMPREGION=`cat /etc/awslogs/awscli.conf | grep region`
-    export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
-    sed -i.back "s/$TMPREGION/region = $Region/g" /etc/awslogs/awscli.conf
+    sed -i.back "s/$TMPREGION/region = $REGION/g" /etc/awslogs/awscli.conf
 
     #Restart awslogs service
     service awslogs restart
@@ -213,14 +218,13 @@ state_file = /var/awslogs/state/agent-state
 log_stream_name = {instance_id}
 datetime_format = %b %d %H:%M:%S
 EOF
-    export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
     cat /tmp/groupname.txt >> ~/cloudwatchlog.conf
 
     curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
     export DEBIAN_FRONTEND=noninteractive
     apt-get install -y python
     chmod +x ./awslogs-agent-setup.py
-    ./awslogs-agent-setup.py -n -r $Region -c ~/cloudwatchlog.conf
+    ./awslogs-agent-setup.py -n -r $REGION -c ~/cloudwatchlog.conf
 
     #Install Unit file for Ubuntu 16.04
     ubuntu=`cat /etc/os-release | grep VERSION_ID | tr -d \VERSION_ID=\"`
@@ -306,12 +310,11 @@ buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
 EOF
-    export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
     cat /tmp/groupname.txt >> ~/cloudwatchlog.conf
 
     curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
     chmod +x ./awslogs-agent-setup.py
-    ./awslogs-agent-setup.py -n -r $Region -c ~/cloudwatchlog.conf
+    ./awslogs-agent-setup.py -n -r $REGION -c ~/cloudwatchlog.conf
 cat <<'EOF' >> /etc/systemd/system/awslogs.service
 [Unit]
 Description=The CloudWatch Logs agent
@@ -334,9 +337,8 @@ EOF
         chown root:centos /var/log/bastion
         yum update -y
         yum install -y awslogs
-        export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
         export TMPREGION=`cat /etc/awslogs/awscli.conf | grep region`
-        sed -i.back "s/$TMPREGION/region = $Region/g" /etc/awslogs/awscli.conf
+        sed -i.back "s/$TMPREGION/region = $REGION/g" /etc/awslogs/awscli.conf
         export CWG=`curl http://169.254.169.254/latest/user-data/ | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g'`
         echo "file = $BASTION_LOGFILE_SHADOW" >> /tmp/groupname.txt
         echo "log_group_name = $CWG" >> /tmp/groupname.txt
@@ -356,8 +358,7 @@ EOF
         cat /tmp/groupname.txt >> /etc/awslogs/awslogs.conf
         yum install ec2-metadata -y
         export TMPREGION=`cat /etc/awslogs/awscli.conf | grep region`
-        export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
-        sed -i.back "s/$TMPREGION/region = $Region/g" /etc/awslogs/awscli.conf
+        sed -i.back "s/$TMPREGION/region = $REGION/g" /etc/awslogs/awscli.conf
         sleep 3
         service awslogs stop
         sleep 3
@@ -376,13 +377,11 @@ EOF
 
 function request_eip() {
     release=$(osrelease)
-    export Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
-
     #Check if EIP already assigned.
     ALLOC=1
     ZERO=0
     INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
-    ASSIGNED=$(aws ec2 describe-addresses --region $Region --output text | grep $INSTANCE_IP | wc -l)
+    ASSIGNED=$(aws ec2 describe-addresses --region $REGION --output text | grep $INSTANCE_IP | wc -l)
     if [ "$ASSIGNED" -gt "$ZERO" ]; then
         echo "Already assigned an EIP."
     else
@@ -449,10 +448,9 @@ function request_eip() {
 }
 
 function call_request_eip() {
-    Region=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone | rev | cut -c 2- | rev`
     ZERO=0
     INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
-    ASSIGNED=$(aws ec2 describe-addresses --region $Region --output text | grep $INSTANCE_IP | wc -l)
+    ASSIGNED=$(aws ec2 describe-addresses --region $REGION --output text | grep $INSTANCE_IP | wc -l)
     if [ "$ASSIGNED" -gt "$ZERO" ]; then
         echo "Already assigned an EIP."
     else
@@ -476,6 +474,7 @@ function prevent_process_snooping() {
 
 # Call checkos to ensure platform is Linux
 checkos
+setup_environment_variables
 
 ## set an initial value
 SSH_BANNER="LINUX BASTION"
