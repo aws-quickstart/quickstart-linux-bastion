@@ -384,7 +384,7 @@ function request_eip() {
     ALLOC=1
     ZERO=0
     INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
-    ASSIGNED=$(aws ec2 describe-addresses --region $REGION --output text | grep $INSTANCE_IP | wc -l)
+    ASSIGNED=$(aws ec2 describe-addresses --region $REGION --output text | grep $'\\t'${INSTANCE_IP}$'\\t' | wc -l)
     if [ "$ASSIGNED" -gt "$ZERO" ]; then
         echo "Already assigned an EIP."
     else
@@ -432,7 +432,7 @@ function request_eip() {
         fi
 
         INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
-        ASSIGNED=$(aws ec2 describe-addresses --region $REGION --output text | grep $INSTANCE_IP | wc -l)
+        ASSIGNED=$(aws ec2 describe-addresses --region $REGION --output text | grep $'\\t'${INSTANCE_IP}$'\\t' | wc -l)
         if [ "$ASSIGNED" -eq 1 ]; then
             echo "EIP successfully assigned."
         else
@@ -442,7 +442,7 @@ function request_eip() {
                 sleep 3
                 request_eip
                 INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
-                ASSIGNED=$(aws ec2 describe-addresses --region $REGION --output text | grep $INSTANCE_IP | wc -l)
+                ASSIGNED=$(aws ec2 describe-addresses --region $REGION --output text | grep $'\\t'${INSTANCE_IP}$'\\t' | wc -l)
             done
         fi
     fi
@@ -458,7 +458,7 @@ function _query_public_v4_ips() {
 function call_request_eip() {
     ZERO=0
     INSTANCE_IP=`ifconfig -a | grep inet | awk {'print $2'} | sed 's/addr://g' | head -1`
-    ASSIGNED=$(aws ec2 describe-addresses --region $REGION --output text | grep $INSTANCE_IP | wc -l)
+    ASSIGNED=$(aws ec2 describe-addresses --region $REGION --output text | grep $'\\t'${INSTANCE_IP}$'\\t' | wc -l)
     if [ "$ASSIGNED" -gt 0 ]; then
         echo "Already assigned an EIP."
     else
