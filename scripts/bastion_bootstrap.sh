@@ -27,14 +27,14 @@ function setup_environment_variables() {
 
   ETH0_MAC=$(/sbin/ip link show dev eth0 | /bin/egrep -o -i 'link/ether\ ([0-9a-z]{2}:){5}[0-9a-z]{2}' | /bin/sed -e 's,link/ether\ ,,g')
 
-  _userdata=$(curl http://169.254.169.254/latest/user-data/)
+  _userdata_file="/var/lib/cloud/instance/user-data.txt"
 
   INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
-  EIP_LIST=$(echo ${_userdata} | grep EIP_LIST | sed -e 's/EIP_LIST=//g' -e 's/\"//g')
+  EIP_LIST=$(grep EIP_LIST ${_userdata_file} | sed -e 's/EIP_LIST=//g' -e 's/\"//g')
 
   LOCAL_IP_ADDRESS=$(curl -sq 169.254.169.254/latest/meta-data/network/interfaces/macs/${ETH0_MAC}/local-ipv4s/)
 
-  CWG=$(echo ${_userdata} | grep CLOUDWATCHGROUP | sed 's/CLOUDWATCHGROUP=//g')
+  CWG=$(grep CLOUDWATCHGROUP ${_userdata_file} | sed 's/CLOUDWATCHGROUP=//g')
 
   # LOGGING CONFIGURATION
   BASTION_MNT="/var/log/bastion"
@@ -387,18 +387,27 @@ function request_eip() {
 
     # Is the already-assigned Public IP an elastic IP?
     _query_assigned_public_ip
-    _determine_eip_assocation_status ${PUBLIC_IP_ADDRESS}
-    if [[ $? -ne 1 ]]; then
+    _determine_eip_assc_status ${PUBLIC_IP_ADDRESS}
+
+    # This must return false.
+    if [[ ${_eip_associated} -ne 1 ]]; then
       echo "The Public IP address associated with eth0 (${PUBLIC_IP_ADDRESS}) is already an Elastic IP. Not proceeding further."
       exit 1
     fi
+
     EIP_ARRAY=(${EIP_LIST//,/ })
     _eip_assigned_count=0
 
     for eip in "${EIP_ARRAY[@]}"; do
+
+      if [ "${eip}" == "Null" ]; then
+        echo "Detected a NULL Value, moving on."
+        continue
+      fi
+
       # Determine if the EIP has already been assigned.
-      _determine_eip_assocation_status ${eip}
-      if [[ $? -eq 0 ]]; then
+      _determine_eip_assc_status ${eip}
+      if [[ ${_eip_associated} -eq 0 ]]; then
         echo "Elastic IP [${eip}] already has an association. Moving on."
         let _eip_assigned_count+=1
         if [ "${_eip_assigned_count}" -eq "${#EIP_ARRAY[@]}" ]; then
@@ -410,9 +419,13 @@ function request_eip() {
 
       _determine_eip_allocation ${eip}
 
-      # Attempt to assign it to the ENI.
+      # Attempt to assign EIP to the ENI.
+      set +e
       aws ec2 associate-address --instance-id ${INSTANCE_ID} --allocation-id  ${eip_allocation} --region ${REGION}
-      if [ $? -ne 0 ]; then
+      rc=$?
+      set -e
+
+      if [ ${rc} -ne 0 ]; then
         let _eip_assigned_count+=1
         continue
       else
@@ -426,18 +439,29 @@ function request_eip() {
 function _query_assigned_public_ip() {
   # Note: ETH0 Only.
   # - Does not distinquish between EIP and Standard IP. Need to cross-ref later.
+  echo "Querying the assigned public IP"
   PUBLIC_IP_ADDRESS=$(curl -sq 169.254.169.254/latest/meta-data/public-ipv4/${ETH0_MAC}/public-ipv4s/)
 }
 
-function _determine_eip_assocation_status(){
-  aws ec2 describe-addresses --public-ips ${1} --output text --region ${REGION}  | grep -o -i eipassoc -q
-  if [[ $? -eq 0 ]]; then
-    return 0
+function _determine_eip_assc_status(){
+  # Is the provided EIP associated?
+  # Also determines if an IP is an EIP.
+  # 0 => true
+  # 1 => false
+  echo "Determining EIP Association Status for [${1}]"
+  set +e
+  aws ec2 describe-addresses --public-ips ${1} --output text --region ${REGION} 2>/dev/null  | grep -o -i eipassoc -q
+  rc=$?
+  set -e
+  if [[ ${rc} -eq 1 ]]; then
+    _eip_associated=1
+  else
+    _eip_associated=0
   fi
-  return 1
 }
 
 function _determine_eip_allocation(){
+  echo "Determining EIP Allocation for [${1}]"
   eip_allocation=$(aws ec2 describe-addresses --public-ips ${1} --output text --region ${REGION}| egrep 'eipalloc-([a-z0-9]{8})' -o)
 }
 
