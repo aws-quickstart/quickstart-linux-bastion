@@ -403,8 +403,11 @@ function request_eip() {
 
     for eip in "${EIP_ARRAY[@]}"; do
       # Determine if the EIP has already been assigned.
-      _status=$(_determine_eip_assocation_status ${eip})
-      if [[ ${_status} == "yes" ]]; then
+      set +e
+      _determine_eip_assocation_status ${eip}
+      rc=$?
+      set -e
+      if [[ $? -eq 0 ]]; then
         echo "Elastic IP [${eip}] already has an association. Moving on."
         let _eip_assigned_count+=1
         if [ "${_eip_assigned_count}" -eq "${#EIP_ARRAY[@]}" ]; then
