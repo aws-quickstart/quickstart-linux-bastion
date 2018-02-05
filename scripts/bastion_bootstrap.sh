@@ -387,10 +387,13 @@ function request_eip() {
 
     # Is the already-assigned Public IP an elastic IP?
     _query_assigned_public_ip
-    _determine_eip_assc_status ${PUBLIC_IP_ADDRESS}
+    
+    set +e
+    _determine_eip_assocation_status ${PUBLIC_IP_ADDRESS}
+    rc=$?
+    set -e
 
-    # This must return false.
-    if [[ ${_eip_associated} -ne 1 ]]; then
+    if [[ ${rc} -ne 1 ]]; then
       echo "The Public IP address associated with eth0 (${PUBLIC_IP_ADDRESS}) is already an Elastic IP. Not proceeding further."
       exit 1
     fi
@@ -406,8 +409,11 @@ function request_eip() {
       fi
 
       # Determine if the EIP has already been assigned.
-      _determine_eip_assc_status ${eip}
-      if [[ ${_eip_associated} -eq 0 ]]; then
+      set +e
+      _determine_eip_assocation_status ${eip}
+      rc=$?
+      set -e
+      if [[ $? -eq 0 ]]; then
         echo "Elastic IP [${eip}] already has an association. Moving on."
         let _eip_assigned_count+=1
         if [ "${_eip_assigned_count}" -eq "${#EIP_ARRAY[@]}" ]; then
@@ -422,10 +428,12 @@ function request_eip() {
       # Attempt to assign EIP to the ENI.
       set +e
       aws ec2 associate-address --instance-id ${INSTANCE_ID} --allocation-id  ${eip_allocation} --region ${REGION}
+
       rc=$?
       set -e
 
       if [ ${rc} -ne 0 ]; then
+
         let _eip_assigned_count+=1
         continue
       else
@@ -458,6 +466,7 @@ function _determine_eip_assc_status(){
   else
     _eip_associated=0
   fi
+
 }
 
 function _determine_eip_allocation(){
