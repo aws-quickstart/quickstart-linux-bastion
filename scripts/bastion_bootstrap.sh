@@ -387,13 +387,12 @@ function request_eip() {
 
     # Is the already-assigned Public IP an elastic IP?
     _query_assigned_public_ip
-    
+
     set +e
-    _determine_eip_assocation_status ${PUBLIC_IP_ADDRESS}
-    rc=$?
+    _determine_eip_assc_status ${PUBLIC_IP_ADDRESS}
     set -e
 
-    if [[ ${rc} -ne 1 ]]; then
+    if [[ ${_eip_associated} -ne 1 ]]; then
       echo "The Public IP address associated with eth0 (${PUBLIC_IP_ADDRESS}) is already an Elastic IP. Not proceeding further."
       exit 1
     fi
@@ -410,10 +409,9 @@ function request_eip() {
 
       # Determine if the EIP has already been assigned.
       set +e
-      _determine_eip_assocation_status ${eip}
-      rc=$?
+      _determine_eip_assc_status ${eip}
       set -e
-      if [[ $? -eq 0 ]]; then
+      if [[ ${_eip_associated} -eq 0 ]]; then
         echo "Elastic IP [${eip}] already has an association. Moving on."
         let _eip_assigned_count+=1
         if [ "${_eip_assigned_count}" -eq "${#EIP_ARRAY[@]}" ]; then
