@@ -309,7 +309,7 @@ EOF
         echo "file = ${BASTION_LOGFILE_SHADOW}" >> /tmp/groupname.txt
         echo "log_group_name = ${CWG}" >> /tmp/groupname.txt
 
-        cat <<EOF >> ~/cloudwatchlog.conf
+        cat <<- 'EOF' >> ~/cloudwatchlog.conf
         [general]
         state_file = /var/awslogs/state/agent-state
         use_gzip_http_content_encoding = true
@@ -321,13 +321,13 @@ EOF
         buffer_duration = 5000
         log_stream_name = {instance_id}
         initial_position = start_of_file
-EOF
+'EOF'
         cat /tmp/groupname.txt >> ~/cloudwatchlog.conf
 
         curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
         chmod +x ./awslogs-agent-setup.py
         ./awslogs-agent-setup.py -n -r ${REGION} -c ~/cloudwatchlog.conf
-        cat << EOF >> /etc/systemd/system/awslogs.service
+        cat <<- 'EOF' >> /etc/systemd/system/awslogs.service
         [Unit]
         Description=The CloudWatch Logs agent
         After=rc-local.service
@@ -342,7 +342,7 @@ EOF
 
         [Install]
         WantedBy=multi-user.target
-EOF
+'EOF'
         service awslogs restart
         chkconfig awslogs on
   else
@@ -354,7 +354,7 @@ EOF
         echo "file = ${BASTION_LOGFILE_SHADOW}" >> /tmp/groupname.txt
         echo "log_group_name = ${CWG}" >> /tmp/groupname.txt
 
-        cat <<EOF >> ~/cloudwatchlog.conf
+        cat <<'EOF' >> ~/cloudwatchlog.conf
         [/var/log/bastion]
         datetime_format = %b %d %H:%M:%S
         buffer_duration = 5000
