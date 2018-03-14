@@ -469,7 +469,7 @@ function _determine_eip_assc_status(){
 
 function _determine_eip_allocation(){
   echo "Determining EIP Allocation for [${1}]"
-  eip_allocation=$(aws ec2 describe-addresses --public-ips ${1} --output text --region ${REGION}| egrep 'eipalloc-([a-z0-9]{17})' -o)
+  eip_allocation=$(aws ec2 describe-addresses --public-ips ${1} --output text --region ${REGION}| egrep 'eipalloc-([a-z0-9]{8})' -o)
 }
 
 function prevent_process_snooping() {
