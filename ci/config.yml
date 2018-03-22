@@ -1,5 +1,5 @@
 global:
-  marketplace-ami: true
+  marketplace-ami: false
   owner: quickstart-eng@amazon.com
   qsname: quickstart-linux-bastion
   regions:
