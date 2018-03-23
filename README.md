@@ -12,5 +12,5 @@ Deployment steps:
   * /templates/linux-bastion.template (to deploy bastion hosts into your existing VPC)
 3. Add AWS services and other applications.
 
-The Quick Start provides parameters that you can set to customize your deployment. For architectural details, best practices, step-by-step instructions, and customization options, see the [deployment guide](https://fwd.aws/R9NRw)
+The Quick Start provides parameters that you can set to customize your deployment. For architectural details, best practices, step-by-step instructions, and customization options, see the [deployment guide](https://fwd.aws/R9NRw).
 
