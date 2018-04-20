@@ -54,6 +54,12 @@ function setup_environment_variables() {
           LOCAL_IP_ADDRESS INSTANCE_ID
 }
 
+function verify_dependencies(){
+  if [[ "a$(which aws)" == "a" ]]; then
+    pip install awscli
+  fi
+  echo "${FUNCNAME[0]} Ended"
+}
 
 function usage() {
     echo "$0 <usage>"
@@ -474,7 +480,7 @@ function _determine_eip_allocation(){
       eip_allocation=$(aws ec2 describe-addresses --public-ips ${1} --output text --region ${REGION}| egrep 'eipalloc-([a-z0-9]{17})' -o)
   else
       eip_allocation=$(aws ec2 describe-addresses --public-ips ${1} --output text --region ${REGION}| egrep 'eipalloc-([a-z0-9]{8})' -o)
-  fi      
+  fi
 }
 
 function prevent_process_snooping() {
@@ -489,6 +495,8 @@ function prevent_process_snooping() {
 
 # Call checkos to ensure platform is Linux
 checkos
+# Verify dependencies are installed.
+verify_dependencies
 # Assuming it is, setup environment variables.
 setup_environment_variables
 
