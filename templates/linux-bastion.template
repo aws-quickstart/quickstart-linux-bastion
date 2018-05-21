@@ -677,6 +677,7 @@
                 }
             },
             "Properties": {
+                "AssociatePublicIpAddress": "true",
                 "KeyName": {
                     "Ref": "KeyPairName"
                 },
