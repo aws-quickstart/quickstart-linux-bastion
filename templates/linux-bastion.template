@@ -31,6 +31,7 @@
                     },
                     "Parameters": [
                         "NumBastionHosts",
+                        "BastionTenancy",
                         "EnableBanner",
                         "BastionBanner",
                         "EnableTCPForwarding",
@@ -50,6 +51,9 @@
             "ParameterLabels": {
                 "BastionAMIOS": {
                     "default": "Bastion AMI Operating System"
+                },
+                "BastionTenancy":{
+                    "default":"Bastion Tenancy"
                 },
                 "BastionBanner": {
                     "default": "Bastion Banner"
@@ -109,6 +113,15 @@
             "Default": "https://aws-quickstart.s3.amazonaws.com/quickstart-linux-bastion/scripts/banner_message.txt",
             "Description": "Banner text to display upon login",
             "Type": "String"
+        },
+        "BastionTenancy": {
+            "Description":"VPC Tenancy to launch the bastion in. Options: 'dedicated' or 'default'",
+            "Type":"String",
+            "Default":"default",
+            "AllowedValues":[
+                "dedicated",
+                "default"
+            ]
         },
         "BastionInstanceType": {
             "AllowedValues": [
@@ -224,7 +237,24 @@
                     "AssertDescription": "All subnets must exist in the VPC"
                 }
             ]
-        }
+        },
+        "DedicatedVPCtoDedicatedBastion":{
+            "RuleCondition":{
+                "Fn::Equals":[
+                    {
+                    "Ref":"VPCTenancy"
+                }, "dedicated"]
+            },
+            "Assertions": [
+                {
+                "Assert":{ "Fn::Equals":[
+                    {"Ref":"BastionTenancy"},
+                    "dedicated"
+                ]},
+                "AssertDescription": "BastionTenancy must be dedicated when VPCTenancy is dedicated."
+                }
+            ]
+         }
     },
     "Mappings": {
         "AWSAMIRegionMap": {
@@ -678,6 +708,9 @@
             },
             "Properties": {
                 "AssociatePublicIpAddress": "true",
+                "PlacementTenancy": {
+                    "Ref":"BastionTenancy"
+                },
                 "KeyName": {
                     "Ref": "KeyPairName"
                 },

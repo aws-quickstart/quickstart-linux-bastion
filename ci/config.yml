@@ -31,3 +31,6 @@ tests:
   us1604hvm:
     parameter_input: linux-bastion-master-us1604hvm.json
     template_file: linux-bastion-master.template
+  amznlinuxhvm_dedicatedtenancy:
+    parameter_input: linux-bastion-master-amznlinuxhvm_dedicatedtenancy.json
+    template_file: linux-bastion-master.template

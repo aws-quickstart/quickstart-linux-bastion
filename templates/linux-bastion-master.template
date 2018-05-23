@@ -15,7 +15,8 @@
                         "PrivateSubnet2CIDR",
                         "PublicSubnet1CIDR",
                         "PublicSubnet2CIDR",
-                        "RemoteAccessCIDR"
+                        "RemoteAccessCIDR",
+                        "VPCTenancy"
                     ]
                 },
                 {
@@ -34,6 +35,7 @@
                     },
                     "Parameters": [
                         "NumBastionHosts",
+                        "BastionTenancy",
                         "EnableBanner",
                         "BastionBanner",
                         "EnableTCPForwarding",
@@ -56,6 +58,9 @@
                 },
                 "BastionAMIOS": {
                     "default": "Bastion AMI Operating System"
+                },
+                "BastionTenancy":{
+                    "default":"Bastion Tenancy"
                 },
                 "BastionBanner": {
                     "default": "Bastion Banner"
@@ -89,6 +94,9 @@
                 },
                 "PublicSubnet2CIDR": {
                     "default": "Public Subnet 2 CIDR"
+                },
+                "VPCTenancy":{
+                    "default": "VPC Tenancy"
                 },
                 "QSS3BucketName": {
                     "default": "Quick Start S3 Bucket Name"
@@ -125,6 +133,15 @@
             "Default": "https://aws-quickstart.s3.amazonaws.com/quickstart-linux-bastion/scripts/banner_message.txt",
             "Description": "Banner text to display upon login",
             "Type": "String"
+        },
+        "BastionTenancy": {
+            "Description":"VPC Tenancy to launch the bastion in. Options: 'dedicated' or 'default'",
+            "Type":"String",
+            "Default":"default",
+            "AllowedValues":[
+                "dedicated",
+                "default"
+            ]
         },
         "BastionInstanceType": {
             "Description": "Amazon EC2 instance type for the bastion instances",
@@ -215,6 +232,15 @@
             "Description": "CIDR Block for the public DMZ subnet 2 located in Availability Zone 2",
             "Type": "String"
         },
+        "VPCTenancy": {
+            "AllowedValues": [
+                "default",
+                "dedicated"
+            ],
+            "Default": "default",
+            "Description": "The allowed tenancy of instances launched into the VPC",
+            "Type": "String"
+        },
         "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
@@ -298,6 +324,9 @@
                     },
                     "VPCCIDR": {
                         "Ref": "VPCCIDR"
+                    },
+                    "VPCTenancy": {
+                        "Ref": "VPCTenancy"
                     }
                 }
             }
