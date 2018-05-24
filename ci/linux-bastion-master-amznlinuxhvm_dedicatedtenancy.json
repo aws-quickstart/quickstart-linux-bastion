@@ -40,7 +40,7 @@
         "ParameterValue": "10.0.0.0/16"
     },
     {
-        "ParameterKey"::"VPCTenancy",
+        "ParameterKey":"VPCTenancy",
         "ParameterValue":"dedicated"
     },
     {
