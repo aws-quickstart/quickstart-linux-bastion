@@ -231,98 +231,98 @@
             "AMI": {
                 "AMZNLINUXHVM": "amzn-ami-hvm-2018.03.0.20180508-x86_64-gp2",
                 "CENTOS7HVM": "CentOS Linux 7 x86_64 HVM EBS ENA 1804_2-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-55a2322a.4",
-                "US1404HVM": "ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20180509",
-                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180509"
+                "US1404HVM": "ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20180522",
+                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180522"
             },
             "ap-northeast-1": {
                 "AMZNLINUXHVM": "ami-92df37ed",
                 "CENTOS7HVM": "ami-3185744e",
-                "US1404HVM": "ami-efec0790",
-                "US1604HVM": "ami-cbb259b4"
+                "US1404HVM": "ami-1450ad6b",
+                "US1604HVM": "ami-48a45937"
             },
             "ap-northeast-2": {
                 "AMZNLINUXHVM": "ami-c10fa6af",
                 "CENTOS7HVM": "ami-46963e28",
-                "US1404HVM": "ami-5b13ba35",
-                "US1604HVM": "ami-191cb577"
+                "US1404HVM": "ami-4000a82e",
+                "US1604HVM": "ami-f030989e"
             },
             "ap-south-1": {
                 "AMZNLINUXHVM": "ami-76d6f519",
                 "CENTOS7HVM": "ami-48301d27",
-                "US1404HVM": "ami-7c8ead13",
-                "US1604HVM": "ami-ff80a390"
+                "US1404HVM": "ami-79c4e816",
+                "US1604HVM": "ami-41e9c52e"
             },
             "ap-southeast-1": {
                 "AMZNLINUXHVM": "ami-de90a5a2",
                 "CENTOS7HVM": "ami-da6151a6",
-                "US1404HVM": "ami-ed102491",
-                "US1604HVM": "ami-d62014aa"
+                "US1404HVM": "ami-c18cbebd",
+                "US1604HVM": "ami-81cefcfd"
             },
             "ap-southeast-2": {
                 "AMZNLINUXHVM": "ami-423bec20",
                 "CENTOS7HVM": "ami-0d13c26f",
-                "US1404HVM": "ami-9d73a4ff",
-                "US1604HVM": "ami-9176a1f3"
+                "US1404HVM": "ami-4c5b8b2e",
+                "US1604HVM": "ami-963cecf4"
             },
             "ca-central-1": {
                 "AMZNLINUXHVM": "ami-338a0a57",
                 "CENTOS7HVM": "ami-456aea21",
-                "US1404HVM": "ami-c29515a6",
-                "US1604HVM": "ami-fe93139a"
+                "US1404HVM": "ami-a32dadc7",
+                "US1604HVM": "ami-7e21a11a"
             },
             "eu-central-1": {
                 "AMZNLINUXHVM": "ami-9a91b371",
                 "CENTOS7HVM": "ami-9a183671",
-                "US1404HVM": "ami-f30f2218",
-                "US1604HVM": "ami-e3381508"
+                "US1404HVM": "ami-2fa58dc4",
+                "US1604HVM": "ami-c7e0c82c"
             },
             "eu-west-1": {
                 "AMZNLINUXHVM": "ami-ca0135b3",
                 "CENTOS7HVM": "ami-4c457735",
-                "US1404HVM": "ami-3342754a",
-                "US1604HVM": "ami-895e69f0"
+                "US1404HVM": "ami-a26d53db",
+                "US1604HVM": "ami-58d7e821"
             },
             "eu-west-2": {
                 "AMZNLINUXHVM": "ami-a36f8dc4",
                 "CENTOS7HVM": "ami-4726cb20",
-                "US1404HVM": "ami-6a4aa80d",
-                "US1604HVM": "ami-3d43a15a"
+                "US1404HVM": "ami-608c6007",
+                "US1604HVM": "ami-5daa463a"
             },
             "eu-west-3": {
                 "AMZNLINUXHVM": "ami-969c2deb",
                 "CENTOS7HVM": "ami-6276c71f",
-                "US1404HVM": "ami-48813035",
-                "US1604HVM": "ami-6f823312"
+                "US1404HVM": "ami-aa53e2d7",
+                "US1604HVM": "ami-1960d164"
             },
             "sa-east-1": {
                 "AMZNLINUXHVM": "ami-3885d854",
                 "CENTOS7HVM": "ami-c2e6baae",
-                "US1404HVM": "ami-7edf8212",
-                "US1604HVM": "ami-05dd8069"
+                "US1404HVM": "ami-b5ecb3d9",
+                "US1604HVM": "ami-67fca30b"
             },
             "us-east-1": {
                 "AMZNLINUXHVM": "ami-14c5486b",
                 "CENTOS7HVM": "ami-d5bf2caa",
-                "US1404HVM": "ami-4004883f",
-                "US1604HVM": "ami-5c66ea23"
+                "US1404HVM": "ami-9f086de0",
+                "US1604HVM": "ami-a4dc46db"
             },
             "us-east-2": {
                 "AMZNLINUXHVM": "ami-922914f7",
                 "CENTOS7HVM": "ami-77724e12",
-                "US1404HVM": "ami-7d132e18",
-                "US1604HVM": "ami-cf172aaa"
+                "US1404HVM": "ami-8df3cfe8",
+                "US1604HVM": "ami-6a003c0f"
             },
             "us-west-1": {
                 "AMZNLINUXHVM": "ami-25110f45",
                 "CENTOS7HVM": "ami-3b89905b",
-                "US1404HVM": "ami-aa203eca",
-                "US1604HVM": "ami-44273924"
+                "US1404HVM": "ami-2cbda54c",
+                "US1604HVM": "ami-8d948ced"
             },
             "us-west-2": {
                 "AMZNLINUXHVM": "ami-e251209a",
                 "CENTOS7HVM": "ami-5490ed2c",
-                "US1404HVM": "ami-5fd8a927",
-                "US1604HVM": "ami-b5ed9ccd"
+                "US1404HVM": "ami-c59ce2bd",
+                "US1604HVM": "ami-db710fa3"
             }
         },
         "LinuxAMINameMap": {
