@@ -202,6 +202,18 @@
         "VPCID": {
             "Description": "ID of the VPC (e.g., vpc-0343606e)",
             "Type": "AWS::EC2::VPC::Id"
+        },
+        "AlternativeInitializationScript": {
+            "AllowedPattern": "^http.*|^$",
+            "ConstraintDescription": "URL must begin with http",
+            "Description": "specify an additional initialization script to run during setup",
+            "Default": "",
+            "Type": "String"
+        },
+        "OSImageOverride": {
+            "Description": "Specify a region specific image to use for the instance",
+            "Type": "String",
+            "Default": ""
         }
     },
     "Rules": {
@@ -388,6 +400,30 @@
                     "Ref": "AWS::Region"
                 },
                 "us-gov-west-1"
+            ]
+        },
+        "UseAlternativeInitialization": {
+            "Fn::Not": [ 
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "AlternativeInitializationScript"
+                        },
+                        ""
+                    ] 
+                }
+            ]
+        },
+        "UseOSImageOverride": {
+            "Fn::Not": [ 
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "OSImageOverride"
+                        },
+                        ""
+                    ] 
+                }
             ]
         }
     },
@@ -626,17 +662,21 @@
                         "files": {
                             "/tmp/bastion_bootstrap.sh": {
                                 "source": {
-                                    "Fn::Sub": [
-                                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh",
-                                        {
-                                            "QSS3Region": {
-                                                "Fn::If": [
-                                                    "GovCloudCondition",
-                                                    "s3-us-gov-west-1",
-                                                    "s3"
-                                                ]
+                                    "Fn::If": [
+                                        "UseAlternativeInitialization",
+                                        { "Ref": "AlternativeInitializationScript"},
+                                        "Fn::Sub": [
+                                            "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh",
+                                            {
+                                                "QSS3Region": {
+                                                    "Fn::If": [
+                                                        "GovCloudCondition",
+                                                        "s3-us-gov-west-1",
+                                                        "s3"
+                                                    ]
+                                                }
                                             }
-                                        }
+                                        ]
                                     ]
                                 },
                                 "mode": "000550",
@@ -685,20 +725,24 @@
                     "Ref": "BastionHostProfile"
                 },
                 "ImageId": {
-                    "Fn::FindInMap": [
-                        "AWSAMIRegionMap",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": [
-                                "LinuxAMINameMap",
-                                {
-                                    "Ref": "BastionAMIOS"
-                                },
-                                "Code"
-                            ]
-                        }
+                    "Fn::If": [
+                        "UseOSImageOverride",
+                        { "Ref": "OSImageOverride" },
+                        "Fn::FindInMap": [
+                            "AWSAMIRegionMap",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            {
+                                "Fn::FindInMap": [
+                                    "LinuxAMINameMap",
+                                    {
+                                        "Ref": "BastionAMIOS"
+                                    },
+                                    "Code"
+                                ]
+                            }
+                        ]
                     ]
                 },
                 "SecurityGroups": [
@@ -715,6 +759,7 @@
                             "",
                             [
                                 "#!/bin/bash\n",
+                                "set -x\n",
                                 "export PATH=$PATH:/usr/local/bin\n",
                                 "which pip &> /dev/null\n",
                                 "if [ $? -ne 0 ] ; then\n",
@@ -765,7 +810,7 @@
                                     "Ref": "BastionMainLogGroup"
                                 },
                                 "\n",
-                                "cfn-init -v --stack ",
+                                "/opt/aws/bin/cfn-init -v --stack ",
                                 {
                                     "Ref": "AWS::StackName"
                                 },
@@ -774,7 +819,7 @@
                                     "Ref": "AWS::Region"
                                 },
                                 "\n",
-                                "cfn-signal -e $? --stack ",
+                                "/opt/aws/bin/cfn-signal -e $? --stack ",
                                 {
                                     "Ref": "AWS::StackName"
                                 },
