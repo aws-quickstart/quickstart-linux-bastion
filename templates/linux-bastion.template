@@ -215,6 +215,18 @@
         "VPCID": {
             "Description": "ID of the VPC (e.g., vpc-0343606e)",
             "Type": "AWS::EC2::VPC::Id"
+        },
+        "AlternativeInitializationScript": {
+            "AllowedPattern": "^http.*|^$",
+            "ConstraintDescription": "URL must begin with http",
+            "Description": "specify an additional initialization script to run during setup",
+            "Default": "",
+            "Type": "String"
+        },
+        "OSImageOverride": {
+            "Description": "Specify a region specific image to use for the instance",
+            "Type": "String",
+            "Default": ""
         }
     },
     "Rules": {
@@ -259,100 +271,100 @@
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "AMZNLINUXHVM": "amzn-ami-hvm-2018.03.0.20180508-x86_64-gp2",
-                "CENTOS7HVM": "CentOS Linux 7 x86_64 HVM EBS ENA 1804_2-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-55a2322a.4",
-                "US1404HVM": "ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20180509",
-                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180509"
+                "AMZNLINUXHVM": "amzn-ami-hvm-2018.03.0.20180622-x86_64-gp2",
+                "CENTOS7HVM": "CentOS Linux 7 x86_64 HVM EBS ENA 1805_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-77ec9308.4",
+                "US1404HVM": "ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20180611",
+                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180627"
             },
             "ap-northeast-1": {
-                "AMZNLINUXHVM": "ami-92df37ed",
-                "CENTOS7HVM": "ami-3185744e",
-                "US1404HVM": "ami-efec0790",
-                "US1604HVM": "ami-cbb259b4"
+                "AMZNLINUXHVM": "ami-9c9443e3",
+                "CENTOS7HVM": "ami-8e8847f1",
+                "US1404HVM": "ami-7a905c05",
+                "US1604HVM": "ami-940cdceb"
             },
             "ap-northeast-2": {
-                "AMZNLINUXHVM": "ami-c10fa6af",
-                "CENTOS7HVM": "ami-46963e28",
-                "US1404HVM": "ami-5b13ba35",
-                "US1604HVM": "ami-191cb577"
+                "AMZNLINUXHVM": "ami-ebc47185",
+                "CENTOS7HVM": "ami-bf9c36d1",
+                "US1404HVM": "ami-3c892352",
+                "US1604HVM": "ami-467acf28"
             },
             "ap-south-1": {
-                "AMZNLINUXHVM": "ami-76d6f519",
-                "CENTOS7HVM": "ami-48301d27",
-                "US1404HVM": "ami-7c8ead13",
-                "US1604HVM": "ami-ff80a390"
+                "AMZNLINUXHVM": "ami-5a8da735",
+                "CENTOS7HVM": "ami-1780a878",
+                "US1404HVM": "ami-f6c1e999",
+                "US1604HVM": "ami-188fba77"
             },
             "ap-southeast-1": {
-                "AMZNLINUXHVM": "ami-de90a5a2",
-                "CENTOS7HVM": "ami-da6151a6",
-                "US1404HVM": "ami-ed102491",
-                "US1604HVM": "ami-d62014aa"
+                "AMZNLINUXHVM": "ami-ed838091",
+                "CENTOS7HVM": "ami-8e0205f2",
+                "US1404HVM": "ami-52e0e42e",
+                "US1604HVM": "ami-51a7aa2d"
             },
             "ap-southeast-2": {
-                "AMZNLINUXHVM": "ami-423bec20",
-                "CENTOS7HVM": "ami-0d13c26f",
-                "US1404HVM": "ami-9d73a4ff",
-                "US1604HVM": "ami-9176a1f3"
+                "AMZNLINUXHVM": "ami-33f92051",
+                "CENTOS7HVM": "ami-d8c21dba",
+                "US1404HVM": "ami-5e954a3c",
+                "US1604HVM": "ami-47c21a25"
             },
             "ca-central-1": {
-                "AMZNLINUXHVM": "ami-338a0a57",
-                "CENTOS7HVM": "ami-456aea21",
-                "US1404HVM": "ami-c29515a6",
-                "US1604HVM": "ami-fe93139a"
+                "AMZNLINUXHVM": "ami-03e86a67",
+                "CENTOS7HVM": "ami-e802818c",
+                "US1404HVM": "ami-2e7bf84a",
+                "US1604HVM": "ami-db9e1cbf"
             },
             "eu-central-1": {
-                "AMZNLINUXHVM": "ami-9a91b371",
-                "CENTOS7HVM": "ami-9a183671",
-                "US1404HVM": "ami-f30f2218",
-                "US1604HVM": "ami-e3381508"
+                "AMZNLINUXHVM": "ami-a058674b",
+                "CENTOS7HVM": "ami-dd3c0f36",
+                "US1404HVM": "ami-39be8ed2",
+                "US1604HVM": "ami-de8fb135"
             },
             "eu-west-1": {
-                "AMZNLINUXHVM": "ami-ca0135b3",
-                "CENTOS7HVM": "ami-4c457735",
-                "US1404HVM": "ami-3342754a",
-                "US1604HVM": "ami-895e69f0"
+                "AMZNLINUXHVM": "ami-e4515e0e",
+                "CENTOS7HVM": "ami-3548444c",
+                "US1404HVM": "ami-cb6964b2",
+                "US1604HVM": "ami-2a7d75c0"
             },
             "eu-west-2": {
-                "AMZNLINUXHVM": "ami-a36f8dc4",
-                "CENTOS7HVM": "ami-4726cb20",
-                "US1404HVM": "ami-6a4aa80d",
-                "US1604HVM": "ami-3d43a15a"
+                "AMZNLINUXHVM": "ami-b2b55cd5",
+                "CENTOS7HVM": "ami-00846a67",
+                "US1404HVM": "ami-7da34d1a",
+                "US1604HVM": "ami-6b3fd60c"
             },
             "eu-west-3": {
-                "AMZNLINUXHVM": "ami-969c2deb",
-                "CENTOS7HVM": "ami-6276c71f",
-                "US1404HVM": "ami-48813035",
-                "US1604HVM": "ami-6f823312"
+                "AMZNLINUXHVM": "ami-d50bbaa8",
+                "CENTOS7HVM": "ami-262e9f5b",
+                "US1404HVM": "ami-5a2b9a27",
+                "US1604HVM": "ami-20ee5e5d"
             },
             "sa-east-1": {
-                "AMZNLINUXHVM": "ami-3885d854",
-                "CENTOS7HVM": "ami-c2e6baae",
-                "US1404HVM": "ami-7edf8212",
-                "US1604HVM": "ami-05dd8069"
+                "AMZNLINUXHVM": "ami-83d58fef",
+                "CENTOS7HVM": "ami-cb5803a7",
+                "US1404HVM": "ami-4d336821",
+                "US1604HVM": "ami-8eecc9e2"
             },
             "us-east-1": {
-                "AMZNLINUXHVM": "ami-14c5486b",
-                "CENTOS7HVM": "ami-d5bf2caa",
-                "US1404HVM": "ami-4004883f",
-                "US1604HVM": "ami-5c66ea23"
+                "AMZNLINUXHVM": "ami-cfe4b2b0",
+                "CENTOS7HVM": "ami-9887c6e7",
+                "US1404HVM": "ami-0d3e7972",
+                "US1604HVM": "ami-759bc50a"
             },
             "us-east-2": {
-                "AMZNLINUXHVM": "ami-922914f7",
-                "CENTOS7HVM": "ami-77724e12",
-                "US1404HVM": "ami-7d132e18",
-                "US1604HVM": "ami-cf172aaa"
+                "AMZNLINUXHVM": "ami-40142d25",
+                "CENTOS7HVM": "ami-9c0638f9",
+                "US1404HVM": "ami-03053b66",
+                "US1604HVM": "ami-5e8bb23b"
             },
             "us-west-1": {
-                "AMZNLINUXHVM": "ami-25110f45",
-                "CENTOS7HVM": "ami-3b89905b",
-                "US1404HVM": "ami-aa203eca",
-                "US1604HVM": "ami-44273924"
+                "AMZNLINUXHVM": "ami-0e86606d",
+                "CENTOS7HVM": "ami-4826c22b",
+                "US1404HVM": "ami-8ae206e9",
+                "US1604HVM": "ami-4aa04129"
             },
             "us-west-2": {
-                "AMZNLINUXHVM": "ami-e251209a",
-                "CENTOS7HVM": "ami-5490ed2c",
-                "US1404HVM": "ami-5fd8a927",
-                "US1604HVM": "ami-b5ed9ccd"
+                "AMZNLINUXHVM": "ami-0ad99772",
+                "CENTOS7HVM": "ami-3ecc8f46",
+                "US1404HVM": "ami-221f5c5a",
+                "US1604HVM": "ami-ba602bc2"
             }
         },
         "LinuxAMINameMap": {
@@ -418,6 +430,30 @@
                     "Ref": "AWS::Region"
                 },
                 "us-gov-west-1"
+            ]
+        },
+        "UseAlternativeInitialization": {
+            "Fn::Not": [ 
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "AlternativeInitializationScript"
+                        },
+                        ""
+                    ] 
+                }
+            ]
+        },
+        "UseOSImageOverride": {
+            "Fn::Not": [ 
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "OSImageOverride"
+                        },
+                        ""
+                    ] 
+                }
             ]
         }
     },
@@ -656,17 +692,21 @@
                         "files": {
                             "/tmp/bastion_bootstrap.sh": {
                                 "source": {
-                                    "Fn::Sub": [
-                                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh",
-                                        {
-                                            "QSS3Region": {
-                                                "Fn::If": [
-                                                    "GovCloudCondition",
-                                                    "s3-us-gov-west-1",
-                                                    "s3"
-                                                ]
+                                    "Fn::If": [
+                                        "UseAlternativeInitialization",
+                                        { "Ref": "AlternativeInitializationScript"},
+                                        "Fn::Sub": [
+                                            "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh",
+                                            {
+                                                "QSS3Region": {
+                                                    "Fn::If": [
+                                                        "GovCloudCondition",
+                                                        "s3-us-gov-west-1",
+                                                        "s3"
+                                                    ]
+                                                }
                                             }
-                                        }
+                                        ]
                                     ]
                                 },
                                 "mode": "000550",
@@ -718,20 +758,24 @@
                     "Ref": "BastionHostProfile"
                 },
                 "ImageId": {
-                    "Fn::FindInMap": [
-                        "AWSAMIRegionMap",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": [
-                                "LinuxAMINameMap",
-                                {
-                                    "Ref": "BastionAMIOS"
-                                },
-                                "Code"
-                            ]
-                        }
+                    "Fn::If": [
+                        "UseOSImageOverride",
+                        { "Ref": "OSImageOverride" },
+                        "Fn::FindInMap": [
+                            "AWSAMIRegionMap",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            {
+                                "Fn::FindInMap": [
+                                    "LinuxAMINameMap",
+                                    {
+                                        "Ref": "BastionAMIOS"
+                                    },
+                                    "Code"
+                                ]
+                            }
+                        ]
                     ]
                 },
                 "SecurityGroups": [
@@ -748,6 +792,7 @@
                             "",
                             [
                                 "#!/bin/bash\n",
+                                "set -x\n",
                                 "export PATH=$PATH:/usr/local/bin\n",
                                 "which pip &> /dev/null\n",
                                 "if [ $? -ne 0 ] ; then\n",
@@ -798,7 +843,7 @@
                                     "Ref": "BastionMainLogGroup"
                                 },
                                 "\n",
-                                "cfn-init -v --stack ",
+                                "/opt/aws/bin/cfn-init -v --stack ",
                                 {
                                     "Ref": "AWS::StackName"
                                 },
@@ -807,7 +852,7 @@
                                     "Ref": "AWS::Region"
                                 },
                                 "\n",
-                                "cfn-signal -e $? --stack ",
+                                "/opt/aws/bin/cfn-signal -e $? --stack ",
                                 {
                                     "Ref": "AWS::StackName"
                                 },
