@@ -13,7 +13,7 @@
     },
     {
         "ParameterKey": "KeyPairName",
-        "ParameterValue": "$[alfred_getkeypair]"
+        "ParameterValue": "override"
     },
     {
         "ParameterKey": "PrivateSubnet1CIDR",
