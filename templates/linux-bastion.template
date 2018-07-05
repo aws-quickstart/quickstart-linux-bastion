@@ -695,7 +695,7 @@
                                     "Fn::If": [
                                         "UseAlternativeInitialization",
                                         { "Ref": "AlternativeInitializationScript"},
-                                        "Fn::Sub": [
+                                        { "Fn::Sub": [
                                             "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh",
                                             {
                                                 "QSS3Region": {
@@ -706,7 +706,7 @@
                                                     ]
                                                 }
                                             }
-                                        ]
+                                        ]}
                                     ]
                                 },
                                 "mode": "000550",
@@ -761,7 +761,7 @@
                     "Fn::If": [
                         "UseOSImageOverride",
                         { "Ref": "OSImageOverride" },
-                        "Fn::FindInMap": [
+                        { "Fn::FindInMap": [
                             "AWSAMIRegionMap",
                             {
                                 "Ref": "AWS::Region"
@@ -775,7 +775,7 @@
                                     "Code"
                                 ]
                             }
-                        ]
+                        ]}
                     ]
                 },
                 "SecurityGroups": [
