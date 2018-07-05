@@ -359,6 +359,9 @@
                     "BastionInstanceType": {
                         "Ref": "BastionInstanceType"
                     },
+                    "BastionTenancy": {
+                      "Ref": "BastionTenancy"
+                    },
                     "EnableBanner": {
                         "Ref": "EnableBanner"
                     },
