@@ -86,7 +86,7 @@ function osrelease () {
     OS=`cat /etc/os-release | grep '^NAME=' |  tr -d \" | sed 's/\n//g' | sed 's/NAME=//g'`
     if [ "${OS}" == "Ubuntu" ]; then
         echo "Ubuntu"
-    elif [ "${OS}" == "Amazon Linux AMI" ]; then
+    elif [ "${OS}" == "Amazon Linux AMI" ] || [ "${OS}" == "Amazon Linux" ]; then
         echo "AMZN"
     elif [ "${OS}" == "CentOS Linux" ]; then
         echo "CentOS"
@@ -197,8 +197,14 @@ EOF
     sed -i.back "s/${TMPREGION}/region = ${REGION}/g" /etc/awslogs/awscli.conf
 
     #Restart awslogs service
-    service awslogs restart
-    chkconfig awslogs on
+    local OS=`cat /etc/os-release | grep '^NAME=' |  tr -d \" | sed 's/\n//g' | sed 's/NAME=//g'`
+    if [ "$OS"  == "Amazon Linux" ]; then # amazon linux 2
+        systemctl start awslogsd.service
+        systemctl enable awslogsd.service
+    else
+        service awslogs restart
+        chkconfig awslogs on
+    fi
 
     #Run security updates
 cat <<'EOF' >> ~/mycron
