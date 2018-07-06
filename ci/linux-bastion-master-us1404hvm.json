@@ -41,7 +41,7 @@
     },
     {
         "ParameterKey":"QSS3BucketName",
-        "ParameterKey":"override"
+        "ParameterValue":"override"
     }
 
 ]
