@@ -12,8 +12,7 @@
                         "VPCID",
                         "PublicSubnet1ID",
                         "PublicSubnet2ID",
-                        "RemoteAccessCIDR",
-                        "VPCTenancy"
+                        "RemoteAccessCIDR"
                     ]
                 },
                 {
@@ -55,9 +54,6 @@
                 },
                 "BastionTenancy": {
                     "default": "Bastion Tenancy"
-                },
-                "VPCTenancy": {
-                  "default":"VPC Tenancy"
                 },
                 "BastionBanner": {
                     "default": "Bastion Banner"
@@ -126,15 +122,6 @@
                 "dedicated",
                 "default"
             ]
-        },
-        "VPCTenancy": {
-          "Description": "VPC Tenancy to launch the bastion in. Options: 'dedicated' or 'default'",
-          "Type": "String",
-          "Default": "default",
-          "AllowedValues": [
-              "dedicated",
-              "default"
-          ]
         },
         "BastionInstanceType": {
             "AllowedValues": [
@@ -260,29 +247,6 @@
                         ]
                     },
                     "AssertDescription": "All subnets must exist in the VPC"
-                }
-            ]
-        },
-        "DedicatedVPCtoDedicatedBastion": {
-            "RuleCondition": {
-                "Fn::Equals": [
-                    {
-                        "Ref": "VPCTenancy"
-                    },
-                    "dedicated"
-                ]
-            },
-            "Assertions": [
-                {
-                    "Assert": {
-                        "Fn::Equals": [
-                            {
-                                "Ref": "BastionTenancy"
-                            },
-                            "dedicated"
-                        ]
-                    },
-                    "AssertDescription": "BastionTenancy must be dedicated when VPCTenancy is dedicated."
                 }
             ]
         }
