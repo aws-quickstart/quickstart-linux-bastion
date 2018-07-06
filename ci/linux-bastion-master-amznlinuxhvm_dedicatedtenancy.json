@@ -46,5 +46,9 @@
     {
         "ParameterKey":"BastionTenancy",
         "ParameterValue":"dedicated"
+    },
+    {
+        "ParameterKey":"QSS3BucketName",
+        "ParameterKey":"override"
     }
 ]
