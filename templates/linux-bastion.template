@@ -12,7 +12,8 @@
                         "VPCID",
                         "PublicSubnet1ID",
                         "PublicSubnet2ID",
-                        "RemoteAccessCIDR"
+                        "RemoteAccessCIDR",
+                        "VPCTenancy"
                     ]
                 },
                 {
@@ -54,6 +55,9 @@
                 },
                 "BastionTenancy": {
                     "default": "Bastion Tenancy"
+                },
+                "VPCTenancy": {
+                  "default":"VPC Tenancy"
                 },
                 "BastionBanner": {
                     "default": "Bastion Banner"
@@ -122,6 +126,15 @@
                 "dedicated",
                 "default"
             ]
+        },
+        "VPCTenancy": {
+          "Description": "VPC Tenancy to launch the bastion in. Options: 'dedicated' or 'default'",
+          "Type": "String",
+          "Default": "default",
+          "AllowedValues": [
+              "dedicated",
+              "default"
+          ]
         },
         "BastionInstanceType": {
             "AllowedValues": [
