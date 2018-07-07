@@ -1,3 +1,4 @@
+
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "This template is intended to be deployed into an existing VPC with two public subnets. It will create an auto-scaling group of Linux bastion instances in the public VPC subnets. **WARNING** This template creates Amazon EC2 instance and related resources. You will be billed for the AWS resources used if you create a stack from this template. QS(0037)",
@@ -834,7 +835,7 @@
                                     "Ref": "BastionMainLogGroup"
                                 },
                                 "\n",
-                                "/opt/aws/bin/cfn-init -v --stack ",
+                                "cfn-init -v --stack ",
                                 {
                                     "Ref": "AWS::StackName"
                                 },
@@ -843,7 +844,7 @@
                                     "Ref": "AWS::Region"
                                 },
                                 "\n",
-                                "/opt/aws/bin/cfn-signal -e $? --stack ",
+                                "cfn-signal -e $? --stack ",
                                 {
                                     "Ref": "AWS::StackName"
                                 },
