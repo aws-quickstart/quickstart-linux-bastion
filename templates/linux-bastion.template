@@ -176,6 +176,7 @@
         },
         "NumBastionHosts": {
             "AllowedValues": [
+                "0",
                 "1",
                 "2",
                 "3",
@@ -367,6 +368,27 @@
         }
     },
     "Conditions": {
+        "1BastionCondition": {
+            "Fn::Or": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "NumBastionHosts"
+                        },
+                        "1"
+                    ]
+                },
+                {
+                    "Condition": "2BastionCondition"
+                },
+                {
+                    "Condition": "3BastionCondition"
+                },
+                {
+                    "Condition": "4BastionCondition"
+                }
+            ]
+        },
         "2BastionCondition": {
             "Fn::Or": [
                 {
@@ -589,6 +611,7 @@
         },
         "EIP1": {
             "Type": "AWS::EC2::EIP",
+            "Condition": "1BastionCondition",
             "Properties": {
                 "Domain": "vpc"
             }
@@ -616,6 +639,7 @@
         },
         "BastionAutoScalingGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "Condition":"1BastionCondition",
             "Properties": {
                 "LaunchConfigurationName": {
                     "Ref": "BastionLaunchConfiguration"
@@ -657,6 +681,7 @@
         },
         "BastionLaunchConfiguration": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "Condition":"1BastionCondition",
             "Metadata": {
                 "AWS::CloudFormation::Authentication": {
                     "S3AccessCreds": {
@@ -889,6 +914,7 @@
     },
     "Outputs": {
         "BastionAutoScalingGroup": {
+            "Condition": "1BastionCondition",
             "Description": "Auto Scaling Group Reference ID",
             "Value": {
                 "Ref": "BastionAutoScalingGroup"
@@ -900,6 +926,7 @@
             }
         },
         "EIP1": {
+            "Condition": "1BastionCondition",
             "Description": "Elastic IP 1 for Bastion",
             "Value": {
                 "Ref": "EIP1"

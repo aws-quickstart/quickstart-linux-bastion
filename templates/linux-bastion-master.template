@@ -195,6 +195,7 @@
         },
         "NumBastionHosts": {
             "AllowedValues": [
+                "0",
                 "1",
                 "2",
                 "3",
@@ -338,17 +339,17 @@
                 "TemplateURL": {
                     "Fn::Sub": [
                         "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}templates/linux-bastion.template",
-                        {
+                            {
                             "QSS3Region": {
                                 "Fn::If": [
-                                    "GovCloudCondition",
-                                    "s3-us-gov-west-1",
-                                    "s3"
-                                ]
+                                        "GovCloudCondition",
+                                        "s3-us-gov-west-1",
+                                        "s3"
+                                    ]
+                                }
                             }
-                        }
-                    ]
-                },
+                        ]
+                    },
                 "Parameters": {
                     "BastionAMIOS": {
                         "Ref": "BastionAMIOS"
