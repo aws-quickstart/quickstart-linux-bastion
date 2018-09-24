@@ -510,7 +510,7 @@ setup_environment_variables
 SSH_BANNER="LINUX BASTION"
 
 # Read the options from cli input
-TEMP=`getopt -o h:  --long help,banner:,enable:,tcp-forwarding:,x11-forwarding: -n $0 -- "$@"`
+TEMP=`getopt -o h:  --long help,banner:,enable:,tcp-forwarding:,ssh-agent-enabled:,x11-forwarding: -n $0 -- "$@"`
 eval set -- "${TEMP}"
 
 
@@ -533,6 +533,10 @@ while true; do
             ;;
         --tcp-forwarding)
             TCP_FORWARDING="$2";
+            shift 2
+            ;;
+        --ssh-agent-enabled)
+            SSH_AGENT="$2";
             shift 2
             ;;
         --x11-forwarding)
@@ -573,15 +577,35 @@ fi
 #Enable/Disable TCP forwarding
 TCP_FORWARDING=`echo "${TCP_FORWARDING}" | sed 's/\\n//g'`
 
+#Enable/Disable SSH Agent forwarding
+SSH_AGENT=`echo "${SSH_AGENT}" | sed 's/\\n//g'`
+
 #Enable/Disable X11 forwarding
 X11_FORWARDING=`echo "${X11_FORWARDING}" | sed 's/\\n//g'`
 
 echo "Value of TCP_FORWARDING - ${TCP_FORWARDING}"
+echo "Value of SSH_AGENT - ${SSH_AGENT}"
 echo "Value of X11_FORWARDING - ${X11_FORWARDING}"
+
 if [[ ${TCP_FORWARDING} == "false" ]];then
     awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
     echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
     harden_ssh_security
+elif [[ ${TCP_FORWARDING} == "true" ]];then
+    awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+    echo "AllowTcpForwarding yes" >> /etc/ssh/sshd_config
+fi
+
+if [[ ${SSH_AGENT} == "false" ]];then
+    awk '!/AllowAgentForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+    echo "AllowAgentForwarding no" >> /etc/ssh/sshd_config
+    awk '!/ForwardAgent/' /etc/ssh/ssh_config > temp && mv temp /etc/ssh/ssh_config
+    echo "ForwardAgent no" >> /etc/ssh/ssh_config
+elif [[ ${SSH_AGENT} == "true" ]];then
+    awk '!/AllowAgentForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+    echo "AllowAgentForwarding yes" >> /etc/ssh/sshd_config
+    awk '!/ForwardAgent/' /etc/ssh/ssh_config > temp && mv temp /etc/ssh/ssh_config
+    echo "ForwardAgent yes" >> /etc/ssh/ssh_config
 fi
 
 if [[ ${X11_FORWARDING} == "false" ]];then
