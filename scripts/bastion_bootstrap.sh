@@ -481,7 +481,7 @@ function _determine_eip_assc_status(){
 
 function _determine_eip_allocation(){
   echo "Determining EIP Allocation for [${1}]"
-  resource_id_length=$(aws ec2 describe-addresses --public-ips ${1} --output text --region ${REGION} | awk {'print $2'} | sed 's/.*eipalloc-//')
+  resource_id_length=$(aws ec2 describe-addresses --public-ips ${1} --output text --region ${REGION} | head -n 1 | awk {'print $2'} | sed 's/.*eipalloc-//')
   if [ "${#resource_id_length}" -eq 17 ]; then
       eip_allocation=$(aws ec2 describe-addresses --public-ips ${1} --output text --region ${REGION}| egrep 'eipalloc-([a-z0-9]{17})' -o)
   else
