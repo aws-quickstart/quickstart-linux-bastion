@@ -219,12 +219,22 @@
         "AlternativeInitializationScript": {
             "AllowedPattern": "^http.*|^$",
             "ConstraintDescription": "URL must begin with http",
-            "Description": "specify an additional initialization script to run during setup",
+            "Description": "specify an alternative initialization script to run during setup",
             "Default": "",
             "Type": "String"
         },
         "OSImageOverride": {
             "Description": "Specify a region specific image to use for the instance",
+            "Type": "String",
+            "Default": ""
+        },
+        "AlternativeIAMRole": {
+            "Description": "specify an existing IAM Role name to attach to the bastion, if left blank a new role will be created.",
+            "Default": "",
+            "Type": "String"
+        },
+        "EnvironmentVariables": {
+            "Description": "Specify a comma separated list of environment variables for use in bootstrapping. Variables must be in the format KEY=VALUE. VALUE cannot contain commas",
             "Type": "String",
             "Default": ""
         }
@@ -427,6 +437,14 @@
                 }
             ]
         },
+        "CreateIAMRole": {
+            "Fn::Equals": [
+                {
+                    "Ref": "AlternativeIAMRole"
+                },
+                ""
+            ]
+        },
         "UseOSImageOverride": {
             "Fn::Not": [
                 {
@@ -471,91 +489,9 @@
             }
         },
         "BastionHostRole": {
+            "Condition": "CreateIAMRole",
             "Type": "AWS::IAM::Role",
             "Properties": {
-                "Policies": [
-                    {
-                        "PolicyDocument": {
-                            "Version": "2012-10-17",
-                            "Statement": [
-                                {
-                                    "Action": [
-                                        "s3:GetObject"
-                                    ],
-                                    "Resource": {
-                                        "Fn::Sub": [
-                                            "arn:${Partition}:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*",
-                                            {
-                                                "Partition": {
-                                                    "Fn::If": [
-                                                        "GovCloudCondition",
-                                                        "aws-us-gov",
-                                                        "aws"
-                                                    ]
-                                                }
-                                            }
-                                        ]
-                                    },
-                                    "Effect": "Allow"
-                                }
-                            ]
-                        },
-                        "PolicyName": "aws-quick-start-s3-policy"
-                    },
-                    {
-                        "PolicyDocument": {
-                            "Version": "2012-10-17",
-                            "Statement": [
-                                {
-                                    "Action": [
-                                        "logs:CreateLogStream",
-                                        "logs:GetLogEvents",
-                                        "logs:PutLogEvents",
-                                        "logs:DescribeLogGroups",
-                                        "logs:DescribeLogStreams",
-                                        "logs:PutRetentionPolicy",
-                                        "logs:PutMetricFilter",
-                                        "logs:CreateLogGroup"
-                                    ],
-                                    "Resource": {
-                                        "Fn::Sub": [
-                                            "arn:${Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*",
-                                            {
-                                                "Partition": {
-                                                    "Fn::If": [
-                                                        "GovCloudCondition",
-                                                        "aws-us-gov",
-                                                        "aws"
-                                                    ]
-                                                }
-                                            }
-                                        ]
-                                    },
-                                    "Effect": "Allow"
-                                }
-                            ]
-                        },
-                        "PolicyName": "bastion-cloudwatch-logs-policy"
-                    },
-                    {
-                        "PolicyDocument": {
-                            "Version": "2012-10-17",
-                            "Statement": [
-                                {
-                                    "Action": [
-                                        "ec2:AssociateAddress",
-                                        "ec2:DescribeAddresses"
-                                    ],
-                                    "Resource": [
-                                        "*"
-                                    ],
-                                    "Effect": "Allow"
-                                }
-                            ]
-                        },
-                        "PolicyName": "bastion-eip-policy"
-                    }
-                ],
                 "Path": "/",
                 "AssumeRolePolicyDocument": {
                     "Statement": [
@@ -575,12 +511,100 @@
                 }
             }
         },
+        "BastionHostPolicy": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": "BastionPolicy",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Action": [
+                                "s3:GetObject"
+                            ],
+                            "Resource": {
+                                "Fn::Sub": [
+                                    "arn:${Partition}:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*",
+                                    {
+                                        "Partition": {
+                                            "Fn::If": [
+                                                "GovCloudCondition",
+                                                "aws-us-gov",
+                                                "aws"
+                                            ]
+                                        }
+                                    }
+                                ]
+                            },
+                            "Effect": "Allow"
+                        },
+                        {
+                            "Action": [
+                                "logs:CreateLogStream",
+                                "logs:GetLogEvents",
+                                "logs:PutLogEvents",
+                                "logs:DescribeLogGroups",
+                                "logs:DescribeLogStreams",
+                                "logs:PutRetentionPolicy",
+                                "logs:PutMetricFilter",
+                                "logs:CreateLogGroup"
+                            ],
+                            "Resource": {
+                                "Fn::Sub": [
+                                    "arn:${Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*",
+                                    {
+                                        "Partition": {
+                                            "Fn::If": [
+                                                "GovCloudCondition",
+                                                "aws-us-gov",
+                                                "aws"
+                                            ]
+                                        }
+                                    }
+                                ]
+                            },
+                            "Effect": "Allow"
+                        },
+                        {
+                            "Action": [
+                                "ec2:AssociateAddress",
+                                "ec2:DescribeAddresses"
+                            ],
+                            "Resource": "*",
+                            "Effect": "Allow"
+                        }
+                    ]
+                },
+                "Roles": [
+                    {
+                        "Fn::If": [
+                            "CreateIAMRole",
+                            {
+                                "Ref": "BastionHostRole"
+                            },
+                            {
+                                "Ref": "AlternativeIAMRole"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
         "BastionHostProfile": {
+            "DependsOn": "BastionHostPolicy",
             "Type": "AWS::IAM::InstanceProfile",
             "Properties": {
                 "Roles": [
                     {
-                        "Ref": "BastionHostRole"
+                        "Fn::If": [
+                            "CreateIAMRole",
+                            {
+                                "Ref": "BastionHostRole"
+                            },
+                            {
+                                "Ref": "AlternativeIAMRole"
+                            }
+                        ]
                     }
                 ],
                 "Path": "/"
@@ -661,7 +685,15 @@
                     "S3AccessCreds": {
                         "type": "S3",
                         "roleName": {
-                            "Ref": "BastionHostRole"
+                            "Fn::If": [
+                                "CreateIAMRole",
+                                {
+                                    "Ref": "BastionHostRole"
+                                },
+                                {
+                                    "Ref": "AlternativeIAMRole"
+                                }
+                            ]
                         },
                         "buckets": [
                             {
@@ -784,6 +816,13 @@
                             [
                                 "#!/bin/bash\n",
                                 "set -x\n",
+                                "for e in $(echo \"",
+                                {
+                                    "Ref": "EnvironmentVariables"
+                                },
+                                "\" | tr ',' ' '); do \n",
+                                "  export $e \n",
+                                "done \n",
                                 "export PATH=$PATH:/usr/local/bin\n",
                                 "which pip &> /dev/null\n",
                                 "if [ $? -ne 0 ] ; then\n",
@@ -964,6 +1003,25 @@
             "Export": {
                 "Name": {
                     "Fn::Sub": "${AWS::StackName}-BastionSecurityGroupID"
+                }
+            }
+        },
+        "BastionHostRole": {
+            "Description": "Bastion IAM Role name",
+            "Value": {
+                "Fn::If": [
+                    "CreateIAMRole",
+                    {
+                        "Ref": "BastionHostRole"
+                    },
+                    {
+                        "Ref": "AlternativeIAMRole"
+                    }
+                ]
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-BastionHostRole"
                 }
             }
         }
