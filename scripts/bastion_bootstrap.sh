@@ -50,7 +50,7 @@ function setup_environment_variables() {
   chmod 770 /tmp/messages
   log_shadow_file_location="${bastion_mnt}/.${bastion_log}"
 
-  export REGION ETHO_MAC EIP_LIST CWG BASTION_MNT BASTION_LOG BASTION_LOGFILE BASTION_LOGFILE_SHADOW \
+  export REGION ETH0_MAC EIP_LIST CWG BASTION_MNT BASTION_LOG BASTION_LOGFILE BASTION_LOGFILE_SHADOW \
           LOCAL_IP_ADDRESS INSTANCE_ID
 }
 
