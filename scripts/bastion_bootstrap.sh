@@ -14,7 +14,7 @@ function checkos () {
     if [[ "${unamestr}" == 'Linux' ]]; then
         platform='linux'
     else
-        echo "[WARNING] This script is not supported on MacOS or freebsd"
+        echo "[WARNING] This script is not supported on MacOS or FreeBSD"
         exit 1
     fi
     echo "${FUNCNAME[0]} Ended"
@@ -73,7 +73,7 @@ function usage() {
 }
 
 function chkstatus () {
-    if [ $? -eq 0 ]
+    if [[ $? -eq 0 ]]
     then
         echo "Script [PASS]"
     else
@@ -84,11 +84,11 @@ function chkstatus () {
 
 function osrelease () {
     OS=`cat /etc/os-release | grep '^NAME=' |  tr -d \" | sed 's/\n//g' | sed 's/NAME=//g'`
-    if [ "${OS}" == "Ubuntu" ]; then
+    if [[ "${OS}" == "Ubuntu" ]]; then
         echo "Ubuntu"
-    elif [ "${OS}" == "Amazon Linux AMI" ] || [ "${OS}" == "Amazon Linux" ]; then
+    elif [[ "${OS}" == "Amazon Linux AMI" ]] || [[ "${OS}" == "Amazon Linux" ]]; then
         echo "AMZN"
-    elif [ "${OS}" == "CentOS Linux" ]; then
+    elif [[ "${OS}" == "CentOS Linux" ]]; then
         echo "CentOS"
     else
         echo "Operating System Not Found"
@@ -114,7 +114,7 @@ export Allow_SSH="ssh"
 export Allow_SCP="scp"
 if [[ -z $SSH_ORIGINAL_COMMAND ]] || [[ $SSH_ORIGINAL_COMMAND =~ ^$Allow_SSH ]] || [[ $SSH_ORIGINAL_COMMAND =~ ^$Allow_SCP ]]; then
 #Allow ssh to instance and log connection
-    if [ -z "$SSH_ORIGINAL_COMMAND" ]; then
+    if [[ -z "$SSH_ORIGINAL_COMMAND" ]]; then
         /bin/bash
         exit 0
     else
@@ -141,7 +141,7 @@ EOF
     chmod a+x /usr/bin/bastion/shell
 
     release=$(osrelease)
-    if [ "${release}" == "CentOS" ]; then
+    if [[ "${release}" == "CentOS" ]]; then
         semanage fcontext -a -t ssh_exec_t /usr/bin/bastion/shell
     fi
 
@@ -198,7 +198,7 @@ EOF
 
     #Restart awslogs service
     local OS=`cat /etc/os-release | grep '^NAME=' |  tr -d \" | sed 's/\n//g' | sed 's/NAME=//g'`
-    if [ "$OS"  == "Amazon Linux" ]; then # amazon linux 2
+    if [[ "$OS"  == "Amazon Linux" ]]; then # amazon linux 2
         systemctl start awslogsd.service
         systemctl enable awslogsd.service
     else
@@ -259,7 +259,7 @@ EOF
 
     #Install Unit file for Ubuntu 16.04
     ubuntu=`cat /etc/os-release | grep VERSION_ID | tr -d \VERSION_ID=\"`
-    if [ "${ubuntu}" == "16.04" ]; then
+    if [[ "${ubuntu}" == "16.04" ]]; then
 cat <<'EOF' >> /etc/systemd/system/awslogs.service
 [Unit]
 Description=The CloudWatch Logs agent
@@ -298,17 +298,17 @@ EOF
 
 function cent_os () {
     echo -e "\nDefaults env_keep += \"SSH_CLIENT\"" >>/etc/sudoers
-    echo -e "#Added by the Linux Bastion Bootstrap\ndeclare -rx IP=$(echo ${SSH_CLIENT} | awk '{print $1}')" >> /etc/bashrc
+    echo -e "#Added by the Linux Bastion Bootstrap\ndeclare -rx IP=\$(echo ${SSH_CLIENT} | awk '{print \$1}')" >> /etc/bashrc
 
-    echo "declare -rx BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
+    echo "declare -rx BASTION_LOG=${BASTION_LOGFILE}" >> /etc/bashrc
 
     cat <<- EOF >> /etc/bashrc
-    declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: $(date)   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+    declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: \$(date)   [FROM]:\${IP}   [USER]:\${USER}   [PWD]:\${PWD}" -s 2>>${BASTION_LOGFILE})'
 EOF
 
     chown root:centos ${BASTION_MNT}
     chown root:centos /usr/bin/script
-    chown root:centos  /var/log/bastion/bastion.log
+    chown root:centos /var/log/bastion/bastion.log
     chmod 770 /var/log/bastion/bastion.log
     touch /tmp/messages
     chown root:centos /tmp/messages
@@ -317,7 +317,7 @@ EOF
 
     # Install CloudWatch Log service on Centos Linux
     centos=`cat /etc/os-release | grep VERSION_ID | tr -d \VERSION_ID=\"`
-    if [ "${centos}" == "7" ]; then
+    if [[ "${centos}" == "7" ]]; then
         echo "file = ${BASTION_LOGFILE_SHADOW}" >> /tmp/groupname.txt
         echo "log_group_name = ${CWG}" >> /tmp/groupname.txt
 
@@ -350,7 +350,7 @@ EOF
         KillMode=process
         TimeoutSec=infinity
         PIDFile=/var/awslogs/state/awslogs.pid
-        ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --pidfile $PIDFILE --user awslogs --chuid awslogs &
+        ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --pidfile $PIDFile --user awslogs --chuid awslogs &
 
         [Install]
         WantedBy=multi-user.target
@@ -404,7 +404,7 @@ function request_eip() {
     _determine_eip_assc_status ${PUBLIC_IP_ADDRESS}
     set -e
 
-    if [[ ${_eip_associated} -ne 1 ]]; then
+    if [[ ${_eip_associated} -eq 0 ]]; then
       echo "The Public IP address associated with eth0 (${PUBLIC_IP_ADDRESS}) is already an Elastic IP. Not proceeding further."
       exit 1
     fi
@@ -414,7 +414,7 @@ function request_eip() {
 
     for eip in "${EIP_ARRAY[@]}"; do
 
-      if [ "${eip}" == "Null" ]; then
+      if [[ "${eip}" == "Null" ]]; then
         echo "Detected a NULL Value, moving on."
         continue
       fi
@@ -426,7 +426,7 @@ function request_eip() {
       if [[ ${_eip_associated} -eq 0 ]]; then
         echo "Elastic IP [${eip}] already has an association. Moving on."
         let _eip_assigned_count+=1
-        if [ "${_eip_assigned_count}" -eq "${#EIP_ARRAY[@]}" ]; then
+        if [[ "${_eip_assigned_count}" -eq "${#EIP_ARRAY[@]}" ]]; then
           echo "All of the stack EIPs have been assigned (${_eip_assigned_count}/${#EIP_ARRAY[@]}). I can't assign anything else. Exiting."
           exit 1
         fi
@@ -442,7 +442,7 @@ function request_eip() {
       rc=$?
       set -e
 
-      if [ ${rc} -ne 0 ]; then
+      if [[ ${rc} -ne 0 ]]; then
 
         let _eip_assigned_count+=1
         continue
@@ -456,7 +456,7 @@ function request_eip() {
 
 function _query_assigned_public_ip() {
   # Note: ETH0 Only.
-  # - Does not distinquish between EIP and Standard IP. Need to cross-ref later.
+  # - Does not distinguish between EIP and Standard IP. Need to cross-ref later.
   echo "Querying the assigned public IP"
   PUBLIC_IP_ADDRESS=$(curl -sq 169.254.169.254/latest/meta-data/public-ipv4/${ETH0_MAC}/public-ipv4s/)
 }
@@ -482,7 +482,7 @@ function _determine_eip_assc_status(){
 function _determine_eip_allocation(){
   echo "Determining EIP Allocation for [${1}]"
   resource_id_length=$(aws ec2 describe-addresses --public-ips ${1} --output text --region ${REGION} | head -n 1 | awk {'print $2'} | sed 's/.*eipalloc-//')
-  if [ "${#resource_id_length}" -eq 17 ]; then
+  if [[ "${#resource_id_length}" -eq 17 ]]; then
       eip_allocation=$(aws ec2 describe-addresses --public-ips ${1} --output text --region ${REGION}| egrep 'eipalloc-([a-z0-9]{17})' -o)
   else
       eip_allocation=$(aws ec2 describe-addresses --public-ips ${1} --output text --region ${REGION}| egrep 'eipalloc-([a-z0-9]{8})' -o)
@@ -510,11 +510,11 @@ setup_environment_variables
 SSH_BANNER="LINUX BASTION"
 
 # Read the options from cli input
-TEMP=`getopt -o h:  --long help,banner:,enable:,tcp-forwarding:,x11-forwarding: -n $0 -- "$@"`
+TEMP=`getopt -o h  --longoptions help,banner:,enable:,tcp-forwarding:,x11-forwarding: -n $0 -- "$@"`
 eval set -- "${TEMP}"
 
 
-if [ $# == 1 ] ; then echo "No input provided! type ($0 --help) to see usage help" >&2 ; exit 1 ; fi
+if [[ $# == 1 ]] ; then echo "No input provided! type ($0 --help) to see usage help" >&2 ; exit 1 ; fi
 
 # extract options and their arguments into variables.
 while true; do
@@ -551,14 +551,14 @@ done
 # BANNER CONFIGURATION
 BANNER_FILE="/etc/ssh_banner"
 if [[ ${ENABLE} == "true" ]];then
-    if [ -z ${BANNER_PATH} ];then
+    if [[ -z ${BANNER_PATH} ]];then
         echo "BANNER_PATH is null skipping ..."
     else
         echo "BANNER_PATH = ${BANNER_PATH}"
         echo "Creating Banner in ${BANNER_FILE}"
         echo "curl  -s ${BANNER_PATH} > ${BANNER_FILE}"
         curl  -s ${BANNER_PATH} > ${BANNER_FILE}
-        if [ ${BANNER_FILE} ] ;then
+        if [[ -e ${BANNER_FILE} ]] ;then
             echo "[INFO] Installing banner ... "
             echo -e "\n Banner ${BANNER_FILE}" >>/etc/ssh/sshd_config
         else
@@ -591,15 +591,15 @@ fi
 
 release=$(osrelease)
 # Ubuntu Linux
-if [ "${release}" == "Ubuntu" ]; then
+if [[ "${release}" == "Ubuntu" ]]; then
     #Call function for Ubuntu
     ubuntu_os
 # AMZN Linux
-elif [ "${release}" == "AMZN" ]; then
+elif [[ "${release}" == "AMZN" ]]; then
     #Call function for AMZN
     amazon_os
 # CentOS Linux
-elif [ "${release}" == "CentOS" ]; then
+elif [[ "${release}" == "CentOS" ]]; then
     #Call function for CentOS
     cent_os
 else
