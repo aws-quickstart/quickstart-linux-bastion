@@ -271,7 +271,7 @@ Restart=always
 KillMode=process
 TimeoutSec=infinity
 PIDFile=/var/awslogs/state/awslogs.pid
-ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --pidfile $PIDFILE --user awslogs --chuid awslogs &
+ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --pidfile \$PIDFile --user awslogs --chuid awslogs &
 
 [Install]
 WantedBy=multi-user.target
@@ -350,7 +350,7 @@ EOF
         KillMode=process
         TimeoutSec=infinity
         PIDFile=/var/awslogs/state/awslogs.pid
-        ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --pidfile $PIDFile --user awslogs --chuid awslogs &
+        ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --pidfile \$PIDFile --user awslogs --chuid awslogs &
 
         [Install]
         WantedBy=multi-user.target
