@@ -298,12 +298,12 @@ EOF
 
 function cent_os () {
     echo -e "\nDefaults env_keep += \"SSH_CLIENT\"" >>/etc/sudoers
-    echo -e "#Added by the Linux Bastion Bootstrap\ndeclare -rx IP=$(echo ${SSH_CLIENT} | awk '{print $1}')" >> /etc/bashrc
+    echo -e "#Added by the Linux Bastion Bootstrap\ndeclare -rx IP=\$(echo \${SSH_CLIENT} | awk '{print \$1}')" >> /etc/bashrc
 
     echo "declare -rx BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
 
     cat <<- EOF >> /etc/bashrc
-    declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: $(date)   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+    declare -rx PROMPT_COMMAND='history -a >(logger -t "[ON]: $(date)   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
 EOF
 
     chown root:centos ${BASTION_MNT}
