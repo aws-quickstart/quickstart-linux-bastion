@@ -48,7 +48,6 @@ function setup_environment_variables() {
   mkdir -p /usr/bin/bastion
   touch /tmp/messages
   chmod 770 /tmp/messages
-  log_shadow_file_location="${bastion_mnt}/.${bastion_log}"
 
   export REGION ETHO_MAC EIP_LIST CWG BASTION_MNT BASTION_LOG BASTION_LOGFILE BASTION_LOGFILE_SHADOW \
           LOCAL_IP_ADDRESS INSTANCE_ID
@@ -120,7 +119,7 @@ if [[ -z $SSH_ORIGINAL_COMMAND ]] || [[ $SSH_ORIGINAL_COMMAND =~ ^$Allow_SSH ]] 
     else
         $SSH_ORIGINAL_COMMAND
     fi
-
+log_shadow_file_location="${bastion_mnt}/.${bastion_log}"
 log_file=`echo "$log_shadow_file_location"`
 DATE_TIME_WHOAMI="`whoami`:`date "+%Y-%m-%d %H:%M:%S"`"
 LOG_ORIGINAL_COMMAND=`echo "$DATE_TIME_WHOAMI:$SSH_ORIGINAL_COMMAND"`
