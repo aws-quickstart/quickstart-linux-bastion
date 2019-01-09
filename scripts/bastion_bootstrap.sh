@@ -44,13 +44,14 @@ function setup_environment_variables() {
   BASTION_LOGFILE="${BASTION_MNT}/${BASTION_LOG}"
   BASTION_LOGFILE_SHADOW="${BASTION_MNT}/.${BASTION_LOG}"
   touch ${BASTION_LOGFILE}
-  ln ${BASTION_LOGFILE} ${BASTION_LOGFILE_SHADOW}
+  if ! [ -L "$BASTION_LOGFILE_SHADOW" ]; then
+    ln ${BASTION_LOGFILE} ${BASTION_LOGFILE_SHADOW}
+  fi
   mkdir -p /usr/bin/bastion
   touch /tmp/messages
   chmod 770 /tmp/messages
-  log_shadow_file_location="${bastion_mnt}/.${bastion_log}"
 
-  export REGION ETHO_MAC EIP_LIST CWG BASTION_MNT BASTION_LOG BASTION_LOGFILE BASTION_LOGFILE_SHADOW \
+  export REGION ETH0_MAC EIP_LIST CWG BASTION_MNT BASTION_LOG BASTION_LOGFILE BASTION_LOGFILE_SHADOW \
           LOCAL_IP_ADDRESS INSTANCE_ID
 }
 
@@ -120,7 +121,7 @@ if [[ -z $SSH_ORIGINAL_COMMAND ]] || [[ $SSH_ORIGINAL_COMMAND =~ ^$Allow_SSH ]] 
     else
         $SSH_ORIGINAL_COMMAND
     fi
-
+log_shadow_file_location="${bastion_mnt}/.${bastion_log}"
 log_file=`echo "$log_shadow_file_location"`
 DATE_TIME_WHOAMI="`whoami`:`date "+%Y-%m-%d %H:%M:%S"`"
 LOG_ORIGINAL_COMMAND=`echo "$DATE_TIME_WHOAMI:$SSH_ORIGINAL_COMMAND"`
@@ -155,13 +156,13 @@ function amazon_os () {
     echo -e "\nDefaults env_keep += \"SSH_CLIENT\"" >>/etc/sudoers
 cat <<'EOF' >> /etc/bashrc
 #Added by linux bastion bootstrap
-declare -rx IP=$(echo $SSH_CLIENT | awk '{print $1}')
+declare -rx IP=\$(echo \$SSH_CLIENT | awk '{print \$1}')
 EOF
 
-    echo " declare -rx BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bashrc
+    echo "declare -rx BASTION_LOG=${BASTION_LOGFILE}" >> /etc/bashrc
 
 cat <<'EOF' >> /etc/bashrc
-declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: $(date)   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "[ON]:\$(date)   [FROM]:\${IP}   [USER]:\${USER}   [PWD]:\${PWD}" -s 2>>\${BASTION_LOG})'
 EOF
     chown root:ec2-user  ${BASTION_MNT}
     chown root:ec2-user  ${BASTION_LOGFILE}
@@ -220,13 +221,13 @@ function ubuntu_os () {
     chown root:ubuntu /usr/bin/script
 cat <<'EOF' >> /etc/bash.bashrc
 #Added by linux bastion bootstrap
-declare -rx IP=$(who am i --ips|awk '{print $5}')
+declare -rx IP=\$(who am i --ips|awk '{print \$5}')
 EOF
 
-    echo " declare -rx BASTION_LOG=${BASTION_MNT}/${BASTION_LOG}" >> /etc/bash.bashrc
+    echo "declare -rx BASTION_LOG=${BASTION_LOGFILE}" >> /etc/bash.bashrc
 
 cat <<'EOF' >> /etc/bash.bashrc
-declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: $(date)   [FROM]:${IP}   [USER]:${USER}   [PWD]:${PWD}" -s 2>>${BASTION_LOG})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "[ON]:\$(date)   [FROM]:\${IP}   [USER]:\${USER}   [PWD]:\${PWD}" -s 2>>\${BASTION_LOG})'
 EOF
     chown root:ubuntu ${BASTION_MNT}
     chown root:ubuntu  ${BASTION_LOGFILE}
@@ -271,7 +272,7 @@ Restart=always
 KillMode=process
 TimeoutSec=infinity
 PIDFile=/var/awslogs/state/awslogs.pid
-ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --pidfile \$PIDFile --user awslogs --chuid awslogs &
+ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --pidfile \$PIDFILE --user awslogs --chuid awslogs &
 
 [Install]
 WantedBy=multi-user.target
@@ -298,12 +299,12 @@ EOF
 
 function cent_os () {
     echo -e "\nDefaults env_keep += \"SSH_CLIENT\"" >>/etc/sudoers
-    echo -e "#Added by the Linux Bastion Bootstrap\ndeclare -rx IP=\$(echo ${SSH_CLIENT} | awk '{print \$1}')" >> /etc/bashrc
+    echo -e "#Added by the Linux Bastion Bootstrap\ndeclare -rx IP=\$(echo \${SSH_CLIENT} | awk '{print \$1}')" >> /etc/bashrc
 
     echo "declare -rx BASTION_LOG=${BASTION_LOGFILE}" >> /etc/bashrc
 
     cat <<- EOF >> /etc/bashrc
-    declare -rx PROMPT_COMMAND='history -a >(logger -t "ON: \$(date)   [FROM]:\${IP}   [USER]:\${USER}   [PWD]:\${PWD}" -s 2>>${BASTION_LOGFILE})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "[ON]:\$(date)   [FROM]:\${IP}   [USER]:\${USER}   [PWD]:\${PWD}" -s 2>>\${BASTION_LOG})'
 EOF
 
     chown root:centos ${BASTION_MNT}
@@ -318,42 +319,42 @@ EOF
     # Install CloudWatch Log service on Centos Linux
     centos=`cat /etc/os-release | grep VERSION_ID | tr -d \VERSION_ID=\"`
     if [[ "${centos}" == "7" ]]; then
-        echo "file = ${BASTION_LOGFILE_SHADOW}" >> /tmp/groupname.txt
-        echo "log_group_name = ${CWG}" >> /tmp/groupname.txt
 
         cat <<EOF >> ~/cloudwatchlog.conf
-        [general]
-        state_file = /var/awslogs/state/agent-state
-        use_gzip_http_content_encoding = true
-        logging_config_file = /var/awslogs/etc/awslogs.conf
+[general]
+state_file = /var/awslogs/state/agent-state
+use_gzip_http_content_encoding = true
+logging_config_file = /var/awslogs/etc/awslogs.conf
 
-        [/var/log/bastion]
-        datetime_format = %Y-%m-%d %H:%M:%S
-        file = /var/log/messages
-        buffer_duration = 5000
-        log_stream_name = {instance_id}
-        initial_position = start_of_file
+[/var/log/bastion]
+datetime_format = %Y-%m-%d %H:%M:%S
+time_zone = UTC
+file = ${BASTION_LOGFILE_SHADOW}
+buffer_duration = 5000
+log_group_name = ${CWG}
+log_stream_name = {instance_id}
+initial_position = start_of_file
 EOF
         cat /tmp/groupname.txt >> ~/cloudwatchlog.conf
 
         curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
         chmod +x ./awslogs-agent-setup.py
-        ./awslogs-agent-setup.py -n -r ${REGION} -c ~/cloudwatchlog.conf
+        ./awslogs-agent-setup.py -n -r ${REGION} -c ~/cloudwatchlog.conf --no-proxy 169.254.169.254
         cat << EOF >> /etc/systemd/system/awslogs.service
-        [Unit]
-        Description=The CloudWatch Logs agent
-        After=rc-local.service
+[Unit]
+Description=The CloudWatch Logs agent
+After=rc-local.service
 
-        [Service]
-        Type=simple
-        Restart=always
-        KillMode=process
-        TimeoutSec=infinity
-        PIDFile=/var/awslogs/state/awslogs.pid
-        ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --pidfile \$PIDFile --user awslogs --chuid awslogs &
+[Service]
+Type=simple
+Restart=always
+KillMode=process
+TimeoutSec=infinity
+PIDFile=/var/awslogs/state/awslogs.pid
+ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --pidfile \$PIDFILE --user awslogs --chuid awslogs &
 
-        [Install]
-        WantedBy=multi-user.target
+[Install]
+WantedBy=multi-user.target
 EOF
         service awslogs restart
         chkconfig awslogs on
@@ -510,7 +511,7 @@ setup_environment_variables
 SSH_BANNER="LINUX BASTION"
 
 # Read the options from cli input
-TEMP=`getopt -o h  --longoptions help,banner:,enable:,tcp-forwarding:,x11-forwarding: -n $0 -- "$@"`
+TEMP=`getopt -o h --longoptions help,banner:,enable:,tcp-forwarding:,x11-forwarding: -n $0 -- "$@"`
 eval set -- "${TEMP}"
 
 
