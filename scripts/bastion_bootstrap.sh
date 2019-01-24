@@ -21,45 +21,45 @@ function checkos () {
 }
 
 function setup_environment_variables() {
-  REGION=$(curl -sq http://169.254.169.254/latest/meta-data/placement/availability-zone/)
-    #ex: us-east-1a => us-east-1
-  REGION=${REGION: :-1}
+    REGION=$(curl -sq http://169.254.169.254/latest/meta-data/placement/availability-zone/)
+      #ex: us-east-1a => us-east-1
+    REGION=${REGION: :-1}
 
-  ETH0_MAC=$(/sbin/ip link show dev eth0 | /bin/egrep -o -i 'link/ether\ ([0-9a-z]{2}:){5}[0-9a-z]{2}' | /bin/sed -e 's,link/ether\ ,,g')
+    ETH0_MAC=$(/sbin/ip link show dev eth0 | /bin/egrep -o -i 'link/ether\ ([0-9a-z]{2}:){5}[0-9a-z]{2}' | /bin/sed -e 's,link/ether\ ,,g')
 
-  _userdata_file="/var/lib/cloud/instance/user-data.txt"
+    _userdata_file="/var/lib/cloud/instance/user-data.txt"
 
-  INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
-  EIP_LIST=$(grep EIP_LIST ${_userdata_file} | sed -e 's/EIP_LIST=//g' -e 's/\"//g')
+    INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+    EIP_LIST=$(grep EIP_LIST ${_userdata_file} | sed -e 's/EIP_LIST=//g' -e 's/\"//g')
 
-  LOCAL_IP_ADDRESS=$(curl -sq 169.254.169.254/latest/meta-data/network/interfaces/macs/${ETH0_MAC}/local-ipv4s/)
+    LOCAL_IP_ADDRESS=$(curl -sq 169.254.169.254/latest/meta-data/network/interfaces/macs/${ETH0_MAC}/local-ipv4s/)
 
-  CWG=$(grep CLOUDWATCHGROUP ${_userdata_file} | sed 's/CLOUDWATCHGROUP=//g')
+    CWG=$(grep CLOUDWATCHGROUP ${_userdata_file} | sed 's/CLOUDWATCHGROUP=//g')
 
-  # LOGGING CONFIGURATION
-  BASTION_MNT="/var/log/bastion"
-  BASTION_LOG="bastion.log"
-  echo "Setting up bastion session log in ${BASTION_MNT}/${BASTION_LOG}"
-  mkdir -p ${BASTION_MNT}
-  BASTION_LOGFILE="${BASTION_MNT}/${BASTION_LOG}"
-  BASTION_LOGFILE_SHADOW="${BASTION_MNT}/.${BASTION_LOG}"
-  touch ${BASTION_LOGFILE}
-  if ! [ -L "$BASTION_LOGFILE_SHADOW" ]; then
-    ln ${BASTION_LOGFILE} ${BASTION_LOGFILE_SHADOW}
-  fi
-  mkdir -p /usr/bin/bastion
-  touch /tmp/messages
-  chmod 770 /tmp/messages
+    # LOGGING CONFIGURATION
+    BASTION_MNT="/var/log/bastion"
+    BASTION_LOG="bastion.log"
+    echo "Setting up bastion session log in ${BASTION_MNT}/${BASTION_LOG}"
+    mkdir -p ${BASTION_MNT}
+    BASTION_LOGFILE="${BASTION_MNT}/${BASTION_LOG}"
+    BASTION_LOGFILE_SHADOW="${BASTION_MNT}/.${BASTION_LOG}"
+    touch ${BASTION_LOGFILE}
+    if ! [ -L "$BASTION_LOGFILE_SHADOW" ]; then
+      ln ${BASTION_LOGFILE} ${BASTION_LOGFILE_SHADOW}
+    fi
+    mkdir -p /usr/bin/bastion
+    touch /tmp/messages
+    chmod 770 /tmp/messages
 
-  export REGION ETH0_MAC EIP_LIST CWG BASTION_MNT BASTION_LOG BASTION_LOGFILE BASTION_LOGFILE_SHADOW \
+    export REGION ETH0_MAC EIP_LIST CWG BASTION_MNT BASTION_LOG BASTION_LOGFILE BASTION_LOGFILE_SHADOW \
           LOCAL_IP_ADDRESS INSTANCE_ID
 }
 
 function verify_dependencies(){
-  if [[ "a$(which aws)" == "a" ]]; then
-    pip install awscli
-  fi
-  echo "${FUNCNAME[0]} Ended"
+    if [[ "a$(which aws)" == "a" ]]; then
+      pip install awscli
+    fi
+    echo "${FUNCNAME[0]} Ended"
 }
 
 function usage() {
@@ -91,6 +91,8 @@ function osrelease () {
         echo "AMZN"
     elif [[ "${OS}" == "CentOS Linux" ]]; then
         echo "CentOS"
+    elif [[ "${OS}" == "SLES" ]]; then
+        echo "SLES"
     else
         echo "Operating System Not Found"
     fi
@@ -149,250 +151,113 @@ EOF
     echo "${FUNCNAME[0]} Ended"
 }
 
-function amazon_os () {
+function setup_logs () {
+
     echo "${FUNCNAME[0]} Started"
-    chown root:ec2-user /usr/bin/script
-    service sshd restart
-    echo -e "\nDefaults env_keep += \"SSH_CLIENT\"" >>/etc/sudoers
-cat <<'EOF' >> /etc/bashrc
-#Added by linux bastion bootstrap
-declare -rx IP=\$(echo \$SSH_CLIENT | awk '{print \$1}')
+
+    if [[ "${release}" == "SLES" ]]; then
+        curl 'https://s3.amazonaws.com/amazoncloudwatch-agent/suse/amd64/latest/amazon-cloudwatch-agent.rpm' -O
+        zypper install --allow-unsigned-rpm -y ./amazon-cloudwatch-agent.rpm
+        rm ./amazon-cloudwatch-agent.rpm
+    elif [[ "${release}" == "CentOS" ]]; then
+        curl 'https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm' -O
+        rpm -U ./amazon-cloudwatch-agent.rpm
+        rm ./amazon-cloudwatch-agent.rpm
+    elif [[ "${release}" == "Ubuntu" ]]; then
+        curl 'https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb' -O
+        dpkg -i -E ./amazon-cloudwatch-agent.deb
+        rm ./amazon-cloudwatch-agent.deb
+    elif [[ "${release}" == "AMZN" ]]; then
+        curl 'https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm' -O
+        rpm -U ./amazon-cloudwatch-agent.rpm
+        rm ./amazon-cloudwatch-agent.rpm
+    fi
+
+    cat <<EOF >> /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+{
+    "logs": {
+        "force_flush_interval": 5,
+        "logs_collected": {
+            "files": {
+                "collect_list": [
+                    {
+                        "file_path": "${BASTION_LOGFILE_SHADOW}",
+                        "log_group_name": "${CWG}",
+                        "log_stream_name": "{instance_id}",
+                        "timestamp_format": "%Y-%m-%d %H:%M:%S",
+                        "timezone": "UTC"
+                    }
+                ]
+            }
+        }
+    }
+}
 EOF
 
-    echo "declare -rx BASTION_LOG=${BASTION_LOGFILE}" >> /etc/bashrc
-
-cat <<'EOF' >> /etc/bashrc
-declare -rx PROMPT_COMMAND='history -a >(logger -t "[ON]:\$(date)   [FROM]:\${IP}   [USER]:\${USER}   [PWD]:\${PWD}" -s 2>>\${BASTION_LOG})'
-EOF
-    chown root:ec2-user  ${BASTION_MNT}
-    chown root:ec2-user  ${BASTION_LOGFILE}
-    chown root:ec2-user  ${BASTION_LOGFILE_SHADOW}
-    chmod 662 ${BASTION_LOGFILE}
-    chmod 662 ${BASTION_LOGFILE_SHADOW}
-    chattr +a ${BASTION_LOGFILE}
-    chattr +a ${BASTION_LOGFILE_SHADOW}
-    touch /tmp/messages
-    chown root:ec2-user /tmp/messages
-    #Install CloudWatch Log service on AMZN
-    yum update -y
-    yum install -y awslogs
-    echo "file = ${BASTION_LOGFILE_SHADOW}" >> /tmp/groupname.txt
-    echo "log_group_name = ${CWG}" >> /tmp/groupname.txt
-
-cat <<'EOF' >> ~/cloudwatchlog.conf
-
-[/var/log/bastion]
-datetime_format = %b %d %H:%M:%S
-buffer_duration = 5000
-log_stream_name = {instance_id}
-initial_position = start_of_file
-EOF
-
-    LINE=$(cat -n /etc/awslogs/awslogs.conf | grep '\[\/var\/log\/messages\]' | awk '{print $1}')
-    END_LINE=$(echo $((${LINE}-1)))
-    head -${END_LINE} /etc/awslogs/awslogs.conf > /tmp/awslogs.conf
-    cat /tmp/awslogs.conf > /etc/awslogs/awslogs.conf
-    cat ~/cloudwatchlog.conf >> /etc/awslogs/awslogs.conf
-    cat /tmp/groupname.txt >> /etc/awslogs/awslogs.conf
-    export TMPREGION=$(grep region /etc/awslogs/awscli.conf)
-    sed -i.back "s/${TMPREGION}/region = ${REGION}/g" /etc/awslogs/awscli.conf
-
-    #Restart awslogs service
-    local OS=`cat /etc/os-release | grep '^NAME=' |  tr -d \" | sed 's/\n//g' | sed 's/NAME=//g'`
-    if [[ "$OS"  == "Amazon Linux" ]]; then # amazon linux 2
-        systemctl start awslogsd.service
-        systemctl enable awslogsd.service
+    if [ -x /bin/systemctl ] || [ -x /usr/bin/systemctl ]; then
+        systemctl enable amazon-cloudwatch-agent.service
+        systemctl restart amazon-cloudwatch-agent.service
     else
-        service awslogs restart
-        chkconfig awslogs on
+        start amazon-cloudwatch-agent
     fi
-
-    #Run security updates
-cat <<'EOF' >> ~/mycron
-0 0 * * * yum -y update --security
-EOF
-    crontab ~/mycron
-    rm ~/mycron
-    echo "${FUNCNAME[0]} Ended"
 }
 
-function ubuntu_os () {
-    chown syslog:adm /var/log/bastion
-    chown root:ubuntu /usr/bin/script
-cat <<'EOF' >> /etc/bash.bashrc
-#Added by linux bastion bootstrap
-declare -rx IP=\$(who am i --ips|awk '{print \$5}')
-EOF
+function setup_os () {
 
-    echo "declare -rx BASTION_LOG=${BASTION_LOGFILE}" >> /etc/bash.bashrc
+    echo "${FUNCNAME[0]} Started"
 
-cat <<'EOF' >> /etc/bash.bashrc
-declare -rx PROMPT_COMMAND='history -a >(logger -t "[ON]:\$(date)   [FROM]:\${IP}   [USER]:\${USER}   [PWD]:\${PWD}" -s 2>>\${BASTION_LOG})'
-EOF
-    chown root:ubuntu ${BASTION_MNT}
-    chown root:ubuntu  ${BASTION_LOGFILE}
-    chown root:ubuntu  ${BASTION_LOGFILE_SHADOW}
-    chmod 662 ${BASTION_LOGFILE}
-    chmod 662 ${BASTION_LOGFILE_SHADOW}
-    chattr +a ${BASTION_LOGFILE}
-    chattr +a ${BASTION_LOGFILE_SHADOW}
-    touch /tmp/messages
-    chown root:ubuntu /tmp/messages
-    #Install CloudWatch logs on Ubuntu
-    echo "file = ${BASTION_LOGFILE_SHADOW}" >> /tmp/groupname.txt
-    echo "log_group_name = ${CWG}" >> /tmp/groupname.txt
-
-cat <<'EOF' >> ~/cloudwatchlog.conf
-[general]
-state_file = /var/awslogs/state/agent-state
-
-[/var/log/bastion]
-log_stream_name = {instance_id}
-datetime_format = %b %d %H:%M:%S
-EOF
-    cat /tmp/groupname.txt >> ~/cloudwatchlog.conf
-
-    curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get install -y python
-    chmod +x ./awslogs-agent-setup.py
-    ./awslogs-agent-setup.py -n -r ${REGION} -c ~/cloudwatchlog.conf
-
-    #Install Unit file for Ubuntu 16.04
-    ubuntu=`cat /etc/os-release | grep VERSION_ID | tr -d \VERSION_ID=\"`
-    if [[ "${ubuntu}" == "16.04" ]]; then
-cat <<'EOF' >> /etc/systemd/system/awslogs.service
-[Unit]
-Description=The CloudWatch Logs agent
-After=rc-local.service
-
-[Service]
-Type=simple
-Restart=always
-KillMode=process
-TimeoutSec=infinity
-PIDFile=/var/awslogs/state/awslogs.pid
-ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --pidfile \$PIDFILE --user awslogs --chuid awslogs &
-
-[Install]
-WantedBy=multi-user.target
-EOF
+    if [[ "${release}" == "AMZN" ]] || [[ "${release}" == "CentOS" ]]; then
+        bash_file="/etc/bashrc"
+    else
+        bash_file="/etc/bash.bashrc"
     fi
 
-    #Restart awslogs service
-    service awslogs restart
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get install sysv-rc-conf -y
-    sysv-rc-conf awslogs on
-
-    #Restart SSH
-    service ssh stop
-    service ssh start
-
-    #Run security updates
-    apt-get install unattended-upgrades
-    echo "0 0 * * * unattended-upgrades -d" >> ~/mycron
-    crontab ~/mycron
-    rm ~/mycron
-    echo "${FUNCNAME[0]} Ended"
-}
-
-function cent_os () {
-    echo -e "\nDefaults env_keep += \"SSH_CLIENT\"" >>/etc/sudoers
-    echo -e "#Added by the Linux Bastion Bootstrap\ndeclare -rx IP=\$(echo \${SSH_CLIENT} | awk '{print \$1}')" >> /etc/bashrc
-
-    echo "declare -rx BASTION_LOG=${BASTION_LOGFILE}" >> /etc/bashrc
-
-    cat <<- EOF >> /etc/bashrc
+cat <<EOF >> "${bash_file}"
+#Added by Linux bastion bootstrap
+declare -rx IP=\$(echo \$SSH_CLIENT | awk '{print \$1}')
+declare -rx BASTION_LOG=${BASTION_LOGFILE}
 declare -rx PROMPT_COMMAND='history -a >(logger -t "[ON]:\$(date)   [FROM]:\${IP}   [USER]:\${USER}   [PWD]:\${PWD}" -s 2>>\${BASTION_LOG})'
 EOF
 
-    chown root:centos ${BASTION_MNT}
-    chown root:centos /usr/bin/script
-    chown root:centos /var/log/bastion/bastion.log
-    chmod 770 /var/log/bastion/bastion.log
-    touch /tmp/messages
-    chown root:centos /tmp/messages
-    restorecon -v /etc/ssh/sshd_config
-    /bin/systemctl restart sshd.service
+    echo "Defaults env_keep += \"SSH_CLIENT\"" >> /etc/sudoers
 
-    # Install CloudWatch Log service on Centos Linux
-    centos=`cat /etc/os-release | grep VERSION_ID | tr -d \VERSION_ID=\"`
-    if [[ "${centos}" == "7" ]]; then
-
-        cat <<EOF >> ~/cloudwatchlog.conf
-[general]
-state_file = /var/awslogs/state/agent-state
-use_gzip_http_content_encoding = true
-logging_config_file = /var/awslogs/etc/awslogs.conf
-
-[/var/log/bastion]
-datetime_format = %Y-%m-%d %H:%M:%S
-time_zone = UTC
-file = ${BASTION_LOGFILE_SHADOW}
-buffer_duration = 5000
-log_group_name = ${CWG}
-log_stream_name = {instance_id}
-initial_position = start_of_file
-EOF
-        cat /tmp/groupname.txt >> ~/cloudwatchlog.conf
-
-        curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
-        chmod +x ./awslogs-agent-setup.py
-        ./awslogs-agent-setup.py -n -r ${REGION} -c ~/cloudwatchlog.conf --no-proxy 169.254.169.254
-        cat << EOF >> /etc/systemd/system/awslogs.service
-[Unit]
-Description=The CloudWatch Logs agent
-After=rc-local.service
-
-[Service]
-Type=simple
-Restart=always
-KillMode=process
-TimeoutSec=infinity
-PIDFile=/var/awslogs/state/awslogs.pid
-ExecStart=/var/awslogs/bin/awslogs-agent-launcher.sh --start --background --pidfile \$PIDFILE --user awslogs --chuid awslogs &
-
-[Install]
-WantedBy=multi-user.target
-EOF
-        service awslogs restart
-        chkconfig awslogs on
-  else
-        chown root:centos /var/log/bastion
-        yum update -y
-        yum install -y awslogs
-        export TMPREGION=`cat /etc/awslogs/awscli.conf | grep region`
-        sed -i.back "s/${TMPREGION}/region = ${REGION}/g" /etc/awslogs/awscli.conf
-        echo "file = ${BASTION_LOGFILE_SHADOW}" >> /tmp/groupname.txt
-        echo "log_group_name = ${CWG}" >> /tmp/groupname.txt
-
-        cat <<EOF >> ~/cloudwatchlog.conf
-        [/var/log/bastion]
-        datetime_format = %b %d %H:%M:%S
-        buffer_duration = 5000
-        log_stream_name = {instance_id}
-        initial_position = start_of_file
-EOF
-        export TMPGROUP=`cat /etc/awslogs/awslogs.conf | grep ^log_group_name`
-        export TMPGROUP=`echo ${TMPGROUP} | sed 's/\//\\\\\//g'`
-        sed -i.back "s/${TMPGROUP}/log_group_name = ${CWG}/g" /etc/awslogs/awslogs.conf
-        cat ~/cloudwatchlog.conf >> /etc/awslogs/awslogs.conf
-        cat /tmp/groupname.txt >> /etc/awslogs/awslogs.conf
-        yum install ec2-metadata -y
-        export TMPREGION=`cat /etc/awslogs/awscli.conf | grep region`
-        sed -i.back "s/${TMPREGION}/region = ${REGION}/g" /etc/awslogs/awscli.conf
-        sleep 3
-        service awslogs stop
-        sleep 3
-        service awslogs start
-        chkconfig awslogs on
+    if [[ "${release}" == "Ubuntu" ]]; then
+        user_group="ubuntu"
+    elif [[ "${release}" == "CentOS" ]]; then
+        user_group="centos"
+    elif [[ "${release}" == "SLES" ]]; then
+        user_group="users"
+    else
+        user_group="ec2-user"
     fi
 
-    #Run security updates
-    echo "0 0 * * * yum -y update --security" > ~/mycron
+    chown root:"${user_group}" "${BASTION_MNT}"
+    chown root:"${user_group}" "${BASTION_LOGFILE}"
+    chown root:"${user_group}" "${BASTION_LOGFILE_SHADOW}"
+    chmod 662 "${BASTION_LOGFILE}"
+    chmod 662 "${BASTION_LOGFILE_SHADOW}"
+    chattr +a "${BASTION_LOGFILE}"
+    chattr +a "${BASTION_LOGFILE_SHADOW}"
+    touch /tmp/messages
+    chown root:"${user_group}" /tmp/messages
+
+    if [[ "${release}" == "CentOS" ]]; then
+        restorecon -v /etc/ssh/sshd_config
+        systemctl restart sshd
+    fi
+
+    if [[ "${release}" == "SLES" ]]; then
+        echo "0 0 * * * zypper patch --non-interactive" > ~/mycron
+    elif [[ "${release}" == "Ubuntu" ]]; then
+        apt-get install -y unattended-upgrades
+        echo "0 0 * * * unattended-upgrades -d" > ~/mycron
+    else
+        echo "0 0 * * * yum -y update --security" > ~/mycron
+    fi
+
     crontab ~/mycron
     rm ~/mycron
+
     echo "${FUNCNAME[0]} Ended"
 }
 
@@ -591,21 +456,12 @@ if [[ ${X11_FORWARDING} == "false" ]];then
 fi
 
 release=$(osrelease)
-# Ubuntu Linux
-if [[ "${release}" == "Ubuntu" ]]; then
-    #Call function for Ubuntu
-    ubuntu_os
-# AMZN Linux
-elif [[ "${release}" == "AMZN" ]]; then
-    #Call function for AMZN
-    amazon_os
-# CentOS Linux
-elif [[ "${release}" == "CentOS" ]]; then
-    #Call function for CentOS
-    cent_os
-else
+if [[ "${release}" == "Operating System Not Found" ]]; then
     echo "[ERROR] Unsupported Linux Bastion OS"
     exit 1
+else
+    setup_os
+    setup_logs
 fi
 
 prevent_process_snooping

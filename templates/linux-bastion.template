@@ -103,7 +103,8 @@
                 "Amazon-Linux-HVM",
                 "CentOS-7-HVM",
                 "Ubuntu-Server-14.04-LTS-HVM",
-                "Ubuntu-Server-16.04-LTS-HVM"
+                "Ubuntu-Server-16.04-LTS-HVM",
+                "SUSE-SLES-15-HVM"
             ],
             "Default": "Amazon-Linux-HVM",
             "Description": "The Linux distribution for the AMI to be used for the bastion instances",
@@ -267,97 +268,113 @@
                 "AMZNLINUXHVM": "amzn-ami-hvm-2018.03.0.20181129-x86_64-gp2",
                 "CENTOS7HVM": "CentOS Linux 7 x86_64 HVM EBS ENA 1805_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-77ec9308.4",
                 "US1404HVM": "ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20181022",
-                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20181223"
+                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20181223",
+                "SLES15HVM": "suse-sles-15-v20180816-hvm-ssd-x86_64"
             },
             "ap-northeast-1": {
                 "AMZNLINUXHVM": "ami-00a5245b4816c38e6",
                 "CENTOS7HVM": "ami-8e8847f1",
                 "US1404HVM": "ami-0be9269b44d4b26c1",
-                "US1604HVM": "ami-0d5e82481c5fd4ad5"
+                "US1604HVM": "ami-0d5e82481c5fd4ad5",
+                "SLES15HVM": "ami-09161bc9964f46a98"
             },
             "ap-northeast-2": {
                 "AMZNLINUXHVM": "ami-00dc207f8ba6dc919",
                 "CENTOS7HVM": "ami-bf9c36d1",
                 "US1404HVM": "ami-017332df4b882edd2",
-                "US1604HVM": "ami-0507b772e2c9b8c15"
+                "US1604HVM": "ami-0507b772e2c9b8c15",
+                "SLES15HVM": "ami-04ecb44b7d8e8d354"
             },
             "ap-south-1": {
                 "AMZNLINUXHVM": "ami-0ad42f4f66f6c1cc9",
                 "CENTOS7HVM": "ami-1780a878",
                 "US1404HVM": "ami-09dcf5653a185f5df",
-                "US1604HVM": "ami-0c8810f694cbe10ba"
+                "US1604HVM": "ami-0c8810f694cbe10ba",
+                "SLES15HVM": "ami-025d8258d76079367"
             },
             "ap-southeast-1": {
                 "AMZNLINUXHVM": "ami-05b3bcf7f311194b3",
                 "CENTOS7HVM": "ami-8e0205f2",
                 "US1404HVM": "ami-09592de3725419634",
-                "US1604HVM": "ami-09f2be3a5a5867258"
+                "US1604HVM": "ami-09f2be3a5a5867258",
+                "SLES15HVM": "ami-0920c364049458e86"
             },
             "ap-southeast-2": {
                 "AMZNLINUXHVM": "ami-02fd0b06f06d93dfc",
                 "CENTOS7HVM": "ami-d8c21dba",
                 "US1404HVM": "ami-0d9ca8d416482590e",
-                "US1604HVM": "ami-04978aa3dd8b62cc8"
+                "US1604HVM": "ami-04978aa3dd8b62cc8",
+                "SLES15HVM": "ami-05dff2fbe99ec205f"
             },
             "ca-central-1": {
                 "AMZNLINUXHVM": "ami-07423fb63ea0a0930",
                 "CENTOS7HVM": "ami-e802818c",
                 "US1404HVM": "ami-031b4238707e9edc0",
-                "US1604HVM": "ami-0a851426a8a56bf4b"
+                "US1604HVM": "ami-0a851426a8a56bf4b",
+                "SLES15HVM": "ami-016b2a9a2f0f2a73b"
             },
             "eu-central-1": {
                 "AMZNLINUXHVM": "ami-0cfbf4f6db41068ac",
                 "CENTOS7HVM": "ami-dd3c0f36",
                 "US1404HVM": "ami-02bcc91bbf9535b00",
-                "US1604HVM": "ami-00f3256a9deda4e1b"
+                "US1604HVM": "ami-00f3256a9deda4e1b",
+                "SLES15HVM": "ami-0a1886cf45f944eb1"
             },
             "eu-west-1": {
                 "AMZNLINUXHVM": "ami-08935252a36e25f85",
                 "CENTOS7HVM": "ami-3548444c",
                 "US1404HVM": "ami-02699dba41e68180a",
-                "US1604HVM": "ami-0233bae36f499afe8"
+                "US1604HVM": "ami-0233bae36f499afe8",
+                "SLES15HVM": "ami-050889503ddaec473"
             },
             "eu-west-2": {
                 "AMZNLINUXHVM": "ami-01419b804382064e4",
                 "CENTOS7HVM": "ami-00846a67",
                 "US1404HVM": "ami-024279d2324df257e",
-                "US1604HVM": "ami-03c015fc0026bf4fc"
+                "US1604HVM": "ami-03c015fc0026bf4fc",
+                "SLES15HVM": "ami-0ec5eddd70b0a01a3"
             },
             "eu-west-3": {
                 "AMZNLINUXHVM": "ami-0dd7e7ed60da8fb83",
                 "CENTOS7HVM": "ami-262e9f5b",
                 "US1404HVM": "ami-0b49b417468d0e8d1",
-                "US1604HVM": "ami-0b2985229e9f6bbba"
+                "US1604HVM": "ami-0b2985229e9f6bbba",
+                "SLES15HVM": "ami-01116bee807116ece"
             },
             "sa-east-1": {
                 "AMZNLINUXHVM": "ami-05145e0b28ad8e0b2",
                 "CENTOS7HVM": "ami-cb5803a7",
                 "US1404HVM": "ami-01c858a779ba95305",
-                "US1604HVM": "ami-08a4ba9038d7e8565"
+                "US1604HVM": "ami-08a4ba9038d7e8565",
+                "SLES15HVM": "ami-07a3b03df5feb2954"
             },
             "us-east-1": {
                 "AMZNLINUXHVM": "ami-0080e4c5bc078760e",
                 "CENTOS7HVM": "ami-9887c6e7",
                 "US1404HVM": "ami-05a36d3b9aa4a17ac",
-                "US1604HVM": "ami-03a935aafa6b52b97"
+                "US1604HVM": "ami-03a935aafa6b52b97",
+                "SLES15HVM": "ami-06ea7729e394412c8"
             },
             "us-east-2": {
                 "AMZNLINUXHVM": "ami-0cd3dfa4e37921605",
                 "CENTOS7HVM": "ami-9c0638f9",
                 "US1404HVM": "ami-0970ab4b97fe3a913",
-                "US1604HVM": "ami-00c5e3f4a8dd369e8"
+                "US1604HVM": "ami-00c5e3f4a8dd369e8",
+                "SLES15HVM": "ami-0eb9f58db22854f8f"
             },
             "us-west-1": {
                 "AMZNLINUXHVM": "ami-0ec6517f6edbf8044",
                 "CENTOS7HVM": "ami-4826c22b",
                 "US1404HVM": "ami-056411f6be4840844",
-                "US1604HVM": "ami-0689ca7fe00282a37"
+                "US1604HVM": "ami-0689ca7fe00282a37",
+                "SLES15HVM": "ami-0170f00982ba7732d"
             },
             "us-west-2": {
                 "AMZNLINUXHVM": "ami-01e24be29428c15b2",
                 "CENTOS7HVM": "ami-3ecc8f46",
                 "US1404HVM": "ami-0ea790e761025f9ce",
-                "US1604HVM": "ami-0dbd6cabe4749f197"
+                "US1604HVM": "ami-0dbd6cabe4749f197",
+                "SLES15HVM": "ami-0de02b68de6f5f732"
             }
         },
         "LinuxAMINameMap": {
@@ -372,6 +389,9 @@
             },
             "Ubuntu-Server-16.04-LTS-HVM": {
                 "Code": "US1604HVM"
+            },
+            "SUSE-SLES-15-HVM": {
+                "Code": "SLES15HVM"
             }
         }
     },
@@ -829,6 +849,7 @@
                                 "    echo \"PIP NOT INSTALLED\"\n",
                                 "    [ `which yum` ] && $(yum install -y epel-release; yum install -y python-pip) && echo \"PIP INSTALLED\"\n",
                                 "    [ `which apt-get` ] && apt-get -y update && apt-get -y install python-pip && echo \"PIP INSTALLED\"\n",
+                                "    [ `which zypper` ] && zypper refresh && zypper install -y python-pip && update-alternatives --set easy_install /usr/bin/easy_install-2.7 && echo \"PIP INSTALLED\"\n",
                                 "fi\n",
                                 "pip install --upgrade pip &> /dev/null\n",
                                 "pip install awscli --ignore-installed six &> /dev/null\n",
