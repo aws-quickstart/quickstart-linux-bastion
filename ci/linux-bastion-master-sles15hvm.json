@@ -5,7 +5,7 @@
     },
     {
         "ParameterKey": "BastionAMIOS",
-        "ParameterValue": "Ubuntu-Server-14.04-LTS-HVM"
+        "ParameterValue": "SUSE-SLES-15-HVM"
     },
     {
         "ParameterKey": "BastionInstanceType",
@@ -43,5 +43,4 @@
         "ParameterKey":"QSS3BucketName",
         "ParameterValue":"$[taskcat_autobucket]"
     }
-
 ]

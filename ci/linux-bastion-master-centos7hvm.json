@@ -1,7 +1,7 @@
 [
     {
         "ParameterKey": "AvailabilityZones",
-        "ParameterValue": "$[alfred_getaz_2]"
+        "ParameterValue": "$[taskcat_getaz_2]"
     },
     {
         "ParameterKey": "BastionAMIOS",
@@ -13,7 +13,7 @@
     },
     {
         "ParameterKey": "KeyPairName",
-        "ParameterValue": "override"
+        "ParameterValue": "$[taskcat_getkeypair]"
     },
     {
         "ParameterKey": "PrivateSubnet1CIDR",
@@ -41,7 +41,7 @@
     },
     {
         "ParameterKey":"QSS3BucketName",
-        "ParameterValue":"override"
+        "ParameterValue":"$[taskcat_autobucket]"
     }
 ]
 
