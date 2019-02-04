@@ -39,7 +39,8 @@
                         "EnableBanner",
                         "BastionBanner",
                         "EnableTCPForwarding",
-                        "EnableX11Forwarding"
+                        "EnableX11Forwarding",
+                        "SSHPort"
                     ]
                 },
                 {
@@ -76,6 +77,9 @@
                 },
                 "EnableX11Forwarding": {
                     "default": "Enable X11 Forwarding"
+                },
+                "SSHPort": {
+                    "default": "Port for SSH"
                 },
                 "KeyPairName": {
                     "default": "Key Pair Name"
@@ -188,6 +192,11 @@
                 "true",
                 "false"
             ]
+        },
+        "SSHPort": {
+            "Type": "Number",
+            "Description": "Port used by SSH",
+            "Default": "22"
         },
         "KeyPairName": {
             "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
@@ -370,6 +379,9 @@
                     },
                     "EnableX11Forwarding": {
                         "Ref": "EnableX11Forwarding"
+                    },
+                    "SSHPort": {
+                        "Ref": "SSHPort"
                     },
                     "KeyPairName": {
                         "Ref": "KeyPairName"

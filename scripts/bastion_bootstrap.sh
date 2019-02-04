@@ -70,6 +70,7 @@ function usage() {
     echo -e "--enable \t SSH Banner"
     echo -e "--tcp-forwarding \t Enable or Disable TCP Forwarding"
     echo -e "--x11-forwarding \t Enable or Disable X11 Forwarding"
+    echo -e "--ssh-port \t Use different SSH port"
 }
 
 function chkstatus () {
@@ -539,6 +540,10 @@ while true; do
             X11_FORWARDING="$2";
             shift 2
             ;;
+        --ssh-port)
+            SSH_NEW_PORT="$2";
+            shift 2
+            ;;
         --)
             break
             ;;
@@ -576,8 +581,13 @@ TCP_FORWARDING=`echo "${TCP_FORWARDING}" | sed 's/\\n//g'`
 #Enable/Disable X11 forwarding
 X11_FORWARDING=`echo "${X11_FORWARDING}" | sed 's/\\n//g'`
 
+#Change SSH port from default 22
+SSH_NEW_PORT=`echo "${SSH_NEW_PORT}" | sed 's/\\n//g'`
+
 echo "Value of TCP_FORWARDING - ${TCP_FORWARDING}"
 echo "Value of X11_FORWARDING - ${X11_FORWARDING}"
+echo "Value of SSH_NEW_PORT - ${SSH_NEW_PORT}"
+
 if [[ ${TCP_FORWARDING} == "false" ]];then
     awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
     echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
@@ -587,6 +597,11 @@ fi
 if [[ ${X11_FORWARDING} == "false" ]];then
     awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
     echo "X11Forwarding no" >> /etc/ssh/sshd_config
+fi
+
+if [[ ${SSH_NEW_PORT} != "" ]];then
+    awk '!/Port/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+    echo "Port ${SSH_NEW_PORT}" >> /etc/ssh/sshd_config
 fi
 
 release=$(osrelease)
