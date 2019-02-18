@@ -22,7 +22,8 @@
                     "Parameters": [
                         "KeyPairName",
                         "BastionAMIOS",
-                        "BastionInstanceType"
+                        "BastionInstanceType",
+                        "RootVolumeSize"
                     ]
                 },
                 {
@@ -93,6 +94,9 @@
                 },
                 "VPCID": {
                     "default": "VPC ID"
+                },
+                "RootVolumeSize": {
+                    "default": "Root Volume Size"
                 }
             }
         }
@@ -238,6 +242,11 @@
             "Description": "Specify a comma separated list of environment variables for use in bootstrapping. Variables must be in the format KEY=VALUE. VALUE cannot contain commas",
             "Type": "String",
             "Default": ""
+        },
+        "RootVolumeSize": {
+            "Description": "Specify a size in GB for the root EBS volume",
+            "Type": "Number",
+            "Default": "10"
         }
     },
     "Rules": {
@@ -829,6 +838,18 @@
                 "InstanceType": {
                     "Ref": "BastionInstanceType"
                 },
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/xvda",
+                        "Ebs": {
+                            "VolumeSize": {
+                                "Ref": "RootVolumeSize"
+                            },
+                            "VolumeType": "gp2",
+                            "DeleteOnTermination": "true"
+                        }
+                    }
+                ],
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
