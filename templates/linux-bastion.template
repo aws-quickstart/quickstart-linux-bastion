@@ -501,7 +501,7 @@
                 "MetricTransformations": [
                     {
                         "MetricName": "SSHCommandCount",
-                        "MetricValue": 1,
+                        "MetricValue": "1",
                         "MetricNamespace": {
                             "Fn::Join": [
                                 "/",
@@ -538,11 +538,11 @@
                     ],
                     "Version": "2012-10-17"
                 },
-                {
+                
                     "ManagedPolicyArns": [
                         "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
                     ]
-                }
+                
             }
         },
         "BastionHostPolicy": {
@@ -699,7 +699,7 @@
                     {
                         "Key": "Name",
                         "Value": "LinuxBastion",
-                        "PropagateAtLaunch": "true"
+                        "PropagateAtLaunch": true
                     }
                 ]
             },
@@ -800,7 +800,7 @@
                 }
             },
             "Properties": {
-                "AssociatePublicIpAddress": "true",
+                "AssociatePublicIpAddress": true,
                 "PlacementTenancy": {
                     "Ref": "BastionTenancy"
                 },
@@ -851,7 +851,7 @@
                                 "Ref": "RootVolumeSize"
                             },
                             "VolumeType": "gp2",
-                            "DeleteOnTermination": "true"
+                            "DeleteOnTermination": true
                         }
                     }
                 ],
@@ -954,16 +954,16 @@
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
-                        "FromPort": "22",
-                        "ToPort": "22",
+                        "FromPort": 22,
+                        "ToPort": 22,
                         "CidrIp": {
                             "Ref": "RemoteAccessCIDR"
                         }
                     },
                     {
                         "IpProtocol": "icmp",
-                        "FromPort": "-1",
-                        "ToPort": "-1",
+                        "FromPort": -1,
+                        "ToPort": -1,
                         "CidrIp": {
                             "Ref": "RemoteAccessCIDR"
                         }
