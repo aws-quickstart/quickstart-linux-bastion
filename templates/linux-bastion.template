@@ -77,8 +77,7 @@ Parameters:
     Description: The Linux distribution for the AMI to be used for the bastion instances
     Type: String
   BastionBanner:
-    Default: >-
-      https://aws-quickstart.s3.amazonaws.com/quickstart-linux-bastion/scripts/banner_message.txt
+    Default: https://aws-quickstart.s3.amazonaws.com/quickstart-linux-bastion/scripts/banner_message.txt
     Description: Banner text to display upon login
     Type: String
   BastionTenancy:
@@ -110,8 +109,7 @@ Parameters:
       - 'true'
       - 'false'
     Default: 'false'
-    Description: >-
-      To include a banner to be displayed when connecting via SSH to the
+    Description: To include a banner to be displayed when connecting via SSH to the
       bastion, set this parameter to true
     Type: String
   EnableTCPForwarding:
@@ -129,8 +127,7 @@ Parameters:
       - 'true'
       - 'false'
   KeyPairName:
-    Description: >-
-      Enter a Public/private key pair. If you do not have one in this region,
+    Description: Enter a Public/private key pair. If you do not have one in this region,
       please create it before continuing
     Type: 'AWS::EC2::KeyPair::KeyName'
   NumBastionHosts:
@@ -143,41 +140,34 @@ Parameters:
     Description: Enter the number of bastion hosts to create
     Type: String
   PublicSubnet1ID:
-    Description: >-
-      ID of the public subnet 1 that you want to provision the first bastion
+    Description: ID of the public subnet 1 that you want to provision the first bastion
       into (e.g., subnet-a0246dcd)
     Type: 'AWS::EC2::Subnet::Id'
   PublicSubnet2ID:
-    Description: >-
-      ID of the public subnet 2 you want to provision the second bastion into
+    Description: ID of the public subnet 2 you want to provision the second bastion into
       (e.g., subnet-e3246d8e)
     Type: 'AWS::EC2::Subnet::Id'
   QSS3BucketName:
     AllowedPattern: '^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$'
-    ConstraintDescription: >-
-      Quick Start bucket name can include numbers, lowercase letters, uppercase
+    ConstraintDescription: Quick Start bucket name can include numbers, lowercase letters, uppercase
       letters, and hyphens (-). It cannot start or end with a hyphen (-).
     Default: aws-quickstart
-    Description: >-
-      S3 bucket name for the Quick Start assets. Quick Start bucket name can
+    Description: S3 bucket name for the Quick Start assets. Quick Start bucket name can
       include numbers, lowercase letters, uppercase letters, and hyphens (-). It
       cannot start or end with a hyphen (-).
     Type: String
   QSS3KeyPrefix:
     AllowedPattern: '^([0-9a-zA-Z-.]+/)*$'
-    ConstraintDescription: >-
-      Quick Start key prefix can include numbers, lowercase letters, uppercase
+    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters, uppercase
       letters, hyphens (-), dots (.) and forward slash (/). The prefix should
       end with a forward slash (/).
     Default: quickstart-linux-bastion/
-    Description: >-
-      S3 key prefix for the Quick Start assets. Quick Start key prefix can
+    Description: S3 key prefix for the Quick Start assets. Quick Start key prefix can
       include numbers, lowercase letters, uppercase letters, hyphens (-), dots
       (.) and forward slash (/) and it should end with a forward slash (/).
     Type: String
   RemoteAccessCIDR:
-    AllowedPattern: >-
-      ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x
     Description: Allowed CIDR block for external SSH access to the bastions
     Type: String
@@ -187,7 +177,7 @@ Parameters:
   AlternativeInitializationScript:
     AllowedPattern: ^http.*|^$
     ConstraintDescription: URL must begin with http
-    Description: specify an alternative initialization script to run during setup
+    Description: Specify an alternative initialization script to run during setup
     Default: ''
     Type: String
   OSImageOverride:
@@ -195,14 +185,12 @@ Parameters:
     Type: String
     Default: ''
   AlternativeIAMRole:
-    Description: >-
-      specify an existing IAM Role name to attach to the bastion, if left blank
+    Description: Specify an existing IAM Role name to attach to the bastion, if left blank
       a new role will be created.
     Default: ''
     Type: String
   EnvironmentVariables:
-    Description: >-
-      Specify a comma separated list of environment variables for use in
+    Description: Specify a comma separated list of environment variables for use in
       bootstrapping. Variables must be in the format KEY=VALUE. VALUE cannot
       contain commas
     Type: String
@@ -225,8 +213,7 @@ Mappings:
   AWSAMIRegionMap:
     AMI:
       AMZNLINUXHVM: amzn-ami-hvm-2018.03.0.20181129-x86_64-gp2
-      CENTOS7HVM: >-
-        CentOS Linux 7 x86_64 HVM EBS ENA
+      CENTOS7HVM: CentOS Linux 7 x86_64 HVM EBS ENA
         1805_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-77ec9308.4
       US1404HVM: ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20181022
       US1604HVM: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20181223
@@ -418,8 +405,7 @@ Resources:
               - 'logs:PutMetricFilter'
               - 'logs:CreateLogGroup'
             Resource: !Sub 
-              - >-
-                arn:${Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*
+              - arn:${Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*
               - Partition: !If 
                   - GovCloudCondition
                   - aws-us-gov
@@ -503,8 +489,7 @@ Resources:
                 - UseAlternativeInitialization
                 - !Ref AlternativeInitializationScript
                 - !Sub 
-                  - >-
-                    https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh
+                  - https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh
                   - QSS3Region: !If 
                       - GovCloudCondition
                       - s3-us-gov-west-1
