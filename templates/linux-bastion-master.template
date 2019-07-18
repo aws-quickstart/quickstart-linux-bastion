@@ -1,12 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: >-
-  This template creates a VPC infrastructure for a multi-AZ, multi-tier
-  deployment of a Linux based Application infrastructure. It will deploy a
-  bastion and managed NAT gateways or NAT instances into the public subnet for
-  each Availability Zone. **WARNING** This template creates Amazon EC2 instance
-  and related resources. You will be billed for the AWS resources used if you
-  create a stack from this template.
+Description: Linux Bastion+VPC (Please do not remove)
 Metadata:
+  LICENSE: Apache License, Version 2.0 
   'AWS::CloudFormation::Interface':
     ParameterGroups:
       - Label:

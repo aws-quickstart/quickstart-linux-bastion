@@ -1,11 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: >-
-  This template is intended to be deployed into an existing VPC with two public
-  subnets. It will create an auto-scaling group of Linux bastion instances in
-  the public VPC subnets. **WARNING** This template creates Amazon EC2 instance
-  and related resources. You will be billed for the AWS resources used if you
-  create a stack from this template. QS(0037)
+Description: LinuxBastion+VPC July,18,2019QS (0037) (Please do not remove) 
 Metadata:
+  LICENSE: Apache License, Version 2.0 
   'AWS::CloudFormation::Interface':
     ParameterGroups:
       - Label:
