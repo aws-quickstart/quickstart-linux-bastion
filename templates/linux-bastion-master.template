@@ -255,7 +255,6 @@ Resources:
         VPCCIDR: !Ref VPCCIDR
         VPCTenancy: !Ref VPCTenancy
   BastionStack:
-    DependsOn: VPCStack
     Type: 'AWS::CloudFormation::Stack'
     Properties:
       TemplateURL: !Sub 
