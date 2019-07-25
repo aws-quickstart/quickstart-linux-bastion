@@ -109,6 +109,12 @@ Parameters:
       - t2.small
       - t2.medium
       - t2.large
+      - t3.micro
+      - t3.small
+      - t3.medium
+      - t3.large
+      - t3.xlarge
+      - t3.2xlarge
       - m3.large
       - m3.xlarge
       - m3.2xlarge
