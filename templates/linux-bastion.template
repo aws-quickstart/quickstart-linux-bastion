@@ -546,6 +546,7 @@ Resources:
           Ebs:
             VolumeSize: !Ref RootVolumeSize
             VolumeType: gp2
+            Encrypted: true
             DeleteOnTermination: true
       UserData: !Base64 
         'Fn::Join':
