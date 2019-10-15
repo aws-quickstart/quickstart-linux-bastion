@@ -5,21 +5,21 @@ Metadata:
   'AWS::CloudFormation::Interface':
     ParameterGroups:
       - Label:
-          default: Network Configuration
+          default: Network configuration
         Parameters:
           - VPCID
           - PublicSubnet1ID
           - PublicSubnet2ID
           - RemoteAccessCIDR
       - Label:
-          default: Amazon EC2 Configuration
+          default: Amazon EC2 configuration
         Parameters:
           - KeyPairName
           - BastionAMIOS
           - BastionInstanceType
           - RootVolumeSize
       - Label:
-          default: Linux Bastion Configuration
+          default: Linux bastion configuration
         Parameters:
           - NumBastionHosts
           - BastionTenancy
@@ -28,43 +28,58 @@ Metadata:
           - EnableTCPForwarding
           - EnableX11Forwarding
       - Label:
-          default: AWS Quick Start Configuration
+          default: Alternative configurations
+        Parameters:
+          - AlternativeInitializationScript
+          - OSImageOverride
+          - AlternativeIAMRole
+          - EnvironmentVariables
+      - Label:
+          default: AWS Quick Start configuration
         Parameters:
           - QSS3BucketName
           - QSS3KeyPrefix
     ParameterLabels:
+      AlternativeIAMRole:
+        default: Alternative IAM role
+      AlternativeInitializationScript:
+        default: Alternative initialization script
       BastionAMIOS:
-        default: Bastion AMI Operating System
+        default: Bastion AMI operating system
       BastionTenancy:
-        default: Bastion Tenancy
+        default: Bastion tenancy
       BastionBanner:
-        default: Bastion Banner
+        default: Banner text
       BastionInstanceType:
-        default: Bastion Instance Type
+        default: Bastion instance type
       EnableBanner:
-        default: Enable Banner
+        default: Bastion banner
       EnableTCPForwarding:
-        default: Enable TCP Forwarding
+        default: TCP forwarding
       EnableX11Forwarding:
-        default: Enable X11 Forwarding
+        default: X11 forwarding
+      EnvironmentVariables:
+        default: Environment variables
       KeyPairName:
-        default: Key Pair Name
+        default: Key pair name
       NumBastionHosts:
-        default: Number of Bastion Hosts
+        default: Number of bastion hosts
+      OSImageOverride:
+        default: Operating system override
       PublicSubnet1ID:
-        default: Public Subnet 1 ID
+        default: Public subnet 1 ID
       PublicSubnet2ID:
-        default: Public Subnet 2 ID
+        default: Public subnet 2 ID
       QSS3BucketName:
-        default: Quick Start S3 Bucket Name
+        default: Quick Start S3 bucket name
       QSS3KeyPrefix:
-        default: Quick Start S3 Key Prefix
+        default: Quick Start S3 key prefix
       RemoteAccessCIDR:
-        default: Allowed Bastion External Access CIDR
+        default: Allowed bastion external access CIDR
       VPCID:
         default: VPC ID
       RootVolumeSize:
-        default: Root Volume Size
+        default: Root volume size
 Parameters:
   BastionAMIOS:
     AllowedValues:
@@ -74,14 +89,14 @@ Parameters:
       - Ubuntu-Server-16.04-LTS-HVM
       - SUSE-SLES-15-HVM
     Default: Amazon-Linux-HVM
-    Description: The Linux distribution for the AMI to be used for the bastion instances
+    Description: The Linux distribution for the AMI to be used for the bastion instances.
     Type: String
   BastionBanner:
     Default: https://aws-quickstart.s3.amazonaws.com/quickstart-linux-bastion/scripts/banner_message.txt
-    Description: Banner text to display upon login
+    Description: Banner text to display upon login.
     Type: String
   BastionTenancy:
-    Description: 'VPC Tenancy to launch the bastion in. Options: ''dedicated'' or ''default'''
+    Description: 'VPC tenancy to launch the bastion in. Options: ''dedicated'' or ''default'''
     Type: String
     Default: default
     AllowedValues:
@@ -108,7 +123,7 @@ Parameters:
       - m4.2xlarge
       - m4.4xlarge
     Default: t2.micro
-    Description: Amazon EC2 instance type for the bastion instances
+    Description: Amazon EC2 instance type for the bastion instances.
     Type: String
   EnableBanner:
     AllowedValues:
@@ -116,25 +131,25 @@ Parameters:
       - 'false'
     Default: 'false'
     Description: To include a banner to be displayed when connecting via SSH to the
-      bastion, set this parameter to true
+      bastion, choose true.
     Type: String
   EnableTCPForwarding:
     Type: String
-    Description: Enable/Disable TCP Forwarding
+    Description: To enable TCP forwarding, choose true.
     Default: 'false'
     AllowedValues:
       - 'true'
       - 'false'
   EnableX11Forwarding:
     Type: String
-    Description: Enable/Disable X11 Forwarding
+    Description: To enable X11 forwarding, choose true.
     Default: 'false'
     AllowedValues:
       - 'true'
       - 'false'
   KeyPairName:
-    Description: Enter a Public/private key pair. If you do not have one in this region,
-      please create it before continuing
+    Description: Name of an existing public/private key pair. If you do not have one in this AWS Region,
+      please create it before continuing.
     Type: 'AWS::EC2::KeyPair::KeyName'
   NumBastionHosts:
     AllowedValues:
@@ -143,15 +158,15 @@ Parameters:
       - '3'
       - '4'
     Default: '1'
-    Description: Enter the number of bastion hosts to create
+    Description: The number of bastion hosts to create. The maximum number is four.
     Type: String
   PublicSubnet1ID:
     Description: ID of the public subnet 1 that you want to provision the first bastion
-      into (e.g., subnet-a0246dcd)
+      into (e.g., subnet-a0246dcd).
     Type: 'AWS::EC2::Subnet::Id'
   PublicSubnet2ID:
-    Description: ID of the public subnet 2 you want to provision the second bastion into
-      (e.g., subnet-e3246d8e)
+    Description: ID of the public subnet 2 that you want to provision the second bastion into
+      (e.g., subnet-e3246d8e).
     Type: 'AWS::EC2::Subnet::Id'
   QSS3BucketName:
     AllowedPattern: '^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$'
@@ -175,34 +190,34 @@ Parameters:
   RemoteAccessCIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x
-    Description: Allowed CIDR block for external SSH access to the bastions
+    Description: Allowed CIDR block for external SSH access to the bastions.
     Type: String
   VPCID:
-    Description: 'ID of the VPC (e.g., vpc-0343606e)'
+    Description: 'ID of the VPC (e.g., vpc-0343606e).'
     Type: 'AWS::EC2::VPC::Id'
   AlternativeInitializationScript:
     AllowedPattern: ^http.*|^$
     ConstraintDescription: URL must begin with http
-    Description: Specify an alternative initialization script to run during setup
+    Description: An alternative initialization script to run during setup.
     Default: ''
     Type: String
   OSImageOverride:
-    Description: Specify a region specific image to use for the instance
+    Description: The Region-specific image to use for the instance.
     Type: String
     Default: ''
   AlternativeIAMRole:
-    Description: Specify an existing IAM Role name to attach to the bastion, if left blank
+    Description: An existing IAM Role name to attach to the bastion. If left blank,
       a new role will be created.
     Default: ''
     Type: String
   EnvironmentVariables:
-    Description: Specify a comma separated list of environment variables for use in
+    Description: A comma-separated list of environment variables for use in
       bootstrapping. Variables must be in the format KEY=VALUE. VALUE cannot
-      contain commas
+      contain commas.
     Type: String
     Default: ''
   RootVolumeSize:
-    Description: Specify a size in GB for the root EBS volume
+    Description: The size in GB for the root EBS volume.
     Type: Number
     Default: '10'
 Rules:
