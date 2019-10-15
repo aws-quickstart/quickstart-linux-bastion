@@ -5,7 +5,7 @@ Metadata:
   'AWS::CloudFormation::Interface':
     ParameterGroups:
       - Label:
-          default: Network Configuration
+          default: Network configuration
         Parameters:
           - AvailabilityZones
           - VPCCIDR
@@ -16,13 +16,13 @@ Metadata:
           - RemoteAccessCIDR
           - VPCTenancy
       - Label:
-          default: Amazon EC2 Configuration
+          default: Amazon EC2 configuration
         Parameters:
           - KeyPairName
           - BastionAMIOS
           - BastionInstanceType
       - Label:
-          default: Linux Bastion Configuration
+          default: Linux bastion configuration
         Parameters:
           - NumBastionHosts
           - BastionTenancy
@@ -31,7 +31,7 @@ Metadata:
           - EnableTCPForwarding
           - EnableX11Forwarding
       - Label:
-          default: AWS Quick Start Configuration
+          default: AWS Quick Start configuration
         Parameters:
           - QSS3BucketName
           - QSS3KeyPrefix
@@ -39,39 +39,39 @@ Metadata:
       AvailabilityZones:
         default: Availability Zones
       BastionAMIOS:
-        default: Bastion AMI Operating System
+        default: Bastion AMI operating system
       BastionTenancy:
-        default: Bastion Tenancy
+        default: Bastion tenancy
       BastionBanner:
-        default: Bastion Banner
+        default: Banner text
       BastionInstanceType:
-        default: Bastion Instance Type
+        default: Bastion instance type
       EnableBanner:
-        default: Enable Banner
+        default: Bastion banner
       EnableTCPForwarding:
-        default: Enable TCP Forwarding
+        default: TCP forwarding
       EnableX11Forwarding:
-        default: Enable X11 Forwarding
+        default: X11 forwarding
       KeyPairName:
-        default: Key Pair Name
+        default: Key pair name
       NumBastionHosts:
-        default: Number of Bastion Hosts
+        default: Number of bastion hosts
       PrivateSubnet1CIDR:
-        default: Private Subnet 1 CIDR
+        default: Private subnet 1 CIDR
       PrivateSubnet2CIDR:
-        default: Private Subnet 2 CIDR
+        default: Private subnet 2 CIDR
       PublicSubnet1CIDR:
-        default: Public Subnet 1 CIDR
+        default: Public subnet 1 CIDR
       PublicSubnet2CIDR:
-        default: Public Subnet 2 CIDR
+        default: Public subnet 2 CIDR
       VPCTenancy:
-        default: VPC Tenancy
+        default: VPC tenancy
       QSS3BucketName:
-        default: Quick Start S3 Bucket Name
+        default: Quick Start S3 bucket name
       QSS3KeyPrefix:
-        default: Quick Start S3 Key Prefix
+        default: Quick Start S3 key prefix
       RemoteAccessCIDR:
-        default: Allowed Bastion External Access CIDR
+        default: Allowed bastion external access CIDR
       VPCCIDR:
         default: VPC CIDR
 Parameters:
@@ -86,21 +86,21 @@ Parameters:
       - Ubuntu-Server-16.04-LTS-HVM
       - SUSE-SLES-15-HVM
     Default: Amazon-Linux-HVM
-    Description: The Linux distribution for the AMI to be used for the bastion instances
+    Description: The Linux distribution for the AMI to be used for the bastion instances.
     Type: String
   BastionBanner:
     Default: https://aws-quickstart.s3.amazonaws.com/quickstart-linux-bastion/scripts/banner_message.txt
-    Description: Banner text to display upon login
+    Description: Banner text to display upon login.
     Type: String
   BastionTenancy:
-    Description: 'VPC Tenancy to launch the bastion in. Options: ''dedicated'' or ''default'''
+    Description: 'VPC tenancy to launch the bastion in. Options: ''dedicated'' or ''default'''
     Type: String
     Default: default
     AllowedValues:
       - dedicated
       - default
   BastionInstanceType:
-    Description: Amazon EC2 instance type for the bastion instances
+    Description: Amazon EC2 instance type for the bastion instances.
     Type: String
     Default: t2.micro
     AllowedValues:
@@ -128,25 +128,25 @@ Parameters:
       - 'false'
     Default: 'false'
     Description: To include a banner to be displayed when connecting via SSH to the
-      bastion, set this parameter to true
+      bastion, choose true.
     Type: String
   EnableTCPForwarding:
     Type: String
-    Description: Enable/Disable TCP Forwarding
+    Description: To enable TCP forwarding, choose true.
     Default: 'false'
     AllowedValues:
       - 'true'
       - 'false'
   EnableX11Forwarding:
     Type: String
-    Description: Enable/Disable X11 Forwarding
+    Description: To enable X11 forwarding, choose true.
     Default: 'false'
     AllowedValues:
       - 'true'
       - 'false'
   KeyPairName:
-    Description: Public/private key pairs allow you to securely connect to your instance
-      after it launches
+    Description: Name of an existing public/private key pair, which allows you to securely connect to your instance
+      after it launches.
     Type: 'AWS::EC2::KeyPair::KeyName'
   NumBastionHosts:
     AllowedValues:
@@ -155,7 +155,7 @@ Parameters:
       - '3'
       - '4'
     Default: '1'
-    Description: Enter the number of bastion hosts to create
+    Description: The number of bastion hosts to create. The maximum number is four.
     Type: String
   PrivateSubnet1CIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
@@ -173,20 +173,20 @@ Parameters:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
     Default: 10.0.128.0/20
-    Description: CIDR Block for the public DMZ subnet 1 located in Availability Zone 1
+    Description: CIDR Block for the public DMZ subnet 1 located in Availability Zone 1.
     Type: String
   PublicSubnet2CIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
     Default: 10.0.144.0/20
-    Description: CIDR Block for the public DMZ subnet 2 located in Availability Zone 2
+    Description: CIDR Block for the public DMZ subnet 2 located in Availability Zone 2.
     Type: String
   VPCTenancy:
     AllowedValues:
       - default
       - dedicated
     Default: default
-    Description: The allowed tenancy of instances launched into the VPC
+    Description: The allowed tenancy of instances launched into the VPC.
     Type: String
   QSS3BucketName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
@@ -213,7 +213,7 @@ Parameters:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
     Default: 10.0.0.0/16
-    Description: CIDR Block for the VPC
+    Description: CIDR Block for the VPC.
     Type: String
 Conditions:
   GovCloudCondition: !Equals 
