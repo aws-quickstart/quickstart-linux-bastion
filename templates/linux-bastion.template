@@ -232,13 +232,6 @@ Rules:
         AssertDescription: All subnets must exist in the VPC
 Mappings:
   AWSAMIRegionMap:
-    AMI:
-      AMZNLINUXHVM: amzn-ami-hvm-2018.03.0.20181129-x86_64-gp2
-      CENTOS7HVM: CentOS Linux 7 x86_64 HVM EBS ENA
-        1805_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-77ec9308.4
-      US1404HVM: ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20181022
-      US1604HVM: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20181223
-      SLES15HVM: suse-sles-15-v20180816-hvm-ssd-x86_64
     ap-northeast-1:
       AMZNLINUXHVM: ami-0ab3e16f9c414dee7
       CENTOS7HVM: ami-045f38c93733dd48d
