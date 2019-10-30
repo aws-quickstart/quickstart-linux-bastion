@@ -22,6 +22,7 @@ Metadata:
           default: Linux bastion configuration
         Parameters:
           - NumBastionHosts
+          - BastionHostName
           - BastionTenancy
           - EnableBanner
           - BastionBanner
@@ -46,6 +47,8 @@ Metadata:
         default: Alternative initialization script
       BastionAMIOS:
         default: Bastion AMI operating system
+      BastionHostName:
+        default: Bastion Host Name
       BastionTenancy:
         default: Bastion tenancy
       BastionBanner:
@@ -90,6 +93,10 @@ Parameters:
       - SUSE-SLES-15-HVM
     Default: Amazon-Linux-HVM
     Description: The Linux distribution for the AMI to be used for the bastion instances.
+    Type: String
+  BastionHostName:
+    Default: 'LinuxBastion'
+    Description: The value used for the name tag of the bastion host
     Type: String
   BastionBanner:
     Default: https://aws-quickstart.s3.amazonaws.com/quickstart-linux-bastion/scripts/banner_message.txt
@@ -490,7 +497,7 @@ Resources:
       DesiredCapacity: !Ref NumBastionHosts
       Tags:
         - Key: Name
-          Value: LinuxBastion
+          Value: !Ref BastionHostName
           PropagateAtLaunch: true
     CreationPolicy:
       ResourceSignal:
