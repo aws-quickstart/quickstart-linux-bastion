@@ -496,6 +496,11 @@ Resources:
       ResourceSignal:
         Count: !Ref NumBastionHosts
         Timeout: PT30M
+      AutoScalingCreationPolicy:
+        MinSuccessfulInstancesPercent: 100
+    UpdatePolicy:
+      AutoScalingReplacingUpdate:
+        WillReplace: true
   BastionLaunchConfiguration:
     Type: 'AWS::AutoScaling::LaunchConfiguration'
     Metadata:
