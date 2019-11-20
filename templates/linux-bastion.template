@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: LinuxBastion+VPC Nov,19,2019 QS(0037) (Please do not remove) 
+Description: LinuxBastion+VPC Nov,19,2019 QS(0037) (Please do not remove)
 Metadata:
-  LICENSE: Apache License, Version 2.0 
+  LICENSE: Apache License, Version 2.0
   'AWS::CloudFormation::Interface':
     ParameterGroups:
       - Label:
@@ -366,32 +366,32 @@ Mappings:
     SUSE-SLES-15-HVM:
       Code: SLES15HVM
 Conditions:
-  2BastionCondition: !Or 
-    - !Equals 
+  2BastionCondition: !Or
+    - !Equals
       - !Ref NumBastionHosts
       - '2'
     - !Condition 3BastionCondition
     - !Condition 4BastionCondition
-  3BastionCondition: !Or 
-    - !Equals 
+  3BastionCondition: !Or
+    - !Equals
       - !Ref NumBastionHosts
       - '3'
     - !Condition 4BastionCondition
-  4BastionCondition: !Equals 
+  4BastionCondition: !Equals
     - !Ref NumBastionHosts
     - '4'
-  GovCloudCondition: !Equals 
+  GovCloudCondition: !Equals
     - !Ref 'AWS::Region'
     - us-gov-west-1
-  UseAlternativeInitialization: !Not 
-    - !Equals 
+  UseAlternativeInitialization: !Not
+    - !Equals
       - !Ref AlternativeInitializationScript
       - ''
-  CreateIAMRole: !Equals 
+  CreateIAMRole: !Equals
     - !Ref AlternativeIAMRole
     - ''
-  UseOSImageOverride: !Not 
-    - !Equals 
+  UseOSImageOverride: !Not
+    - !Equals
       - !Ref OSImageOverride
       - ''
 Resources:
@@ -405,7 +405,7 @@ Resources:
       MetricTransformations:
         - MetricName: SSHCommandCount
           MetricValue: '1'
-          MetricNamespace: !Join 
+          MetricNamespace: !Join
             - /
             - - AWSQuickStart
               - !Ref 'AWS::StackName'
@@ -434,9 +434,9 @@ Resources:
         Statement:
           - Action:
               - 's3:GetObject'
-            Resource: !Sub 
+            Resource: !Sub
               - 'arn:${Partition}:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*'
-              - Partition: !If 
+              - Partition: !If
                   - GovCloudCondition
                   - aws-us-gov
                   - aws
@@ -450,9 +450,9 @@ Resources:
               - 'logs:PutRetentionPolicy'
               - 'logs:PutMetricFilter'
               - 'logs:CreateLogGroup'
-            Resource: !Sub 
+            Resource: !Sub
               - arn:${Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*
-              - Partition: !If 
+              - Partition: !If
                   - GovCloudCondition
                   - aws-us-gov
                   - aws
@@ -463,7 +463,7 @@ Resources:
             Resource: '*'
             Effect: Allow
       Roles:
-        - !If 
+        - !If
           - CreateIAMRole
           - !Ref BastionHostRole
           - !Ref AlternativeIAMRole
@@ -472,7 +472,7 @@ Resources:
     Type: 'AWS::IAM::InstanceProfile'
     Properties:
       Roles:
-        - !If 
+        - !If
           - CreateIAMRole
           - !Ref BastionHostRole
           - !Ref AlternativeIAMRole
@@ -526,7 +526,7 @@ Resources:
       'AWS::CloudFormation::Authentication':
         S3AccessCreds:
           type: S3
-          roleName: !If 
+          roleName: !If
             - CreateIAMRole
             - !Ref BastionHostRole
             - !Ref AlternativeIAMRole
@@ -536,12 +536,12 @@ Resources:
         config:
           files:
             /tmp/bastion_bootstrap.sh:
-              source: !If 
+              source: !If
                 - UseAlternativeInitialization
                 - !Ref AlternativeInitializationScript
-                - !Sub 
+                - !Sub
                   - https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh
-                  - QSS3Region: !If 
+                  - QSS3Region: !If
                       - GovCloudCondition
                       - s3-us-gov-west-1
                       - s3
@@ -551,7 +551,7 @@ Resources:
               authentication: S3AccessCreds
           commands:
             b-bootstrap:
-              command: !Join 
+              command: !Join
                 - ''
                 - - ./tmp/bastion_bootstrap.sh
                   - ' --banner '
@@ -567,13 +567,13 @@ Resources:
       PlacementTenancy: !Ref BastionTenancy
       KeyName: !Ref KeyPairName
       IamInstanceProfile: !Ref BastionHostProfile
-      ImageId: !If 
+      ImageId: !If
         - UseOSImageOverride
         - !Ref OSImageOverride
-        - !FindInMap 
+        - !FindInMap
           - AWSAMIRegionMap
           - !Ref 'AWS::Region'
-          - !FindInMap 
+          - !FindInMap
             - LinuxAMINameMap
             - !Ref BastionAMIOS
             - Code
@@ -587,79 +587,44 @@ Resources:
             VolumeType: gp2
             Encrypted: true
             DeleteOnTermination: true
-      UserData: !Base64 
-        'Fn::Join':
-          - ''
-          - - |
-              #!/bin/bash
-            - |
-              set -x
-            - for e in $(echo "
-            - !Ref EnvironmentVariables
-            - |
-              " | tr ',' ' '); do 
-            - |2
-                export $e 
-            - |
-              done 
-            - |
-              export PATH=$PATH:/usr/local/bin
-            - |
-              which pip &> /dev/null
-            - |
-              if [ $? -ne 0 ] ; then
-            - |2
-                  echo "PIP NOT INSTALLED"
-            - |2
-                  [ `which yum` ] && $(yum install -y epel-release; yum install -y python-pip) && echo "PIP INSTALLED"
-            - |2
-                  [ `which apt-get` ] && apt-get -y update && apt-get -y install python-pip && echo "PIP INSTALLED"
-            - |2
-                  [ `which zypper` ] && zypper refresh && zypper install -y python-pip && update-alternatives --set easy_install /usr/bin/easy_install-2.7 && echo "PIP INSTALLED"
-            - |
-              fi
-            - |
-              pip install --upgrade pip &> /dev/null
-            - |
-              pip install awscli --ignore-installed six &> /dev/null
-            - >
-              easy_install
-              https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-            - EIP_LIST="
-            - !Ref EIP1
-            - ','
-            - !If 
+      UserData:
+        Fn::Base64: !Sub
+          - |
+`            #!/bin/bash
+            set -x
+            for e in $(echo "${EnvironmentVariables}" | tr ',' ' '); do
+              export $e
+            done
+            export PATH=$PATH:/usr/local/bin
+            which pip &> /dev/null
+            if [ $? -ne 0 ] ; then
+                echo "PIP NOT INSTALLED"
+                [ `which yum` ] && $(yum install -y epel-release; yum install -y python-pip) && echo "PIP INSTALLED"
+                [ `which apt-get` ] && apt-get -y update && apt-get -y install python-pip && echo "PIP INSTALLED"
+                [ `which zypper` ] && zypper refresh && zypper install -y python-pip && update-alternatives --set easy_install /usr/bin/easy_install-2.7 && echo "PIP INSTALLED"
+            fi
+            pip install --upgrade pip &> /dev/null
+            pip install awscli --ignore-installed six &> /dev/null
+            easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+            EIP_LIST="${EIP1},${EIP2},${EIP3},${EIP4}"
+            CLOUDWATCHGROUP=${BastionMainLogGroup}
+            cfn-init -v --stack '${AWS::StackName}' --resource BastionLaunchConfiguration --region ${AWS::Region}
+            cfn-signal -e $? --stack ${AWS::StackName} --resource BastionAutoScalingGroup --region ${AWS::Region}`
+          - EIP2:
+              !If
               - 2BastionCondition
               - !Ref EIP2
               - 'Null'
-            - ','
-            - !If 
+            EIP3:
+              !If
               - 3BastionCondition
               - !Ref EIP3
               - 'Null'
-            - ','
-            - !If 
+            EIP4:
+              !If
               - 4BastionCondition
               - !Ref EIP4
               - 'Null'
-            - |
-              "
-            - CLOUDWATCHGROUP=
-            - !Ref BastionMainLogGroup
-            - |+
-
-            - 'cfn-init -v --stack '
-            - !Ref 'AWS::StackName'
-            - ' --resource BastionLaunchConfiguration --region '
-            - !Ref 'AWS::Region'
-            - |+
-
-            - 'cfn-signal -e $? --stack '
-            - !Ref 'AWS::StackName'
-            - ' --resource BastionAutoScalingGroup --region '
-            - !Ref 'AWS::Region'
-            - |+
-
   BastionSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -715,7 +680,7 @@ Outputs:
       Name: !Sub '${AWS::StackName}-BastionSecurityGroupID'
   BastionHostRole:
     Description: Bastion IAM Role name
-    Value: !If 
+    Value: !If
       - CreateIAMRole
       - !Ref BastionHostRole
       - !Ref AlternativeIAMRole
