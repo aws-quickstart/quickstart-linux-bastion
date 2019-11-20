@@ -5,7 +5,7 @@
     },
     {
         "ParameterKey": "BastionAMIOS",
-        "ParameterValue": "Amazon-Linux-HVM"
+        "ParameterValue": "Ubuntu-Server-18.04-LTS-HVM"
     },
     {
         "ParameterKey": "BastionInstanceType",
@@ -43,4 +43,5 @@
         "ParameterKey":"QSS3BucketName",
         "ParameterValue":"$[taskcat_autobucket]"
     }
+
 ]

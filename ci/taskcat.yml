@@ -19,14 +19,14 @@ global:
 #    - sa-east-1
   reporting: true
 tests:
-  amznlinuxhvm:
-    parameter_input: linux-bastion-master-amznlinuxhvm.json
+  amznlinux2hvm:
+    parameter_input: linux-bastion-master-amznlinux2hvm.json
     template_file: linux-bastion-master.template
   centos7hvm:
     parameter_input: linux-bastion-master-centos7hvm.json
     template_file: linux-bastion-master.template
-  us1404hvm:
-    parameter_input: linux-bastion-master-us1404hvm.json
+  us1804hvm:
+    parameter_input: linux-bastion-master-us1804hvm.json
     template_file: linux-bastion-master.template
   us1604hvm:
     parameter_input: linux-bastion-master-us1604hvm.json
@@ -34,6 +34,3 @@ tests:
   sles15hvm:
     parameter_input: linux-bastion-master-sles15hvm.json
     template_file: linux-bastion-master.template
-#  amznlinuxhvm_dedicatedtenancy:
-#    parameter_input: linux-bastion-master-amznlinuxhvm_dedicatedtenancy.json
-#    template_file: linux-bastion-master.template
