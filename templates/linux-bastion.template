@@ -590,7 +590,7 @@ Resources:
       UserData:
         Fn::Base64: !Sub
           - |
-`            #!/bin/bash
+            #!/bin/bash
             set -x
             for e in $(echo "${EnvironmentVariables}" | tr ',' ' '); do
               export $e
