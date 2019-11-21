@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: LinuxBastion+VPC July,18,2019 (Please do not remove)
+Description: LinuxBastion+VPC Oct,23,2019 (Please do not remove)
 Metadata:
   LICENSE: Apache License, Version 2.0 
   'AWS::CloudFormation::Interface':
@@ -83,12 +83,13 @@ Parameters:
     Type: 'List<AWS::EC2::AvailabilityZone::Name>'
   BastionAMIOS:
     AllowedValues:
+      - Amazon-Linux2-HVM
       - Amazon-Linux-HVM
       - CentOS-7-HVM
-      - Ubuntu-Server-14.04-LTS-HVM
+      - Ubuntu-Server-18.04-LTS-HVM
       - Ubuntu-Server-16.04-LTS-HVM
       - SUSE-SLES-15-HVM
-    Default: Amazon-Linux-HVM
+    Default: Amazon-Linux2-HVM
     Description: The Linux distribution for the AMI to be used for the bastion instances.
     Type: String
   BastionHostName:

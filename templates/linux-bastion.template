@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: LinuxBastion+VPC July,18,2019 QS(0037) (Please do not remove) 
+Description: LinuxBastion+VPC Nov,19,2019 QS(0037) (Please do not remove)
 Metadata:
-  LICENSE: Apache License, Version 2.0 
+  LICENSE: Apache License, Version 2.0
   'AWS::CloudFormation::Interface':
     ParameterGroups:
       - Label:
@@ -86,12 +86,13 @@ Metadata:
 Parameters:
   BastionAMIOS:
     AllowedValues:
+      - Amazon-Linux2-HVM
       - Amazon-Linux-HVM
       - CentOS-7-HVM
-      - Ubuntu-Server-14.04-LTS-HVM
+      - Ubuntu-Server-18.04-LTS-HVM
       - Ubuntu-Server-16.04-LTS-HVM
       - SUSE-SLES-15-HVM
-    Default: Amazon-Linux-HVM
+    Default: Amazon-Linux2-HVM
     Description: The Linux distribution for the AMI to be used for the bastion instances.
     Type: String
   BastionHostName:
@@ -239,147 +240,158 @@ Rules:
         AssertDescription: All subnets must exist in the VPC
 Mappings:
   AWSAMIRegionMap:
-    AMI:
-      AMZNLINUXHVM: amzn-ami-hvm-2018.03.0.20181129-x86_64-gp2
-      CENTOS7HVM: CentOS Linux 7 x86_64 HVM EBS ENA
-        1805_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-77ec9308.4
-      US1404HVM: ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20181022
-      US1604HVM: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20181223
-      SLES15HVM: suse-sles-15-v20180816-hvm-ssd-x86_64
     ap-northeast-1:
+      AMZNLINUX2: ami-0064e711cbc7a825e
       AMZNLINUXHVM: ami-0ab3e16f9c414dee7
       CENTOS7HVM: ami-045f38c93733dd48d
-      US1404HVM: ami-0cf54a87bffe628d2
-      US1604HVM: ami-044155332102199f1
+      US1604HVM: ami-014cc8d7cb6d26dc8
+      US1804HVM: ami-0f6b4f4104d26f399
       SLES15HVM: ami-056ac8ad44e6a7e1f
     ap-northeast-2:
+      AMZNLINUX2: ami-02b3330196502d247
       AMZNLINUXHVM: ami-0e1e385b0a934254a
       CENTOS7HVM: ami-06cf2a72dadf92410
-      US1404HVM: ami-06014a6d5047caf51
-      US1604HVM: ami-0d3e6bf56bb16893f
+      US1604HVM: ami-004b3430b806f3b1a
+      US1804HVM: ami-0f6b4f4104d26f399
       SLES15HVM: ami-0f81fff879bafe6b8
     ap-south-1:
+      AMZNLINUX2: ami-040c7ad0a93be494e
       AMZNLINUXHVM: ami-02913db388613c3e1
       CENTOS7HVM: ami-02e60be79e78fef21
-      US1404HVM: ami-0460ce78b2cf43489
-      US1604HVM: ami-0bccf4c677f6e992d
+      US1604HVM: ami-0f59afa4a22fad2f0
+      US1804HVM: ami-0f6b4f4104d26f399
       SLES15HVM: ami-01be89269d32f2a16
     ap-southeast-1:
+      AMZNLINUX2: ami-00942d7cd4f3ca5c0
       AMZNLINUXHVM: ami-05c859630889c79c8
       CENTOS7HVM: ami-0b4dd9d65556cac22
-      US1404HVM: ami-0aa787af8cdd260f1
-      US1604HVM: ami-0431fb131a52a2ebd
+      US1604HVM: ami-08b3278ea6e379084
+      US1804HVM: ami-0f6b4f4104d26f399
       SLES15HVM: ami-070356c21596ddc67
     ap-southeast-2:
+      AMZNLINUX2: ami-08a74056dfd30c986
       AMZNLINUXHVM: ami-07cc15c3ba6f8e287
       CENTOS7HVM: ami-08bd00d7713a39e7d
-      US1404HVM: ami-0caee806a0c3782c4
-      US1604HVM: ami-0f3834d5ada79fb43
+      US1604HVM: ami-00d7116c396e73b04
+      US1804HVM: ami-0f6b4f4104d26f399
       SLES15HVM: ami-0c4245381c67efb39
     ca-central-1:
+      AMZNLINUX2: ami-007dbcbce3118978b
       AMZNLINUXHVM: ami-04070f04f450607dc
       CENTOS7HVM: ami-033e6106180a626d0
-      US1404HVM: ami-0975224f6cbaca625
-      US1604HVM: ami-0c8f33daf2ef7175f
+      US1604HVM: ami-0086bcfbab4b22f60
+      US1804HVM: ami-0f6b4f4104d26f399
       SLES15HVM: ami-0c97d9b588207dad6
     eu-central-1:
+      AMZNLINUX2: ami-0f3a43fbf2d3899f7
       AMZNLINUXHVM: ami-010fae13a16763bb4
       CENTOS7HVM: ami-04cf43aca3e6f3de3
-      US1404HVM: ami-0e18ae6e39f4962f0
-      US1604HVM: ami-0f686bcf073842e84
+      US1604HVM: ami-0062c497b55437b01
+      US1804HVM: ami-0f6b4f4104d26f399
       SLES15HVM: ami-05dfd265ea534a3e9
     eu-north-1:
+      AMZNLINUX2: ami-0c947472aff72870d
       AMZNLINUXHVM: ami-6a1f9414
       CENTOS7HVM: ami-5ee66f20
-      US1404HVM: ami-0ef973845f826405f
-      US1604HVM: ami-039e19aa13ca07fb5
+      US1604HVM: ami-0ca3b50bc99a41773
+      US1804HVM: ami-0f6b4f4104d26f399
       SLES15HVM: ami-0741fa1a008af40ad
     eu-west-1:
+      AMZNLINUX2: ami-040ba9174949f6de4
       AMZNLINUXHVM: ami-028188d9b49b32a80
       CENTOS7HVM: ami-0ff760d16d9497662
-      US1404HVM: ami-005af4c3162f495fa
-      US1604HVM: ami-0f0f0893a9b9ce5ee
+      US1604HVM: ami-0987ee37af7792903
+      US1804HVM: ami-0f6b4f4104d26f399
       SLES15HVM: ami-0a58a1b152ba55f1d
     eu-west-2:
+      AMZNLINUX2: ami-00e8b55a2e841be44
       AMZNLINUXHVM: ami-04de2b60dd25fbb2e
       CENTOS7HVM: ami-0eab3a90fc693af19
-      US1404HVM: ami-02e42a8490e212d0a
-      US1604HVM: ami-0de8d2d7eed49232d
+      US1604HVM: ami-05945867d79b7d926
+      US1804HVM: ami-0f6b4f4104d26f399
       SLES15HVM: ami-01497522185aaa4ee
     eu-west-3:
+      AMZNLINUX2: ami-05a51ff00c1d77571
       AMZNLINUXHVM: ami-0652eb0db9b20aeaf
       CENTOS7HVM: ami-0e1ab783dc9489f34
-      US1404HVM: ami-03c04206a3f98c5cd
-      US1604HVM: ami-0d83b6ecc96584f7d
+      US1604HVM: ami-00c60f4df93ff408e
+      US1804HVM: ami-0f6b4f4104d26f399
       SLES15HVM: ami-0f238bd4c6fdbefb0
     sa-east-1:
+      AMZNLINUX2: ami-053f8b6627112b46e
       AMZNLINUXHVM: ami-0e2c2c29d8017dd99
       CENTOS7HVM: ami-0b8d86d4bf91850af
-      US1404HVM: ami-0b42a18b2c9c5ba83
-      US1604HVM: ami-0075cd5c69cc51285
+      US1604HVM: ami-0fb487b6f6ab53ff4
+      US1804HVM: ami-0f6b4f4104d26f399
       SLES15HVM: ami-0772af912976aa692
     us-east-1:
+      AMZNLINUX2: ami-00dc79254d0461090
       AMZNLINUXHVM: ami-00eb20669e0990cb4
       CENTOS7HVM: ami-02eac2c0129f6376b
-      US1404HVM: ami-000b3a073fc20e415
-      US1604HVM: ami-02fb1c72d81ced91a
+      US1604HVM: ami-09f9d773751b9d606
+      US1804HVM: ami-0f6b4f4104d26f399
       SLES15HVM: ami-0b1764f3d7d2e2316
     us-east-2:
+      AMZNLINUX2: ami-00bf61217e296b409
       AMZNLINUXHVM: ami-0c64dd618a49aeee8
       CENTOS7HVM: ami-0f2b4fc905b0bd1f1
-      US1404HVM: ami-032eae14ebea64f91
-      US1604HVM: ami-0a0d2a4208059985c
+      US1604HVM: ami-0891395d749676c2e
+      US1804HVM: ami-0f6b4f4104d26f399
       SLES15HVM: ami-05ea824317ffc0c20
     us-west-1:
+      AMZNLINUX2: ami-024c80694b5b3e51a
       AMZNLINUXHVM: ami-0bce08e823ed38bdd
       CENTOS7HVM: ami-074e2d6769f445be5
-      US1404HVM: ami-0430743863c514c80
-      US1604HVM: ami-07e72dd31cde45187
+      US1604HVM: ami-0c0e5a396959508b0
+      US1804HVM: ami-0f6b4f4104d26f399
       SLES15HVM: ami-00e34a7624e5a7107
     us-west-2:
+      AMZNLINUX2: ami-0a85857bfc5345c38
       AMZNLINUXHVM: ami-08d489468314a58df
       CENTOS7HVM: ami-01ed306a12b7d1c96
-      US1404HVM: ami-0bac6fc47ad07c5f5
-      US1604HVM: ami-0709c7cbbca217084
+      US1604HVM: ami-0bbe9b07c5fe8e86e
+      US1804HVM: ami-0f6b4f4104d26f399
       SLES15HVM: ami-0f1e3b3fb0fec0361
   LinuxAMINameMap:
+    Amazon-Linux2-HVM:
+      Code: AMZNLINUX2
     Amazon-Linux-HVM:
       Code: AMZNLINUXHVM
     CentOS-7-HVM:
       Code: CENTOS7HVM
-    Ubuntu-Server-14.04-LTS-HVM:
-      Code: US1404HVM
+    Ubuntu-Server-18.04-LTS-HVM:
+      Code: US1804HVM
     Ubuntu-Server-16.04-LTS-HVM:
       Code: US1604HVM
     SUSE-SLES-15-HVM:
       Code: SLES15HVM
 Conditions:
-  2BastionCondition: !Or 
-    - !Equals 
+  2BastionCondition: !Or
+    - !Equals
       - !Ref NumBastionHosts
       - '2'
     - !Condition 3BastionCondition
     - !Condition 4BastionCondition
-  3BastionCondition: !Or 
-    - !Equals 
+  3BastionCondition: !Or
+    - !Equals
       - !Ref NumBastionHosts
       - '3'
     - !Condition 4BastionCondition
-  4BastionCondition: !Equals 
+  4BastionCondition: !Equals
     - !Ref NumBastionHosts
     - '4'
-  GovCloudCondition: !Equals 
+  GovCloudCondition: !Equals
     - !Ref 'AWS::Region'
     - us-gov-west-1
-  UseAlternativeInitialization: !Not 
-    - !Equals 
+  UseAlternativeInitialization: !Not
+    - !Equals
       - !Ref AlternativeInitializationScript
       - ''
-  CreateIAMRole: !Equals 
+  CreateIAMRole: !Equals
     - !Ref AlternativeIAMRole
     - ''
-  UseOSImageOverride: !Not 
-    - !Equals 
+  UseOSImageOverride: !Not
+    - !Equals
       - !Ref OSImageOverride
       - ''
 Resources:
@@ -393,7 +405,7 @@ Resources:
       MetricTransformations:
         - MetricName: SSHCommandCount
           MetricValue: '1'
-          MetricNamespace: !Join 
+          MetricNamespace: !Join
             - /
             - - AWSQuickStart
               - !Ref 'AWS::StackName'
@@ -422,9 +434,9 @@ Resources:
         Statement:
           - Action:
               - 's3:GetObject'
-            Resource: !Sub 
+            Resource: !Sub
               - 'arn:${Partition}:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*'
-              - Partition: !If 
+              - Partition: !If
                   - GovCloudCondition
                   - aws-us-gov
                   - aws
@@ -438,9 +450,9 @@ Resources:
               - 'logs:PutRetentionPolicy'
               - 'logs:PutMetricFilter'
               - 'logs:CreateLogGroup'
-            Resource: !Sub 
+            Resource: !Sub
               - arn:${Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*
-              - Partition: !If 
+              - Partition: !If
                   - GovCloudCondition
                   - aws-us-gov
                   - aws
@@ -451,7 +463,7 @@ Resources:
             Resource: '*'
             Effect: Allow
       Roles:
-        - !If 
+        - !If
           - CreateIAMRole
           - !Ref BastionHostRole
           - !Ref AlternativeIAMRole
@@ -460,7 +472,7 @@ Resources:
     Type: 'AWS::IAM::InstanceProfile'
     Properties:
       Roles:
-        - !If 
+        - !If
           - CreateIAMRole
           - !Ref BastionHostRole
           - !Ref AlternativeIAMRole
@@ -514,7 +526,7 @@ Resources:
       'AWS::CloudFormation::Authentication':
         S3AccessCreds:
           type: S3
-          roleName: !If 
+          roleName: !If
             - CreateIAMRole
             - !Ref BastionHostRole
             - !Ref AlternativeIAMRole
@@ -524,12 +536,12 @@ Resources:
         config:
           files:
             /tmp/bastion_bootstrap.sh:
-              source: !If 
+              source: !If
                 - UseAlternativeInitialization
                 - !Ref AlternativeInitializationScript
-                - !Sub 
+                - !Sub
                   - https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh
-                  - QSS3Region: !If 
+                  - QSS3Region: !If
                       - GovCloudCondition
                       - s3-us-gov-west-1
                       - s3
@@ -539,7 +551,7 @@ Resources:
               authentication: S3AccessCreds
           commands:
             b-bootstrap:
-              command: !Join 
+              command: !Join
                 - ''
                 - - ./tmp/bastion_bootstrap.sh
                   - ' --banner '
@@ -555,13 +567,13 @@ Resources:
       PlacementTenancy: !Ref BastionTenancy
       KeyName: !Ref KeyPairName
       IamInstanceProfile: !Ref BastionHostProfile
-      ImageId: !If 
+      ImageId: !If
         - UseOSImageOverride
         - !Ref OSImageOverride
-        - !FindInMap 
+        - !FindInMap
           - AWSAMIRegionMap
           - !Ref 'AWS::Region'
-          - !FindInMap 
+          - !FindInMap
             - LinuxAMINameMap
             - !Ref BastionAMIOS
             - Code
@@ -575,79 +587,44 @@ Resources:
             VolumeType: gp2
             Encrypted: true
             DeleteOnTermination: true
-      UserData: !Base64 
-        'Fn::Join':
-          - ''
-          - - |
-              #!/bin/bash
-            - |
-              set -x
-            - for e in $(echo "
-            - !Ref EnvironmentVariables
-            - |
-              " | tr ',' ' '); do 
-            - |2
-                export $e 
-            - |
-              done 
-            - |
-              export PATH=$PATH:/usr/local/bin
-            - |
-              which pip &> /dev/null
-            - |
-              if [ $? -ne 0 ] ; then
-            - |2
-                  echo "PIP NOT INSTALLED"
-            - |2
-                  [ `which yum` ] && $(yum install -y epel-release; yum install -y python-pip) && echo "PIP INSTALLED"
-            - |2
-                  [ `which apt-get` ] && apt-get -y update && apt-get -y install python-pip && echo "PIP INSTALLED"
-            - |2
-                  [ `which zypper` ] && zypper refresh && zypper install -y python-pip && update-alternatives --set easy_install /usr/bin/easy_install-2.7 && echo "PIP INSTALLED"
-            - |
-              fi
-            - |
-              pip install --upgrade pip &> /dev/null
-            - |
-              pip install awscli --ignore-installed six &> /dev/null
-            - >
-              easy_install
-              https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-            - EIP_LIST="
-            - !Ref EIP1
-            - ','
-            - !If 
+      UserData:
+        Fn::Base64: !Sub
+          - |
+            #!/bin/bash
+            set -x
+            for e in $(echo "${EnvironmentVariables}" | tr ',' ' '); do
+              export $e
+            done
+            export PATH=$PATH:/usr/local/bin
+            which pip &> /dev/null
+            if [ $? -ne 0 ] ; then
+                echo "PIP NOT INSTALLED"
+                [ `which yum` ] && $(yum install -y epel-release; yum install -y python-pip) && echo "PIP INSTALLED"
+                [ `which apt-get` ] && apt-get -y update && apt-get -y install python-pip && echo "PIP INSTALLED"
+                [ `which zypper` ] && zypper refresh && zypper install -y python-pip && update-alternatives --set easy_install /usr/bin/easy_install-2.7 && echo "PIP INSTALLED"
+            fi
+            pip install --upgrade pip &> /dev/null
+            pip install awscli --ignore-installed six &> /dev/null
+            easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+            EIP_LIST="${EIP1},${EIP2},${EIP3},${EIP4}"
+            CLOUDWATCHGROUP=${BastionMainLogGroup}
+            cfn-init -v --stack '${AWS::StackName}' --resource BastionLaunchConfiguration --region ${AWS::Region}
+            cfn-signal -e $? --stack ${AWS::StackName} --resource BastionAutoScalingGroup --region ${AWS::Region}`
+          - EIP2:
+              !If
               - 2BastionCondition
               - !Ref EIP2
               - 'Null'
-            - ','
-            - !If 
+            EIP3:
+              !If
               - 3BastionCondition
               - !Ref EIP3
               - 'Null'
-            - ','
-            - !If 
+            EIP4:
+              !If
               - 4BastionCondition
               - !Ref EIP4
               - 'Null'
-            - |
-              "
-            - CLOUDWATCHGROUP=
-            - !Ref BastionMainLogGroup
-            - |+
-
-            - 'cfn-init -v --stack '
-            - !Ref 'AWS::StackName'
-            - ' --resource BastionLaunchConfiguration --region '
-            - !Ref 'AWS::Region'
-            - |+
-
-            - 'cfn-signal -e $? --stack '
-            - !Ref 'AWS::StackName'
-            - ' --resource BastionAutoScalingGroup --region '
-            - !Ref 'AWS::Region'
-            - |+
-
   BastionSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -703,7 +680,7 @@ Outputs:
       Name: !Sub '${AWS::StackName}-BastionSecurityGroupID'
   BastionHostRole:
     Description: Bastion IAM Role name
-    Value: !If 
+    Value: !If
       - CreateIAMRole
       - !Ref BastionHostRole
       - !Ref AlternativeIAMRole
