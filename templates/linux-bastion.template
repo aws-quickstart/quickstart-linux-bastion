@@ -609,7 +609,7 @@ Resources:
             EIP_LIST="${EIP1},${EIP2},${EIP3},${EIP4}"
             CLOUDWATCHGROUP=${BastionMainLogGroup}
             cfn-init -v --stack '${AWS::StackName}' --resource BastionLaunchConfiguration --region ${AWS::Region}
-            cfn-signal -e $? --stack ${AWS::StackName} --resource BastionAutoScalingGroup --region ${AWS::Region}`
+            cfn-signal -e $? --stack ${AWS::StackName} --resource BastionAutoScalingGroup --region ${AWS::Region}
           - EIP2:
               !If
               - 2BastionCondition
