@@ -245,112 +245,112 @@ Mappings:
       AMZNLINUXHVM: ami-0ab3e16f9c414dee7
       CENTOS7HVM: ami-045f38c93733dd48d
       US1604HVM: ami-014cc8d7cb6d26dc8
-      US1804HVM: ami-07febfdfb4080320e
+      US1804HVM: ami-00622b440d92e55c0
       SLES15HVM: ami-056ac8ad44e6a7e1f
     ap-northeast-2:
       AMZNLINUX2: ami-0d59ddf55cdda6e21
       AMZNLINUXHVM: ami-0e1e385b0a934254a
       CENTOS7HVM: ami-06cf2a72dadf92410
       US1604HVM: ami-004b3430b806f3b1a
-      US1804HVM: ami-07febfdfb4080320e
+      US1804HVM: ami-00622b440d92e55c0
       SLES15HVM: ami-0f81fff879bafe6b8
     ap-south-1:
       AMZNLINUX2: ami-0ce933e2ae91880d3
       AMZNLINUXHVM: ami-02913db388613c3e1
       CENTOS7HVM: ami-02e60be79e78fef21
       US1604HVM: ami-0f59afa4a22fad2f0
-      US1804HVM: ami-07febfdfb4080320e
+      US1804HVM: ami-00622b440d92e55c0
       SLES15HVM: ami-01be89269d32f2a16
     ap-southeast-1:
       AMZNLINUX2: ami-07539a31f72d244e7
       AMZNLINUXHVM: ami-05c859630889c79c8
       CENTOS7HVM: ami-0b4dd9d65556cac22
       US1604HVM: ami-08b3278ea6e379084
-      US1804HVM: ami-07febfdfb4080320e
+      US1804HVM: ami-00622b440d92e55c0
       SLES15HVM: ami-070356c21596ddc67
     ap-southeast-2:
       AMZNLINUX2: ami-0119aa4d67e59007c
       AMZNLINUXHVM: ami-07cc15c3ba6f8e287
       CENTOS7HVM: ami-08bd00d7713a39e7d
       US1604HVM: ami-00d7116c396e73b04
-      US1804HVM: ami-07febfdfb4080320e
+      US1804HVM: ami-00622b440d92e55c0
       SLES15HVM: ami-0c4245381c67efb39
     ca-central-1:
       AMZNLINUX2: ami-0ff24797826ebbcd5
       AMZNLINUXHVM: ami-04070f04f450607dc
       CENTOS7HVM: ami-033e6106180a626d0
       US1604HVM: ami-0086bcfbab4b22f60
-      US1804HVM: ami-07febfdfb4080320e
+      US1804HVM: ami-00622b440d92e55c0
       SLES15HVM: ami-0c97d9b588207dad6
     eu-central-1:
       AMZNLINUX2: ami-0d4c3eabb9e72650a
       AMZNLINUXHVM: ami-010fae13a16763bb4
       CENTOS7HVM: ami-04cf43aca3e6f3de3
       US1604HVM: ami-0062c497b55437b01
-      US1804HVM: ami-07febfdfb4080320e
+      US1804HVM: ami-00622b440d92e55c0
       SLES15HVM: ami-05dfd265ea534a3e9
     eu-north-1:
       AMZNLINUX2: ami-006cda581cf39451b
       AMZNLINUXHVM: ami-6a1f9414
       CENTOS7HVM: ami-5ee66f20
       US1604HVM: ami-0ca3b50bc99a41773
-      US1804HVM: ami-07febfdfb4080320e
+      US1804HVM: ami-00622b440d92e55c0
       SLES15HVM: ami-0741fa1a008af40ad
     eu-west-1:
       AMZNLINUX2: ami-01f14919ba412de34
       AMZNLINUXHVM: ami-028188d9b49b32a80
       CENTOS7HVM: ami-0ff760d16d9497662
       US1604HVM: ami-0987ee37af7792903
-      US1804HVM: ami-07febfdfb4080320e
+      US1804HVM: ami-00622b440d92e55c0
       SLES15HVM: ami-0a58a1b152ba55f1d
     eu-west-2:
       AMZNLINUX2: ami-05f37c3995fffb4fd
       AMZNLINUXHVM: ami-04de2b60dd25fbb2e
       CENTOS7HVM: ami-0eab3a90fc693af19
       US1604HVM: ami-05945867d79b7d926
-      US1804HVM: ami-07febfdfb4080320e
+      US1804HVM: ami-00622b440d92e55c0
       SLES15HVM: ami-01497522185aaa4ee
     eu-west-3:
       AMZNLINUX2: ami-0e9e6ba6d3d38faa8
       AMZNLINUXHVM: ami-0652eb0db9b20aeaf
       CENTOS7HVM: ami-0e1ab783dc9489f34
       US1604HVM: ami-00c60f4df93ff408e
-      US1804HVM: ami-07febfdfb4080320e
+      US1804HVM: ami-00622b440d92e55c0
       SLES15HVM: ami-0f238bd4c6fdbefb0
     sa-east-1:
       AMZNLINUX2: ami-07820a4443539a2b0
       AMZNLINUXHVM: ami-0e2c2c29d8017dd99
       CENTOS7HVM: ami-0b8d86d4bf91850af
       US1604HVM: ami-0fb487b6f6ab53ff4
-      US1804HVM: ami-07febfdfb4080320e
+      US1804HVM: ami-00622b440d92e55c0
       SLES15HVM: ami-0772af912976aa692
     us-east-1:
       AMZNLINUX2: ami-00068cd7555f543d5
       AMZNLINUXHVM: ami-00eb20669e0990cb4
       CENTOS7HVM: ami-02eac2c0129f6376b
       US1604HVM: ami-09f9d773751b9d606
-      US1804HVM: ami-07febfdfb4080320e
+      US1804HVM: ami-00622b440d92e55c0
       SLES15HVM: ami-0b1764f3d7d2e2316
     us-east-2:
       AMZNLINUX2: ami-0dacb0c129b49f529
       AMZNLINUXHVM: ami-0c64dd618a49aeee8
       CENTOS7HVM: ami-0f2b4fc905b0bd1f1
       US1604HVM: ami-0891395d749676c2e
-      US1804HVM: ami-07febfdfb4080320e
+      US1804HVM: ami-00622b440d92e55c0
       SLES15HVM: ami-05ea824317ffc0c20
     us-west-1:
       AMZNLINUX2: ami-0b2d8d1abb76a53d8
       AMZNLINUXHVM: ami-0bce08e823ed38bdd
       CENTOS7HVM: ami-074e2d6769f445be5
       US1604HVM: ami-0c0e5a396959508b0
-      US1804HVM: ami-07febfdfb4080320e
+      US1804HVM: ami-00622b440d92e55c0
       SLES15HVM: ami-00e34a7624e5a7107
     us-west-2:
       AMZNLINUX2: ami-0c5204531f799e0c6
       AMZNLINUXHVM: ami-08d489468314a58df
       CENTOS7HVM: ami-01ed306a12b7d1c96
       US1604HVM: ami-0bbe9b07c5fe8e86e
-      US1804HVM: ami-07febfdfb4080320e
+      US1804HVM: ami-00622b440d92e55c0
       SLES15HVM: ami-0f1e3b3fb0fec0361
   LinuxAMINameMap:
     Amazon-Linux2-HVM:
