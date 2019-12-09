@@ -544,9 +544,10 @@ Resources:
               authentication: S3AccessCreds
           commands:
             b-bootstrap:
+              cwd: '/tmp/'
               command: !Join
                 - ''
-                - - ./tmp/bastion_bootstrap.sh
+                - - ./bastion_bootstrap.sh
                   - ' --banner '
                   - !Ref BastionBanner
                   - ' --enable '
