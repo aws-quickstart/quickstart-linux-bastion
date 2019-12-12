@@ -595,13 +595,13 @@ Resources:
 
             function cfn_fail
             {
-              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource LinuxInstance
+              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource BastionLaunchConfiguration
               exit 1
             }
 
             function cfn_success
             {
-              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource LinuxInstance
+              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource BastionAutoScalingGroup
               exit 0
             }
 
