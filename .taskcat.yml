@@ -1,0 +1,99 @@
+project:
+  name: quickstart-linux-bastion
+  owner: quickstart-eng@amazon.com
+  package_lambda: false
+  regions:
+  - ap-northeast-1
+  - ap-northeast-2
+  - ap-south-1
+  - ap-southeast-1
+  - ap-southeast-2
+  - ca-central-1
+  - eu-central-1
+  - eu-west-1
+  - eu-west-2
+  - us-east-1
+  - us-east-2
+  - us-west-1
+  - us-west-2
+tests:
+  amznlinux2hvm:
+    parameters:
+      AvailabilityZones: $[taskcat_getaz_2]
+      BastionAMIOS: Amazon-Linux2-HVM
+      BastionInstanceType: t2.micro
+      KeyPairName: $[taskcat_getkeypair]
+      PrivateSubnet1CIDR: 10.0.0.0/19
+      PrivateSubnet2CIDR: 10.0.32.0/19
+      PublicSubnet1CIDR: 10.0.128.0/20
+      PublicSubnet2CIDR: 10.0.144.0/20
+      QSS3BucketName: $[taskcat_autobucket]
+      RemoteAccessCIDR: 10.0.0.0/16
+      VPCCIDR: 10.0.0.0/16
+    regions:
+    - us-west-2
+    template: templates/linux-bastion-master.template
+    #  centos7hvm:
+    #    parameters:
+    #      AvailabilityZones: $[taskcat_getaz_2]
+    #      BastionAMIOS: CentOS-7-HVM
+    #      BastionInstanceType: t2.micro
+    #      KeyPairName: $[taskcat_getkeypair]
+    #      PrivateSubnet1CIDR: 10.0.0.0/19
+    #      PrivateSubnet2CIDR: 10.0.32.0/19
+    #      PublicSubnet1CIDR: 10.0.128.0/20
+    #      PublicSubnet2CIDR: 10.0.144.0/20
+    #      QSS3BucketName: $[taskcat_autobucket]
+    #      RemoteAccessCIDR: 10.0.0.0/16
+    #      VPCCIDR: 10.0.0.0/16
+    #    regions:
+    #    - us-west-2
+    #    template: templates/linux-bastion-master.template
+    #  sles15hvm:
+    #    parameters:
+    #      AvailabilityZones: $[taskcat_getaz_2]
+    #      BastionAMIOS: SUSE-SLES-15-HVM
+    #      BastionInstanceType: t2.micro
+    #      KeyPairName: $[taskcat_getkeypair]
+    #      PrivateSubnet1CIDR: 10.0.0.0/19
+    #      PrivateSubnet2CIDR: 10.0.32.0/19
+    #      PublicSubnet1CIDR: 10.0.128.0/20
+    #      PublicSubnet2CIDR: 10.0.144.0/20
+    #      QSS3BucketName: $[taskcat_autobucket]
+    #      RemoteAccessCIDR: 10.0.0.0/16
+    #      VPCCIDR: 10.0.0.0/16
+    #    regions:
+    #    - us-west-2
+    #    template: templates/linux-bastion-master.template
+    #  us1604hvm:
+    #    parameters:
+    #      AvailabilityZones: $[taskcat_getaz_2]
+    #      BastionAMIOS: Ubuntu-Server-16.04-LTS-HVM
+    #      BastionInstanceType: t2.micro
+    #      KeyPairName: $[taskcat_getkeypair]
+    #      PrivateSubnet1CIDR: 10.0.0.0/19
+    #      PrivateSubnet2CIDR: 10.0.32.0/19
+    #      PublicSubnet1CIDR: 10.0.128.0/20
+    #      PublicSubnet2CIDR: 10.0.144.0/20
+    #      QSS3BucketName: $[taskcat_autobucket]
+    #      RemoteAccessCIDR: 10.0.0.0/16
+    #      VPCCIDR: 10.0.0.0/16
+    #    regions:
+    #    - us-west-2
+    #    template: templates/linux-bastion-master.template
+    #  us1804hvm:
+    #   parameters:
+    #     AvailabilityZones: $[taskcat_getaz_2]
+    #     BastionAMIOS: Ubuntu-Server-18.04-LTS-HVM
+    #     BastionInstanceType: t2.micro
+    #     KeyPairName: $[taskcat_getkeypair]
+    #     PrivateSubnet1CIDR: 10.0.0.0/19
+    #     PrivateSubnet2CIDR: 10.0.32.0/19
+    #     PublicSubnet1CIDR: 10.0.128.0/20
+    #     PublicSubnet2CIDR: 10.0.144.0/20
+    #     QSS3BucketName: $[taskcat_autobucket]
+    #     RemoteAccessCIDR: 10.0.0.0/16
+    #     VPCCIDR: 10.0.0.0/16
+    #   regions:
+    #   - us-west-2
+    #   template: templates/linux-bastion-master.template
