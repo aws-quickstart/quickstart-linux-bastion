@@ -340,8 +340,8 @@ Mappings:
     us-gov-east-1:
       AMZNLINUXHVM: ami-28ed0d59
       AMZNLINUX2: ami-7c2bc80d
-      US1404HVM-GOV: ami-21a64050
-      US1604HVM-GOV: ami-a529cad4
+      US1404HVM: ami-21a64050
+      US1604HVM: ami-a529cad4
       SLES15HVM: ami-0e85d9b9717e16d66
     us-east-2:
       AMZNLINUX2: ami-00068cd7555f543d5
