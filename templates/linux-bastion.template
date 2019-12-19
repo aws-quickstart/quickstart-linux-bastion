@@ -628,7 +628,7 @@ Resources:
             cd /quickstart-linux-utilities;
             source quickstart-cfn-tools.source;
             qs_update-os || qs_err;
-            qs_bootstrap_pip || qs_err " pip bootstrap failed ";
+            #qs_bootstrap_pip || qs_err " pip bootstrap failed ";
             qs_aws-cfn-bootstrap || qs_err " cfn bootstrap failed ";
 
             EIP_LIST="${EIP1},${EIP2},${EIP3},${EIP4}"
