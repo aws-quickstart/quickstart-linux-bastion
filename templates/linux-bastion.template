@@ -309,7 +309,7 @@ Mappings:
       CENTOS7HVM: ami-0eab3a90fc693af19
       US1604HVM: ami-05945867d79b7d926
       US1804HVM: ami-00622b440d92e55c0
-      SLES15HVM: ami-01497522185aaa4ee
+      SLES15HVM: ami-00b3184b502428cd0
     eu-west-3:
       AMZNLINUX2: ami-0e9e6ba6d3d38faa8
       AMZNLINUXHVM: ami-0652eb0db9b20aeaf
