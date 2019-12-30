@@ -466,8 +466,8 @@ Resources:
               - arn:${Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*
               - Partition: !If
                   - GovCloudCondition
-                  - aws-us-gov
-                  - aws
+                    - s3-us-gov-west-1
+                    - s3.us-east-1
             Effect: Allow
           - Action:
               - 'ec2:AssociateAddress'
