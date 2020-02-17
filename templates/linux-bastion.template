@@ -552,11 +552,8 @@ Resources:
                 - UseAlternativeInitialization
                 - !Ref AlternativeInitializationScript
                 - !Sub
-                  - https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh
-                  - QSS3Region: !If
-                      - GovCloudCondition
-                      - s3-us-gov-west-1
-                      - s3
+                  - https://s3-${QSS3Region}.amazonaws.com/${QSS3BucketName}/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh
+                  - QSS3Region: !Ref AWS::Region
               mode: '000550'
               owner: root
               group: root
