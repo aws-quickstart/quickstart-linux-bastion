@@ -40,6 +40,7 @@ Metadata:
         Parameters:
           - QSS3BucketName
           - QSS3KeyPrefix
+          - BucketRegion
     ParameterLabels:
       AlternativeIAMRole:
         default: Alternative IAM role
@@ -53,6 +54,8 @@ Metadata:
         default: Bastion tenancy
       BastionBanner:
         default: Banner text
+      BucketRegion:
+        default: Bucket Region
       BastionInstanceType:
         default: Bastion instance type
       EnableBanner:
@@ -99,8 +102,12 @@ Parameters:
     Default: 'LinuxBastion'
     Description: The value used for the name tag of the bastion host
     Type: String
+  BucketRegion:
+    Default: 'us-east-1'
+    Description: Region your S3 Bucket is hosted in.
+    Type: String
   BastionBanner:
-    Default: https://aws-quickstart.s3.amazonaws.com/quickstart-linux-bastion/scripts/banner_message.txt
+    Default: https://aws-quickstart.s3.us-east-1.amazonaws.com/quickstart-linux-bastion/scripts/banner_message.txt
     Description: Banner text to display upon login.
     Type: String
   BastionTenancy:
@@ -392,9 +399,6 @@ Conditions:
   4BastionCondition: !Equals
     - !Ref NumBastionHosts
     - '4'
-  GovCloudCondition: !Equals
-    - !Ref 'AWS::Region'
-    - us-gov-west-1
   UseAlternativeInitialization: !Not
     - !Equals
       - !Ref AlternativeInitializationScript
@@ -406,6 +410,9 @@ Conditions:
     - !Equals
       - !Ref OSImageOverride
       - ''
+  UsingDefaultBucket: !Equals
+    - !Ref QSS3BucketName
+    - 'aws-quickstart'
 Resources:
   BastionMainLogGroup:
     Type: 'AWS::Logs::LogGroup'
@@ -552,11 +559,15 @@ Resources:
                 - UseAlternativeInitialization
                 - !Ref AlternativeInitializationScript
                 - !Sub
-                  - https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh
-                  - QSS3Region: !If
-                      - GovCloudCondition
-                      - s3-us-gov-west-1
-                      - s3
+                  - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh
+                  - S3Bucket: !If
+                      - UsingDefaultBucket
+                      - !Sub 'aws-quickstart-${AWS::Region}'
+                      - !Ref 'QSS3BucketName'
+                    S3Region: !If
+                      - UsingDefaultBucket
+                      - !Ref 'AWS::Region'
+                      - !Ref 'BucketRegion'
               mode: '000550'
               owner: root
               group: root
