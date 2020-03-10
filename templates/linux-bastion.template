@@ -443,7 +443,7 @@ Resources:
             Effect: Allow
         Version: 2012-10-17
       ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonEC2RoleforSSM'
   BastionHostPolicy:
     Type: 'AWS::IAM::Policy'
     Properties:
@@ -453,12 +453,7 @@ Resources:
         Statement:
           - Action:
               - 's3:GetObject'
-            Resource: !Sub
-              - 'arn:${Partition}:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*'
-              - Partition: !If
-                  - GovCloudCondition
-                  - aws-us-gov
-                  - aws
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
             Effect: Allow
           - Action:
               - 'logs:CreateLogStream'
@@ -469,12 +464,7 @@ Resources:
               - 'logs:PutRetentionPolicy'
               - 'logs:PutMetricFilter'
               - 'logs:CreateLogGroup'
-            Resource: !Sub
-              - arn:${Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*
-              - Partition: !If
-                  - GovCloudCondition
-                  - aws-us-gov
-                  - aws
+            Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*"
             Effect: Allow
           - Action:
               - 'ec2:AssociateAddress'
