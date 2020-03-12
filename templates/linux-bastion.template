@@ -615,7 +615,7 @@ Resources:
 
             function cfn_fail
             {
-              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource BastionLaunchConfiguration
+              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource BastionAutoScalingGroup
               exit 1
             }
 
