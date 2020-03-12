@@ -31,7 +31,7 @@ tests:
       QSS3BucketName: $[taskcat_autobucket]
       RemoteAccessCIDR: 10.0.0.0/16
       VPCCIDR: 10.0.0.0/16
-      BucketRegion: $[taskcat_current_region]
+      QSS3BucketRegion: $[taskcat_current_region]
     regions:
     - ap-northeast-1
     - ap-northeast-2
@@ -61,7 +61,7 @@ tests:
       QSS3BucketName: $[taskcat_autobucket]
       RemoteAccessCIDR: 10.0.0.0/16
       VPCCIDR: 10.0.0.0/16
-      BucketRegion: $[taskcat_current_region]
+      QSS3BucketRegion: $[taskcat_current_region]
     regions:
     - ap-northeast-1
     - ap-northeast-2
@@ -91,7 +91,7 @@ tests:
       QSS3BucketName: $[taskcat_autobucket]
       RemoteAccessCIDR: 10.0.0.0/16
       VPCCIDR: 10.0.0.0/16
-      BucketRegion: $[taskcat_current_region]
+      QSS3BucketRegion: $[taskcat_current_region]
     regions:
     - ap-northeast-1
     - ap-northeast-2
@@ -121,7 +121,7 @@ tests:
       QSS3BucketName: $[taskcat_autobucket]
       RemoteAccessCIDR: 10.0.0.0/16
       VPCCIDR: 10.0.0.0/16
-      BucketRegion: $[taskcat_current_region]
+      QSS3BucketRegion: $[taskcat_current_region]
     regions:
     - ap-northeast-1
     - ap-northeast-2
@@ -151,7 +151,7 @@ tests:
       QSS3BucketName: $[taskcat_autobucket]
       RemoteAccessCIDR: 10.0.0.0/16
       VPCCIDR: 10.0.0.0/16
-      BucketRegion: $[taskcat_current_region]
+      QSS3BucketRegion: $[taskcat_current_region]
     regions:
     - ap-northeast-1
     - ap-northeast-2
