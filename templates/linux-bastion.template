@@ -443,7 +443,8 @@ Resources:
             Effect: Allow
         Version: 2012-10-17
       ManagedPolicyArns:
-        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonEC2RoleforSSM'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy'
   BastionHostPolicy:
     Type: 'AWS::IAM::Policy'
     Properties:
