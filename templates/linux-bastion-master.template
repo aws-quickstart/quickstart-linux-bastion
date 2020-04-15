@@ -100,7 +100,7 @@ Parameters:
     Description: The value used for the name tag of the bastion host
     Type: String
   BastionBanner:
-    Default: https://aws-quickstart.s3.us-east-1.amazonaws.com/quickstart-linux-bastion/scripts/banner_message.txt
+    Default: ""
     Description: Banner text to display upon login.
     Type: String
   BastionTenancy:

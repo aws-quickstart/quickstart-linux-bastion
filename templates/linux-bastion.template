@@ -103,7 +103,7 @@ Parameters:
     Description: The value used for the name tag of the bastion host
     Type: String
   BastionBanner:
-    Default: https://aws-quickstart.s3.us-east-1.amazonaws.com/quickstart-linux-bastion/scripts/banner_message.txt
+    Default: ""
     Description: Banner text to display upon login.
     Type: String
   BastionTenancy:
@@ -427,6 +427,7 @@ Conditions:
   UsingDefaultBucket: !Equals
     - !Ref QSS3BucketName
     - 'aws-quickstart'
+  DefaultBanner: !Equals [!Ref BastionBanner, ""]
 Resources:
   BastionMainLogGroup:
     Type: 'AWS::Logs::LogGroup'
@@ -438,10 +439,7 @@ Resources:
       MetricTransformations:
         - MetricName: SSHCommandCount
           MetricValue: '1'
-          MetricNamespace: !Join
-            - /
-            - - AWSQuickStart
-              - !Ref 'AWS::StackName'
+          MetricNamespace: !Sub "AWSQuickStart/${AWS::StackName}"
   BastionHostRole:
     Condition: CreateIAMRole
     Type: 'AWS::IAM::Role'
@@ -453,7 +451,7 @@ Resources:
               - 'sts:AssumeRole'
             Principal:
               Service:
-                - ec2.amazonaws.com
+                - !Sub 'ec2.${AWS::URLSuffix}'
             Effect: Allow
         Version: 2012-10-17
       ManagedPolicyArns:
@@ -582,17 +580,21 @@ Resources:
           commands:
             b-bootstrap:
               cwd: '/tmp/'
-              command: !Join
-                - ''
-                - - ./bastion_bootstrap.sh
-                  - ' --banner '
+              command: !Sub
+                - "./bastion_bootstrap.sh --banner ${BannerUrl} --enable ${EnableBanner} --tcp-forwarding ${EnableTCPForwarding} --x11-forwarding ${EnableX11Forwarding}"
+                - BannerUrl: !If
+                  - DefaultBanner
+                  - !Sub
+                    - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/banner_message.txt
+                    - S3Bucket: !If
+                        - UsingDefaultBucket
+                        - !Sub 'aws-quickstart-${AWS::Region}'
+                        - !Ref 'QSS3BucketName'
+                      S3Region: !If
+                        - UsingDefaultBucket
+                        - !Ref 'AWS::Region'
+                        - !Ref 'QSS3BucketRegion'
                   - !Ref BastionBanner
-                  - ' --enable '
-                  - !Ref EnableBanner
-                  - ' --tcp-forwarding '
-                  - !Ref EnableTCPForwarding
-                  - ' --x11-forwarding '
-                  - !Ref EnableX11Forwarding
     Properties:
       AssociatePublicIpAddress: true
       PlacementTenancy: !Ref BastionTenancy
