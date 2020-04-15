@@ -371,6 +371,20 @@ Mappings:
       US1604HVM: ami-02d0ea44ae3fe9561
       US1804HVM: ami-0edf3b95e26a682df
       SLES15HVM: ami-0f1e3b3fb0fec0361
+    cn-north-1:
+      AMZNLINUX2: ami-010e92a33d9d1fc40
+      AMZNLINUXHVM: ami-04b1196830276cd1f
+      CENTOS7HVM: ami-0e02aaefeb74c3373
+      US1604HVM: ami-04efbaf491dc3e681
+      US1804HVM: ami-0071f6f4df15863cc
+      SLES15HVM: ami-021392849b6221a81
+    cn-northwest-1:
+      AMZNLINUX2: ami-0959f8e18a2aac0fb
+      AMZNLINUXHVM: ami-0bae393f70322bed6
+      CENTOS7HVM: ami-07183a7702633260b
+      US1604HVM: ami-032ddff247c0bae9e
+      US1804HVM: ami-0a22b8776bb32836b
+      SLES15HVM: ami-00e1de3ee6d0d28ea
   LinuxAMINameMap:
     Amazon-Linux2-HVM:
       Code: AMZNLINUX2
