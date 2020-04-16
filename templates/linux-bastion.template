@@ -86,6 +86,7 @@ Metadata:
         default: VPC ID
       RootVolumeSize:
         default: Root volume size
+  cfn-lint: { config: { ignore_checks: [E9007] } }
 Parameters:
   BastionAMIOS:
     AllowedValues:
@@ -581,20 +582,17 @@ Resources:
             b-bootstrap:
               cwd: '/tmp/'
               command: !Sub
-                - "./bastion_bootstrap.sh --banner ${BannerUrl} --enable ${EnableBanner} --tcp-forwarding ${EnableTCPForwarding} --x11-forwarding ${EnableX11Forwarding}"
-                - BannerUrl: !If
-                  - DefaultBanner
-                  - !Sub
-                    - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/banner_message.txt
-                    - S3Bucket: !If
-                        - UsingDefaultBucket
-                        - !Sub 'aws-quickstart-${AWS::Region}'
-                        - !Ref 'QSS3BucketName'
-                      S3Region: !If
-                        - UsingDefaultBucket
-                        - !Ref 'AWS::Region'
-                        - !Ref 'QSS3BucketRegion'
-                  - !Ref BastionBanner
+                - "S3_URI=${S3Uri} S3_REGION=${S3Region} ./bastion_bootstrap.sh --banner ${BannerUrl} --enable ${EnableBanner} --tcp-forwarding ${EnableTCPForwarding} --x11-forwarding ${EnableX11Forwarding}"
+                - S3Uri: !Sub
+                    - "s3://${S3Bucket}/${QSS3KeyPrefix}"
+                    - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+                  S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref 'QSS3BucketRegion' ]
+                  BannerUrl: !If
+                    - DefaultBanner
+                    - !Sub
+                      - s3://${S3Bucket}/${QSS3KeyPrefix}scripts/banner_message.txt
+                      - S3Bucket: !If [ UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref 'QSS3BucketName' ]
+                    - !Ref BastionBanner
     Properties:
       AssociatePublicIpAddress: true
       PlacementTenancy: !Ref BastionTenancy
