@@ -1,7 +1,8 @@
 project:
   name: quickstart-linux-bastion
   owner: quickstart-eng@amazon.com
-  package_lambda: false
+  lambda_source_path: functions/source
+  lambda_zip_path: packages
   regions:
   - ap-northeast-1
   - ap-northeast-2
@@ -10,7 +11,6 @@ project:
   - ap-southeast-2
   - ca-central-1
   - eu-central-1
-  - eu-north-1
   - eu-west-1
   - eu-west-2
   - eu-west-3
@@ -19,8 +19,6 @@ project:
   - us-east-2
   - us-west-1
   - us-west-2
-  - cn-north-1
-  - cn-northwest-1
   - us-gov-east-1
   - us-gov-west-1
   template: templates/linux-bastion-master.template
@@ -40,16 +38,37 @@ tests:
   amznlinux2hvm:
     parameters:
       BastionAMIOS: Amazon-Linux2-HVM
+    regions:
+      - ap-northeast-1
+      - ap-northeast-2
+      - ap-south-1
+      - ap-southeast-1
+      - ap-southeast-2
+      - ca-central-1
+      - eu-central-1
+      - eu-north-1
+      - eu-west-1
+      - eu-west-2
+      - eu-west-3
+      - sa-east-1
+      - us-east-1
+      - us-east-2
+      - us-west-1
+      - us-west-2
+      - cn-north-1
+      - cn-northwest-1
+      - us-gov-east-1
+      - us-gov-west-1
   centos7hvm:
     parameters:
       BastionAMIOS: CentOS-7-HVM
     regions:
-      - cn-north-1
       - ap-northeast-2
       - ap-south-1
       - ap-southeast-2
       - ca-central-1
       - eu-central-1
+      - eu-north-1
       - eu-west-1
       - eu-west-2
       - us-east-1
