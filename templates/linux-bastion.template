@@ -529,7 +529,7 @@ Resources:
         - !Ref PublicSubnet2ID
       MinSize: !Ref NumBastionHosts
       MaxSize: !Ref NumBastionHosts
-      Cooldown: '300'
+      Cooldown: '900'
       DesiredCapacity: !Ref NumBastionHosts
       Tags:
         - Key: Name
@@ -538,7 +538,7 @@ Resources:
     CreationPolicy:
       ResourceSignal:
         Count: !Ref NumBastionHosts
-        Timeout: PT30M
+        Timeout: PT60M
       AutoScalingCreationPolicy:
         MinSuccessfulInstancesPercent: 100
     UpdatePolicy:
