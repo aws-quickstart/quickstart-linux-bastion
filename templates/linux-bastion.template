@@ -596,7 +596,7 @@ Resources:
             b-bootstrap:
               cwd: '/tmp/'
               command: !Sub
-                - "REGION=${AWS::Region} BANNER_REGION=${BannerRegion} ./bastion_bootstrap.sh --banner ${BannerUrl} --enable ${EnableBanner} --tcp-forwarding ${EnableTCPForwarding} --x11-forwarding ${EnableX11Forwarding}"
+                - "REGION=${AWS::Region} URL_SUFFIX=${AWS::URLSuffix} BANNER_REGION=${BannerRegion} ./bastion_bootstrap.sh --banner ${BannerUrl} --enable ${EnableBanner} --tcp-forwarding ${EnableTCPForwarding} --x11-forwarding ${EnableX11Forwarding}"
                 - BannerRegion: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref 'QSS3BucketRegion' ]
                   BannerUrl: !If
                     - DefaultBanner
