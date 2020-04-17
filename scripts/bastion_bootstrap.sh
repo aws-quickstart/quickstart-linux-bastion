@@ -156,19 +156,19 @@ function setup_logs () {
     echo "${FUNCNAME[0]} Started"
 
     if [[ "${release}" == "SLES" ]]; then
-        aws s3 cp "${S3_URI}packages/CloudWatchAgent/amazon-cloudwatch-agent-suse.rpm" ./amazon-cloudwatch-agent.rpm --region ${S3_REGION}
+        curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.amazonaws.com/suse/amd64/latest/amazon-cloudwatch-agent.rpm" -O
         zypper install --allow-unsigned-rpm -y ./amazon-cloudwatch-agent.rpm
         rm ./amazon-cloudwatch-agent.rpm
     elif [[ "${release}" == "CentOS" ]]; then
-        aws s3 cp "${S3_URI}packages/CloudWatchAgent/amazon-cloudwatch-agent-centos.rpm" ./amazon-cloudwatch-agent.rpm --region ${S3_REGION}
+        curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.amazonaws.com/centos/amd64/latest/amazon-cloudwatch-agent.rpm" -O
         rpm -U ./amazon-cloudwatch-agent.rpm
         rm ./amazon-cloudwatch-agent.rpm
     elif [[ "${release}" == "Ubuntu" ]]; then
-        aws s3 cp "${S3_URI}packages/CloudWatchAgent/amazon-cloudwatch-agent-ubnt.deb" ./amazon-cloudwatch-agent.deb --region ${S3_REGION}
+        curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb" -O
         dpkg -i -E ./amazon-cloudwatch-agent.deb
         rm ./amazon-cloudwatch-agent.deb
     elif [[ "${release}" == "AMZN" ]]; then
-        aws s3 cp "${S3_URI}packages/CloudWatchAgent/amazon-cloudwatch-agent-al.rpm" ./amazon-cloudwatch-agent.rpm --region ${S3_REGION}
+        curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.amazonaws.com/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm" -O
         rpm -U ./amazon-cloudwatch-agent.rpm
         rm ./amazon-cloudwatch-agent.rpm
     fi
@@ -422,7 +422,7 @@ if [[ ${ENABLE} == "true" ]];then
     else
         echo "BANNER_PATH = ${BANNER_PATH}"
         echo "Creating Banner in ${BANNER_FILE}"
-        aws s3 cp "${BANNER_PATH}" "${BANNER_FILE}"  --region ${S3_REGION}
+        aws s3 cp "${BANNER_PATH}" "${BANNER_FILE}"  --region ${BANNER_REGION}
         if [[ -e ${BANNER_FILE} ]] ;then
             echo "[INFO] Installing banner ... "
             echo -e "\n Banner ${BANNER_FILE}" >>/etc/ssh/sshd_config
