@@ -154,6 +154,7 @@ EOF
 function setup_logs () {
 
     echo "${FUNCNAME[0]} Started"
+    URL_SUFFIX="${URL_SUFFIX:-amazonaws.com}"
 
     if [[ "${release}" == "SLES" ]]; then
         curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/suse/amd64/latest/amazon-cloudwatch-agent.rpm" -O
