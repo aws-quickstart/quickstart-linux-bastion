@@ -157,19 +157,19 @@ function setup_logs () {
     URL_SUFFIX="${URL_SUFFIX:-amazonaws.com}"
 
     if [[ "${release}" == "SLES" ]]; then
-        curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/suse/amd64/latest/amazon-cloudwatch-agent.rpm" -O
+        curl "https://amazoncloudwatch-agent-${REGION}.s3.amazonaws.com/suse/amd64/latest/amazon-cloudwatch-agent.rpm" -O
         zypper install --allow-unsigned-rpm -y ./amazon-cloudwatch-agent.rpm
         rm ./amazon-cloudwatch-agent.rpm
     elif [[ "${release}" == "CentOS" ]]; then
-        curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/centos/amd64/latest/amazon-cloudwatch-agent.rpm" -O
+        curl "https://amazoncloudwatch-agent-${REGION}.s3.amazonaws.com/centos/amd64/latest/amazon-cloudwatch-agent.rpm" -O
         rpm -U ./amazon-cloudwatch-agent.rpm
         rm ./amazon-cloudwatch-agent.rpm
     elif [[ "${release}" == "Ubuntu" ]]; then
-        curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb" -O
+        curl "https://amazoncloudwatch-agent-${REGION}.s3.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb" -O
         dpkg -i -E ./amazon-cloudwatch-agent.deb
         rm ./amazon-cloudwatch-agent.deb
     elif [[ "${release}" == "AMZN" ]]; then
-        curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm" -O
+        curl "https://amazoncloudwatch-agent-${REGION}.s3.amazonaws.com/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm" -O
         rpm -U ./amazon-cloudwatch-agent.rpm
         rm ./amazon-cloudwatch-agent.rpm
     fi
