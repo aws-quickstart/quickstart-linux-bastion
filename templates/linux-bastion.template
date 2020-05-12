@@ -595,15 +595,18 @@ Resources:
           commands:
             b-bootstrap:
               cwd: '/tmp/'
+              env:
+                REGION: !Sub ${AWS::Region}
+                URL_SUFFIX: !Sub ${AWS::URLSuffix}
+                BANNER_REGION: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref 'QSS3BucketRegion' ]
               command: !Sub
-                - "REGION=${AWS::Region} URL_SUFFIX=${AWS::URLSuffix} BANNER_REGION=${BannerRegion} ./bastion_bootstrap.sh --banner ${BannerUrl} --enable ${EnableBanner} --tcp-forwarding ${EnableTCPForwarding} --x11-forwarding ${EnableX11Forwarding}"
-                - BannerRegion: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref 'QSS3BucketRegion' ]
-                  BannerUrl: !If
-                    - DefaultBanner
-                    - !Sub
-                      - s3://${S3Bucket}/${QSS3KeyPrefix}scripts/banner_message.txt
-                      - S3Bucket: !If [ UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref 'QSS3BucketName' ]
-                    - !Ref BastionBanner
+                - "./bastion_bootstrap.sh --banner ${BannerUrl} --enable ${EnableBanner} --tcp-forwarding ${EnableTCPForwarding} --x11-forwarding ${EnableX11Forwarding}"
+                - BannerUrl: !If
+                  - DefaultBanner
+                  - !Sub
+                    - s3://${S3Bucket}/${QSS3KeyPrefix}scripts/banner_message.txt
+                    - S3Bucket: !If [ UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref 'QSS3BucketName' ]
+                  - !Ref BastionBanner
     Properties:
       AssociatePublicIpAddress: true
       PlacementTenancy: !Ref BastionTenancy
