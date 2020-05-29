@@ -426,7 +426,7 @@ if [[ ${ENABLE} == "true" ]];then
         aws s3 cp "${BANNER_PATH}" "${BANNER_FILE}"  --region ${BANNER_REGION}
         if [[ -e ${BANNER_FILE} ]] ;then
             echo "[INFO] Installing banner ... "
-            echo -e "\n Banner ${BANNER_FILE}" >>/etc/ssh/sshd_config
+            echo -e "\nBanner ${BANNER_FILE}" >>/etc/ssh/sshd_config
         else
             echo "[INFO] banner file is not accessible skipping ..."
             exit 1;
