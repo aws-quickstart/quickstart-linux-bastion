@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: LinuxBastion+VPC Oct,23,2019 (Please do not remove)
+Description: LinuxBastion+VPC Oct,23,2019 (qs-1qup6ra9p) (Please do not remove)
 Metadata:
   LICENSE: Apache License, Version 2.0 
   'AWS::CloudFormation::Interface':
