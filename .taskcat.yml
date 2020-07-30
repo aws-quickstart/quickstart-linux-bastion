@@ -78,9 +78,6 @@ tests:
   sles15hvm:
     parameters:
       BastionAMIOS: SUSE-SLES-15-HVM
-  us1604hvm:
-    parameters:
-      BastionAMIOS: Ubuntu-Server-16.04-LTS-HVM
   us1804hvm:
     parameters:
       BastionAMIOS: Ubuntu-Server-18.04-LTS-HVM
