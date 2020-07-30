@@ -165,6 +165,7 @@ function setup_logs () {
         rpm -U ./amazon-cloudwatch-agent.rpm
         rm ./amazon-cloudwatch-agent.rpm
     elif [[ "${release}" == "Ubuntu" ]]; then
+        export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
         curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb" -O
         dpkg -i -E ./amazon-cloudwatch-agent.deb
         rm ./amazon-cloudwatch-agent.deb
