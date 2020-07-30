@@ -88,7 +88,6 @@ Parameters:
   BastionAMIOS:
     AllowedValues:
       - Amazon-Linux2-HVM
-      - Amazon-Linux-HVM
       - CentOS-7-HVM
       - Ubuntu-Server-18.04-LTS-HVM
       - Ubuntu-Server-16.04-LTS-HVM
