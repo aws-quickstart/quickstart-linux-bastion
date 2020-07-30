@@ -3,6 +3,7 @@ project:
   owner: quickstart-eng@amazon.com
   lambda_source_path: functions/source
   lambda_zip_path: packages
+  s3_regional_buckets: true
   regions:
   - ap-northeast-1
   - ap-northeast-2
