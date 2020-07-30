@@ -82,3 +82,6 @@ tests:
   us1804hvm:
     parameters:
       BastionAMIOS: Ubuntu-Server-18.04-LTS-HVM
+  us2004hvm:
+    parameters:
+      BastionAMIOS: Ubuntu-Server-20.04-LTS-HVM
