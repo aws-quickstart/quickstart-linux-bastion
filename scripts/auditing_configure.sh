@@ -1,3 +1,4 @@
+#!/bin/bash
 function install_stuff_ubuntu(){
   apt-get -y install auditd
 }

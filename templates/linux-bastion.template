@@ -536,17 +536,16 @@ Resources:
                 -a exit,always -F arch=b64 -S execve
                 -a exit,always -F arch=b32 -S execve
             /tmp/auditing_configure.sh:
-              source:
-                - !Sub
-                  - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/auditing_configure.sh
-                  - S3Bucket: !If
-                      - UsingDefaultBucket
-                      - !Sub 'aws-quickstart-${AWS::Region}'
-                      - !Ref 'QSS3BucketName'
-                    S3Region: !If
-                      - UsingDefaultBucket
-                      - !Ref 'AWS::Region'
-                      - !Ref 'QSS3BucketRegion'
+              source: !Sub
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/auditing_configure.sh
+                - S3Bucket: !If
+                    - UsingDefaultBucket
+                    - !Sub 'aws-quickstart-${AWS::Region}'
+                    - !Ref 'QSS3BucketName'
+                  S3Region: !If
+                    - UsingDefaultBucket
+                    - !Ref 'AWS::Region'
+                    - !Ref 'QSS3BucketRegion'
               mode: '000550'
               owner: root
               group: root
