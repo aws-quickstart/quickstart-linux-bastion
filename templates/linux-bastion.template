@@ -380,14 +380,19 @@ Mappings:
   LinuxAMINameMap:
     Amazon-Linux2-HVM:
       Code: AMZNLINUX2
+      OS: Amazon
     CentOS-7-HVM:
       Code: CENTOS7HVM
+      OS: Centos
     Ubuntu-Server-18.04-LTS-HVM:
       Code: US1804HVM
+      OS: Ubuntu
     Ubuntu-Server-20.04-LTS-HVM:
       Code: US2004HVM
+      OS: Ubuntu
     SUSE-SLES-15-HVM:
       Code: SLES15HVM
+      OS: SLES
 Conditions:
   2BastionCondition: !Or
     - !Equals
@@ -549,6 +554,29 @@ Resources:
       'AWS::CloudFormation::Init':
         config:
           files:
+            /tmp/auditd.rules:
+              mode: '000550'
+              owner: root
+              group: root
+              content: |
+                -a exit,always -F arch=b64 -S execve
+                -a exit,always -F arch=b32 -S execve
+            /tmp/auditing_configure.sh:
+              source:
+                - !Sub
+                  - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/auditing_configure.sh
+                  - S3Bucket: !If
+                      - UsingDefaultBucket
+                      - !Sub 'aws-quickstart-${AWS::Region}'
+                      - !Ref 'QSS3BucketName'
+                    S3Region: !If
+                      - UsingDefaultBucket
+                      - !Ref 'AWS::Region'
+                      - !Ref 'QSS3BucketRegion'
+              mode: '000550'
+              owner: root
+              group: root
+              authentication: S3AccessCreds
             /tmp/bastion_bootstrap.sh:
               source: !If
                 - UseAlternativeInitialization
@@ -568,6 +596,14 @@ Resources:
               group: root
               authentication: S3AccessCreds
           commands:
+            a-add_auditd_rules:
+              cwd: '/tmp/'
+              env:
+                BASTION_OS: !FindInMap [LinuxAMINameMap, !Ref BastionAMIOS, OS]
+              command: "./auditing_configure.sh"
+              # command:
+              #   - !If [ ]
+              #   - "cat /tmp/auditd.rules >> /etc/audit/rules.d/audit.rules && service auditd restart"
             b-bootstrap:
               cwd: '/tmp/'
               env:
@@ -641,7 +677,7 @@ Resources:
             EIP_LIST="${EIP1},${EIP2},${EIP3},${EIP4}"
             CLOUDWATCHGROUP=${BastionMainLogGroup}
             cfn-init -v --stack '${AWS::StackName}' --resource BastionLaunchConfiguration --region ${AWS::Region} || cfn_fail
-            [ $(qs_status) == 0 ] && cfn_success || cfn_fail 
+            [ $(qs_status) == 0 ] && cfn_success || cfn_fail
           - EIP2:
               !If
               - 2BastionCondition
