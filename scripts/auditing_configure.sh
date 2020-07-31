@@ -9,11 +9,21 @@ function add_the_rules(){
 }
 
 function restart_services(){
-  service auditd restart
+  case "${BASTION_OS}" in
+    Amazon)
+      /usr/sbin/service auditd restart
+      ;;
+    CentOS|SUSE)
+      /sbin/service auditd restart
+      ;;
+    Ubuntu)
+      service auditd restart
+      ;;
+  esac
 }
 
-case "${BASTION_OS}" in 
-    "Ubuntu")
+case "${BASTION_OS}" in
+    Ubuntu)
       install_stuff_ubuntu
       ;;
 esac
