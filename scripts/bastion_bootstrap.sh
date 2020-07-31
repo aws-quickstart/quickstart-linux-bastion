@@ -36,23 +36,8 @@ function setup_environment_variables() {
 
     CWG=$(grep CLOUDWATCHGROUP ${_userdata_file} | sed 's/CLOUDWATCHGROUP=//g')
 
-    # LOGGING CONFIGURATION
-    BASTION_MNT="/var/log/bastion"
-    BASTION_LOG="bastion.log"
-    echo "Setting up bastion session log in ${BASTION_MNT}/${BASTION_LOG}"
-    mkdir -p ${BASTION_MNT}
-    BASTION_LOGFILE="${BASTION_MNT}/${BASTION_LOG}"
-    BASTION_LOGFILE_SHADOW="${BASTION_MNT}/.${BASTION_LOG}"
-    touch ${BASTION_LOGFILE}
-    if ! [ -L "$BASTION_LOGFILE_SHADOW" ]; then
-      ln ${BASTION_LOGFILE} ${BASTION_LOGFILE_SHADOW}
-    fi
-    mkdir -p /usr/bin/bastion
-    touch /tmp/messages
-    chmod 770 /tmp/messages
 
-    export REGION ETH0_MAC EIP_LIST CWG BASTION_MNT BASTION_LOG BASTION_LOGFILE BASTION_LOGFILE_SHADOW \
-          LOCAL_IP_ADDRESS INSTANCE_ID
+    export REGION ETH0_MAC EIP_LIST CWG LOCAL_IP_ADDRESS INSTANCE_ID
 }
 
 function verify_dependencies(){
@@ -99,58 +84,6 @@ function osrelease () {
     echo "${FUNCNAME[0]} Ended" >> /var/log/cfn-init.log
 }
 
-function harden_ssh_security () {
-    # Allow ec2-user only to access this folder and its content
-    #chmod -R 770 /var/log/bastion
-    #setfacl -Rdm other:0 /var/log/bastion
-
-    # Make OpenSSH execute a custom script on logins
-    echo -e "\nForceCommand /usr/bin/bastion/shell" >> /etc/ssh/sshd_config
-
-
-
-cat <<'EOF' >> /usr/bin/bastion/shell
-bastion_mnt="/var/log/bastion"
-bastion_log="bastion.log"
-# Check that the SSH client did not supply a command. Only SSH to instance should be allowed.
-export Allow_SSH="ssh"
-export Allow_SCP="scp"
-if [[ -z $SSH_ORIGINAL_COMMAND ]] || [[ $SSH_ORIGINAL_COMMAND =~ ^$Allow_SSH ]] || [[ $SSH_ORIGINAL_COMMAND =~ ^$Allow_SCP ]]; then
-#Allow ssh to instance and log connection
-    if [[ -z "$SSH_ORIGINAL_COMMAND" ]]; then
-        /bin/bash
-        exit 0
-    else
-        $SSH_ORIGINAL_COMMAND
-    fi
-log_shadow_file_location="${bastion_mnt}/.${bastion_log}"
-log_file=`echo "$log_shadow_file_location"`
-DATE_TIME_WHOAMI="`whoami`:`date "+%Y-%m-%d %H:%M:%S"`"
-LOG_ORIGINAL_COMMAND=`echo "$DATE_TIME_WHOAMI:$SSH_ORIGINAL_COMMAND"`
-echo "$LOG_ORIGINAL_COMMAND" >> "${bastion_mnt}/${bastion_log}"
-log_dir="/var/log/bastion/"
-
-else
-# The "script" program could be circumvented with some commands
-# (e.g. bash, nc). Therefore, I intentionally prevent users
-# from supplying commands.
-
-echo "This bastion supports interactive sessions only. Do not supply a command"
-exit 1
-fi
-EOF
-
-    # Make the custom script executable
-    chmod a+x /usr/bin/bastion/shell
-
-    release=$(osrelease)
-    if [[ "${release}" == "CentOS" ]]; then
-        semanage fcontext -a -t ssh_exec_t /usr/bin/bastion/shell
-    fi
-
-    echo "${FUNCNAME[0]} Ended"
-}
-
 function setup_logs () {
 
     echo "${FUNCNAME[0]} Started"
@@ -183,7 +116,7 @@ function setup_logs () {
             "files": {
                 "collect_list": [
                     {
-                        "file_path": "${BASTION_LOGFILE_SHADOW}",
+                        "file_path": "/var/log/auditd/auditd.log",
                         "log_group_name": "${CWG}",
                         "log_stream_name": "{instance_id}",
                         "timestamp_format": "%Y-%m-%d %H:%M:%S",
@@ -208,19 +141,6 @@ function setup_os () {
 
     echo "${FUNCNAME[0]} Started"
 
-    if [[ "${release}" == "AMZN" ]] || [[ "${release}" == "CentOS" ]]; then
-        bash_file="/etc/bashrc"
-    else
-        bash_file="/etc/bash.bashrc"
-    fi
-
-cat <<EOF >> "${bash_file}"
-#Added by Linux bastion bootstrap
-declare -rx IP=\$(echo \$SSH_CLIENT | awk '{print \$1}')
-declare -rx BASTION_LOG=${BASTION_LOGFILE}
-declare -rx PROMPT_COMMAND='history -a >(logger -t "[ON]:\$(date)   [FROM]:\${IP}   [USER]:\${USER}   [PWD]:\${PWD}" -s 2>>\${BASTION_LOG})'
-EOF
-
     echo "Defaults env_keep += \"SSH_CLIENT\"" >> /etc/sudoers
 
     if [[ "${release}" == "Ubuntu" ]]; then
@@ -232,16 +152,6 @@ EOF
     else
         user_group="ec2-user"
     fi
-
-    chown root:"${user_group}" "${BASTION_MNT}"
-    chown root:"${user_group}" "${BASTION_LOGFILE}"
-    chown root:"${user_group}" "${BASTION_LOGFILE_SHADOW}"
-    chmod 662 "${BASTION_LOGFILE}"
-    chmod 662 "${BASTION_LOGFILE_SHADOW}"
-    chattr +a "${BASTION_LOGFILE}"
-    chattr +a "${BASTION_LOGFILE_SHADOW}"
-    touch /tmp/messages
-    chown root:"${user_group}" /tmp/messages
 
     if [[ "${release}" == "CentOS" ]]; then
         restorecon -v /etc/ssh/sshd_config
@@ -448,7 +358,6 @@ echo "Value of X11_FORWARDING - ${X11_FORWARDING}"
 if [[ ${TCP_FORWARDING} == "false" ]];then
     awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
     echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
-    harden_ssh_security
 fi
 
 if [[ ${X11_FORWARDING} == "false" ]];then
