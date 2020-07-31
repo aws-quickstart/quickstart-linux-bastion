@@ -154,7 +154,7 @@ function setup_os () {
     fi
 
     if [[ "${release}" == "CentOS" ]]; then
-        restorecon -v /etc/ssh/sshd_config
+        /sbin/restorecon -v /etc/ssh/sshd_config
         systemctl restart sshd
     fi
 
