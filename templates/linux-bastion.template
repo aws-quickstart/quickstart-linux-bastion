@@ -357,7 +357,7 @@ Mappings:
       OS: Amazon
     CentOS-7-HVM:
       Code: CENTOS7HVM
-      OS: Centos
+      OS: CentOS
     Ubuntu-Server-18.04-LTS-HVM:
       Code: US1804HVM
       OS: Ubuntu
