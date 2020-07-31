@@ -125,9 +125,6 @@ Parameters:
       - t3.large
       - t3.xlarge
       - t3.2xlarge
-      - m3.large
-      - m3.xlarge
-      - m3.2xlarge
       - m4.large
       - m4.xlarge
       - m4.2xlarge
