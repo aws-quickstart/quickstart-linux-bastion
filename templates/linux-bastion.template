@@ -320,11 +320,9 @@ Mappings:
       SLES15HVM: ami-0b1764f3d7d2e2316
     us-gov-west-1:
       AMZNLINUX2: ami-74c4f215
-      US2004HVM: ami-fuckeryasfdsadfaf
       SLES15HVM: ami-57c0ba36
     us-gov-east-1:
       AMZNLINUX2: ami-30e00c41
-      US2004HVM: ami-fuckeryasfdsadfaf
       SLES15HVM: ami-05e4bedfad53425e9
     us-east-2:
       AMZNLINUX2: ami-07c8bc5c1ce9598c3
@@ -343,12 +341,10 @@ Mappings:
       SLES15HVM: ami-0f1e3b3fb0fec0361
     cn-north-1:
       AMZNLINUX2: ami-010e92a33d9d1fc40
-      US2004HVM: ami-fuckeryasfdsadfaf
       CENTOS7HVM: ami-0e02aaefeb74c3373
       SLES15HVM: ami-021392849b6221a81
     cn-northwest-1:
       AMZNLINUX2: ami-0959f8e18a2aac0fb
-      US2004HVM: ami-fuckeryasfdsadfaf
       CENTOS7HVM: ami-07183a7702633260b
       SLES15HVM: ami-00e1de3ee6d0d28ea
   LinuxAMINameMap:
