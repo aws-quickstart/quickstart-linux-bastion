@@ -117,19 +117,19 @@ Parameters:
       - t2.nano
       - t2.micro
       - t2.small
-      - t2.medium
-      - t2.large
+      # - t2.medium
+      # - t2.large
       - t3.micro
       - t3.small
       - t3.medium
-      - t3.large
-      - t3.xlarge
-      - t3.2xlarge
-      - m4.large
-      - m4.xlarge
-      - m4.2xlarge
-      - m4.4xlarge
-    Default: t2.micro
+      # - t3.large
+      # - t3.xlarge
+      # - t3.2xlarge
+      # - m4.large
+      # - m4.xlarge
+      # - m4.2xlarge
+      # - m4.4xlarge
+    Default: t3.micro
     Description: Amazon EC2 instance type for the bastion instances.
     Type: String
   EnableBanner:
@@ -143,14 +143,14 @@ Parameters:
   EnableTCPForwarding:
     Type: String
     Description: To enable TCP forwarding, choose true.
-    Default: 'false'
+    Default: 'true'
     AllowedValues:
       - 'true'
       - 'false'
   EnableX11Forwarding:
     Type: String
     Description: To enable X11 forwarding, choose true.
-    Default: 'false'
+    Default: 'true'
     AllowedValues:
       - 'true'
       - 'false'
@@ -161,31 +161,33 @@ Parameters:
   NumBastionHosts:
     AllowedValues:
       - '1'
-      - '2'
-      - '3'
-      - '4'
+      # - '2'
+      # - '3'
+      # - '4'
     Default: '1'
-    Description: The number of bastion hosts to create. The maximum number is four.
+    Description: The number of bastion hosts to create. The maximum number is one (template supports 4).
     Type: String
   PublicSubnet1ID:
     Description: ID of the public subnet 1 that you want to provision the first bastion
       into (e.g., subnet-a0246dcd).
     Type: 'AWS::EC2::Subnet::Id'
+    Default: 'subnet-0b1ceb172ea528a02'
   PublicSubnet2ID:
     Description: ID of the public subnet 2 that you want to provision the second bastion into
       (e.g., subnet-e3246d8e).
     Type: 'AWS::EC2::Subnet::Id'
+    Default: 'subnet-01153d5e7e1bf7115'
   QSS3BucketName:
     AllowedPattern: '^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$'
     ConstraintDescription: Quick Start bucket name can include numbers, lowercase letters, uppercase
       letters, and hyphens (-). It cannot start or end with a hyphen (-).
-    Default: aws-quickstart
+    Default: lehto-bastion
     Description: S3 bucket name for the Quick Start assets. Quick Start bucket name can
       include numbers, lowercase letters, uppercase letters, and hyphens (-). It
       cannot start or end with a hyphen (-).
     Type: String
   QSS3BucketRegion:
-    Default: 'us-east-1'
+    Default: 'us-west-2'
     Description: The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.
     Type: String
   QSS3KeyPrefix:
@@ -193,7 +195,7 @@ Parameters:
     ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters, uppercase
       letters, hyphens (-), dots (.) and forward slash (/). The prefix should
       end with a forward slash (/).
-    Default: quickstart-linux-bastion/
+    Default: ''
     Description: S3 key prefix for the Quick Start assets. Quick Start key prefix can
       include numbers, lowercase letters, uppercase letters, hyphens (-), dots
       (.) and forward slash (/) and it should end with a forward slash (/).
@@ -203,9 +205,11 @@ Parameters:
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x
     Description: Allowed CIDR block for external SSH access to the bastions.
     Type: String
+    Default: '0.0.0.0/0'
   VPCID:
     Description: 'ID of the VPC (e.g., vpc-0343606e).'
     Type: 'AWS::EC2::VPC::Id'
+    Default: 'vpc-828464fb'
   AlternativeInitializationScript:
     AllowedPattern: ^http.*|^$
     ConstraintDescription: URL must begin with http
