@@ -158,6 +158,7 @@ Parameters:
     Description: Name of an existing public/private key pair. If you do not have one in this AWS Region,
       please create it before continuing.
     Type: 'AWS::EC2::KeyPair::KeyName'
+    Default: 'bastion'
   NumBastionHosts:
     AllowedValues:
       - '1'
