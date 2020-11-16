@@ -1,3 +1,4 @@
 .DS_Store
 taskcat_outputs/*
 packages/
+*ignore*

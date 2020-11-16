@@ -681,6 +681,13 @@ Resources:
           FromPort: -1
           ToPort: -1
           CidrIp: !Ref RemoteAccessCIDR
+  DeleteAfterTTLStack:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: 'https://aws-quickstart.s3.amazonaws.com/quickstart-examples/samples/cloudformation-stack-ttl/templates/cloudformation-stack-ttl.yaml'
+      Parameters:
+        StackName: !Ref 'AWS::StackName'
+        TTL: '10'
 Outputs:
   BastionAutoScalingGroup:
     Description: Auto Scaling Group Reference ID
