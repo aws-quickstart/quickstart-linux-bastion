@@ -684,7 +684,7 @@ Resources:
   DeleteAfterTTLStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:
-      TemplateURL: 'https://aws-quickstart.s3.amazonaws.com/quickstart-examples/samples/cloudformation-stack-ttl/templates/cloudformation-stack-ttl.yaml'
+      TemplateURL: 'https://s3.amazonaws.com/cfn-expire-stacks/templates/'
       Parameters:
         StackName: !Ref 'AWS::StackName'
         TTL: '10'

@@ -79,7 +79,7 @@ printf "... found your IP address: %s\n" $MY_IP
 
 # Create Cloudformation stack for bastion host
 CFN_STACK_NAME="${AWS_USER}-${BASTION_SUFFIX}"
-aws cloudformation create-stack --stack-name $CFN_STACK_NAME --template-url $CFN_TEMPLATE_URL --capabilities "CAPABILITY_IAM"
+MY_BASTION=$(aws cloudformation create-stack --stack-name $CFN_STACK_NAME --template-url $CFN_TEMPLATE_URL --capabilities "CAPABILITY_IAM")
 
 #
 exit 0;
