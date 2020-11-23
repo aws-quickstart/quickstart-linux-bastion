@@ -471,127 +471,127 @@ Resources:
           - !Ref BastionHostRole
           - !Ref AlternativeIAMRole
       Path: /
-  EIP1:
-    Type: 'AWS::EC2::EIP'
-    Properties:
-      Domain: vpc
-  EIP2:
-    Type: 'AWS::EC2::EIP'
-    Condition: 2BastionCondition
-    Properties:
-      Domain: vpc
-  EIP3:
-    Type: 'AWS::EC2::EIP'
-    Condition: 3BastionCondition
-    Properties:
-      Domain: vpc
-  EIP4:
-    Type: 'AWS::EC2::EIP'
-    Condition: 4BastionCondition
-    Properties:
-      Domain: vpc
-  BastionAutoScalingGroup:
-    Type: 'AWS::AutoScaling::AutoScalingGroup'
-    Properties:
-      LaunchConfigurationName: !Ref BastionLaunchConfiguration
-      VPCZoneIdentifier:
-        - !Ref PublicSubnet1ID
-        - !Ref PublicSubnet2ID
-      MinSize: !Ref NumBastionHosts
-      MaxSize: !Ref NumBastionHosts
-      Cooldown: '900'
-      DesiredCapacity: !Ref NumBastionHosts
-      Tags:
-        - Key: Name
-          Value: !Ref BastionHostName
-          PropagateAtLaunch: true
-    CreationPolicy:
-      ResourceSignal:
-        Count: !Ref NumBastionHosts
-        Timeout: PT60M
-      AutoScalingCreationPolicy:
-        MinSuccessfulInstancesPercent: 100
-    UpdatePolicy:
-      AutoScalingReplacingUpdate:
-        WillReplace: true
-  BastionLaunchConfiguration:
-    Type: 'AWS::AutoScaling::LaunchConfiguration'
-    Metadata:
-      'AWS::CloudFormation::Authentication':
-        S3AccessCreds:
-          type: S3
-          roleName: !If
-            - CreateIAMRole
-            - !Ref BastionHostRole
-            - !Ref AlternativeIAMRole
-          buckets:
-            - !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-      'AWS::CloudFormation::Init':
-        config:
-          files:
-            /tmp/auditd.rules:
-              mode: '000550'
-              owner: root
-              group: root
-              content: |
-                -a exit,always -F arch=b64 -S execve
-                -a exit,always -F arch=b32 -S execve
-            /tmp/auditing_configure.sh:
-              source: !Sub
-                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/auditing_configure.sh
-                - S3Bucket: !If
-                    - UsingDefaultBucket
-                    - !Sub 'aws-quickstart-${AWS::Region}'
-                    - !Ref 'QSS3BucketName'
-                  S3Region: !If
-                    - UsingDefaultBucket
-                    - !Ref 'AWS::Region'
-                    - !Ref 'QSS3BucketRegion'
-              mode: '000550'
-              owner: root
-              group: root
-              authentication: S3AccessCreds
-            /tmp/bastion_bootstrap.sh:
-              source: !If
-                - UseAlternativeInitialization
-                - !Ref AlternativeInitializationScript
-                - !Sub
-                  - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh
-                  - S3Bucket: !If
-                      - UsingDefaultBucket
-                      - !Sub 'aws-quickstart-${AWS::Region}'
-                      - !Ref 'QSS3BucketName'
-                    S3Region: !If
-                      - UsingDefaultBucket
-                      - !Ref 'AWS::Region'
-                      - !Ref 'QSS3BucketRegion'
-              mode: '000550'
-              owner: root
-              group: root
-              authentication: S3AccessCreds
-          commands:
-            a-add_auditd_rules:
-              cwd: '/tmp/'
-              env:
-                BASTION_OS: !FindInMap [LinuxAMINameMap, !Ref BastionAMIOS, OS]
-              command: "./auditing_configure.sh"
-              # command:
-              #   - !If [ ]
-              #   - "cat /tmp/auditd.rules >> /etc/audit/rules.d/audit.rules && service auditd restart"
-            b-bootstrap:
-              cwd: '/tmp/'
-              env:
-                REGION: !Sub ${AWS::Region}
-                URL_SUFFIX: !Sub ${AWS::URLSuffix}
-                BANNER_REGION: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref 'QSS3BucketRegion' ]
-              command: !Sub
-                - "./bastion_bootstrap.sh --banner ${BannerUrl} --enable ${EnableBanner} --tcp-forwarding ${EnableTCPForwarding} --x11-forwarding ${EnableX11Forwarding}"
-                - BannerUrl: !If
-                  - DefaultBanner
-                  - !Sub
-                    - s3://${S3Bucket}/${QSS3KeyPrefix}scripts/banner_message.txt
-                    - S3Bucket: !If [ UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref 'QSS3BucketName' ]
-                  - !Ref BastionBanner
+  #EIP1:
+  #  Type: 'AWS::EC2::EIP'
+  #  Properties:
+  #    Domain: vpc
+  #EIP2:
+  #  Type: 'AWS::EC2::EIP'
+  #  Condition: 2BastionCondition
+  #  Properties:
+  #    Domain: vpc
+  #EIP3:
+  #  Type: 'AWS::EC2::EIP'
+  #  Condition: 3BastionCondition
+  #  Properties:
+  #    Domain: vpc
+  #EIP4:
+  #  Type: 'AWS::EC2::EIP'
+  #  Condition: 4BastionCondition
+  #  Properties:
+  #    Domain: vpc
+  #BastionAutoScalingGroup:
+  #  Type: 'AWS::AutoScaling::AutoScalingGroup'
+  #  Properties:
+  #    LaunchConfigurationName: !Ref BastionLaunchConfiguration
+  #    VPCZoneIdentifier:
+  #      - !Ref PublicSubnet1ID
+  #      - !Ref PublicSubnet2ID
+  #    MinSize: !Ref NumBastionHosts
+  #    MaxSize: !Ref NumBastionHosts
+  #    Cooldown: '900'
+  #    DesiredCapacity: !Ref NumBastionHosts
+  #    Tags:
+  #      - Key: Name
+  #        Value: !Ref BastionHostName
+  #        PropagateAtLaunch: true
+  #  CreationPolicy:
+  #    ResourceSignal:
+  #      Count: !Ref NumBastionHosts
+  #      Timeout: PT60M
+  #    AutoScalingCreationPolicy:
+  #      MinSuccessfulInstancesPercent: 100
+  #  UpdatePolicy:
+  #    AutoScalingReplacingUpdate:
+  #      WillReplace: true
+  #BastionLaunchConfiguration:
+  #  Type: 'AWS::AutoScaling::LaunchConfiguration'
+  #  Metadata:
+  #    'AWS::CloudFormation::Authentication':
+  #      S3AccessCreds:
+  #        type: S3
+  #        roleName: !If
+  #          - CreateIAMRole
+  #          - !Ref BastionHostRole
+  #          - !Ref AlternativeIAMRole
+  #        buckets:
+  #          - !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+  #    'AWS::CloudFormation::Init':
+  #      config:
+          # files:
+          #   /tmp/auditd.rules:
+          #     mode: '000550'
+          #     owner: root
+          #     group: root
+          #     content: |
+          #       -a exit,always -F arch=b64 -S execve
+          #       -a exit,always -F arch=b32 -S execve
+          #   /tmp/auditing_configure.sh:
+          #     source: !Sub
+          #       - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/auditing_configure.sh
+          #       - S3Bucket: !If
+          #           - UsingDefaultBucket
+          #           - !Sub 'aws-quickstart-${AWS::Region}'
+          #           - !Ref 'QSS3BucketName'
+          #         S3Region: !If
+          #           - UsingDefaultBucket
+          #           - !Ref 'AWS::Region'
+          #           - !Ref 'QSS3BucketRegion'
+          #     mode: '000550'
+          #     owner: root
+          #     group: root
+          #     authentication: S3AccessCreds
+          #   /tmp/bastion_bootstrap.sh:
+          #     source: !If
+          #       - UseAlternativeInitialization
+          #       - !Ref AlternativeInitializationScript
+          #       - !Sub
+          #         - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh
+          #         - S3Bucket: !If
+          #             - UsingDefaultBucket
+          #             - !Sub 'aws-quickstart-${AWS::Region}'
+          #             - !Ref 'QSS3BucketName'
+          #           S3Region: !If
+          #             - UsingDefaultBucket
+          #             - !Ref 'AWS::Region'
+          #             - !Ref 'QSS3BucketRegion'
+          #     mode: '000550'
+          #     owner: root
+          #     group: root
+          #     authentication: S3AccessCreds
+          # commands:
+          #   a-add_auditd_rules:
+          #     cwd: '/tmp/'
+          #     env:
+          #       BASTION_OS: !FindInMap [LinuxAMINameMap, !Ref BastionAMIOS, OS]
+          #     command: "./auditing_configure.sh"
+          #     # command:
+          #     #   - !If [ ]
+          #     #   - "cat /tmp/auditd.rules >> /etc/audit/rules.d/audit.rules && service auditd restart"
+          #   b-bootstrap:
+          #     cwd: '/tmp/'
+          #     env:
+          #       REGION: !Sub ${AWS::Region}
+          #       URL_SUFFIX: !Sub ${AWS::URLSuffix}
+          #       BANNER_REGION: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref 'QSS3BucketRegion' ]
+          #     command: !Sub
+          #       - "./bastion_bootstrap.sh --banner ${BannerUrl} --enable ${EnableBanner} --tcp-forwarding ${EnableTCPForwarding} --x11-forwarding ${EnableX11Forwarding}"
+          #       - BannerUrl: !If
+          #         - DefaultBanner
+          #         - !Sub
+          #           - s3://${S3Bucket}/${QSS3KeyPrefix}scripts/banner_message.txt
+          #           - S3Bucket: !If [ UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref 'QSS3BucketName' ]
+          #         - !Ref BastionBanner
     Properties:
       AssociatePublicIpAddress: true
       PlacementTenancy: !Ref BastionTenancy

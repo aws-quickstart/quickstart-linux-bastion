@@ -1,0 +1,458 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  AWS CloudFormation Template for creating a linux bastion host.  Based on AWS Quickstart samples.
+Parameters:
+  BastionInstanceType:
+    Description: Bastion Host EC2 instance type
+    Type: String
+    Default: t3.micro
+    AllowedValues:
+      - t2.nano
+      - t2.micro
+      - t2.small
+      # - t2.medium
+      # - t2.large
+      - t3.nano
+      - t3.micro
+      - t3.small
+      # - t3.medium
+      # - t3.large
+    ConstraintDescription: must be a valid EC2 instance type.
+  BastionAMIOS:
+    AllowedValues:
+      - Amazon-Linux2-HVM
+      - CentOS-7-HVM
+      - Ubuntu-Server-20.04-LTS-HVM
+      - SUSE-SLES-15-HVM
+    Default: Amazon-Linux2-HVM
+    Description: The Linux distribution for the AMI to be used for the bastion instances.
+    Type: String
+  EnableTCPForwarding:
+    Type: String
+    Description: To enable TCP forwarding, choose true.
+    Default: 'true'
+    AllowedValues:
+      - 'true'
+      - 'false'
+  EnableX11Forwarding:
+    Type: String
+    Description: To enable X11 forwarding, choose true.
+    Default: 'true'
+    AllowedValues:
+      - 'true'
+      - 'false'
+  EnableBanner:
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'false'
+    Description: To include a banner to be displayed when connecting via SSH to the
+      bastion, choose true.
+    Type: String
+  BastionBanner:
+    Default: ""
+    Description: Banner text to display upon login.
+    Type: String
+  AlternativeIAMRole:
+    Description: An existing IAM Role name to attach to the bastion. If left blank,
+      a new role will be created.
+    Default: ''
+    Type: String
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
+    Type: 'AWS::EC2::KeyPair::KeyName'
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+    Default: ''
+  ClientCIDR:
+    Description: Whitelist client IP address block. Pass the client's specific IP address for higher security.
+    Type: String
+    MinLength: '9'
+    MaxLength: '18'
+    Default: 0.0.0.0/0
+    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+  RootVolumeSize:
+    Description: The size in GB for the root EBS volume.
+    Type: Number
+    Default: '10'
+  QSS3BucketName:
+    AllowedPattern: '^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$'
+    ConstraintDescription: Quick Start bucket name can include numbers, lowercase letters, uppercase
+      letters, and hyphens (-). It cannot start or end with a hyphen (-).
+    Default: lehto-bastion
+    Description: S3 bucket name for the Quick Start assets. Quick Start bucket name can
+      include numbers, lowercase letters, uppercase letters, and hyphens (-). It
+      cannot start or end with a hyphen (-).
+    Type: String
+  QSS3BucketRegion:
+    Default: 'us-west-2'
+    Description: The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: '^([0-9a-zA-Z-.]+/)*$'
+    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters, uppercase
+      letters, hyphens (-), dots (.) and forward slash (/). The prefix should
+      end with a forward slash (/).
+    Default: ''
+    Description: S3 key prefix for the Quick Start assets. Quick Start key prefix can
+      include numbers, lowercase letters, uppercase letters, hyphens (-), dots
+      (.) and forward slash (/) and it should end with a forward slash (/).
+    Type: String
+Mappings:
+  AWSAMIRegionMap:
+    ap-northeast-1:
+      AMZNLINUX2: ami-0cc75a8978fbbc969
+      US2004HVM: ami-0461b11e2fad8c14a
+      CENTOS7HVM: ami-06a46da680048c8ae
+      SLES15HVM: ami-056ac8ad44e6a7e1f
+    ap-northeast-2:
+      AMZNLINUX2: ami-0bd7691bf6470fe9c
+      US2004HVM: ami-0dbad3c7f731477cb
+      CENTOS7HVM: ami-06e83aceba2cb0907
+      SLES15HVM: ami-0f81fff879bafe6b8
+    ap-south-1:
+      AMZNLINUX2: ami-0ebc1ac48dfd14136
+      US2004HVM: ami-0ebd654017556e025
+      CENTOS7HVM: ami-026f33d38b6410e30
+      SLES15HVM: ami-01be89269d32f2a16
+    ap-southeast-1:
+      AMZNLINUX2: ami-0cd31be676780afa7
+      US2004HVM: ami-0ba1d1f3433cd4c68
+      CENTOS7HVM: ami-07f65177cb990d65b
+      SLES15HVM: ami-070356c21596ddc67
+    ap-southeast-2:
+      AMZNLINUX2: ami-0ded330691a314693
+      US2004HVM: ami-02be36619a83e9a16
+      CENTOS7HVM: ami-0b2045146eb00b617
+      SLES15HVM: ami-0c4245381c67efb39
+    ca-central-1:
+      AMZNLINUX2: ami-013d1df4bcea6ba95
+      US2004HVM: ami-071c33c681c9d4a00
+      CENTOS7HVM: ami-04a25c39dc7a8aebb
+      SLES15HVM: ami-0c97d9b588207dad6
+    eu-central-1:
+      AMZNLINUX2: ami-0c115dbd34c69a004
+      US2004HVM: ami-0c2b1c303a2e4cb49
+      CENTOS7HVM: ami-0e8286b71b81c3cc1
+      SLES15HVM: ami-05dfd265ea534a3e9
+    me-south-1:
+      AMZNLINUX2: ami-01f41d49c363da2ad
+      US2004HVM: ami-07f9fe3f7a8c82448
+      CENTOS7HVM: ami-011c71a894b10f35b
+      SLES15HVM: ami-0252c6d3a59c7473b
+    ap-east-1:
+      AMZNLINUX2: ami-47317236
+      US2004HVM: ami-545b1825
+      CENTOS7HVM: ami-0e5c29e6c87a9644f
+      SLES15HVM: ami-0ad6e15bcbb2dbe38
+    eu-north-1:
+      AMZNLINUX2: ami-039609244d2810a6b
+      US2004HVM: ami-08baf9e3c347b7092
+      CENTOS7HVM: ami-05788af9005ef9a93
+      SLES15HVM: ami-0741fa1a008af40ad
+    eu-west-1:
+      AMZNLINUX2: ami-07d9160fa81ccffb5
+      US2004HVM: ami-0f1d11c92a9467c07
+      CENTOS7HVM: ami-0b850cf02cc00fdc8
+      SLES15HVM: ami-0a58a1b152ba55f1d
+    eu-west-2:
+      AMZNLINUX2: ami-0a13d44dccf1f5cf6
+      US2004HVM: ami-082335b69bcfdb15b
+      CENTOS7HVM: ami-09e5afc68eed60ef4
+      SLES15HVM: ami-01497522185aaa4ee
+    eu-west-3:
+      AMZNLINUX2: ami-093fa4c538885becf
+      US2004HVM: ami-00f6fb16625871821
+      CENTOS7HVM: ami-0cb72d2e599cffbf9
+      SLES15HVM: ami-0f238bd4c6fdbefb0
+    sa-east-1:
+      AMZNLINUX2: ami-018ccfb6b4745882a
+      US2004HVM: ami-083aa2af86ff2bd11
+      CENTOS7HVM: ami-0b30f38d939dd4b54
+      SLES15HVM: ami-0772af912976aa692
+    us-east-1:
+      AMZNLINUX2: ami-02354e95b39ca8dec
+      US2004HVM: ami-0758470213bdd23b1
+      CENTOS7HVM: ami-0affd4508a5d2481b
+      SLES15HVM: ami-0b1764f3d7d2e2316
+    us-gov-west-1:
+      AMZNLINUX2: ami-74c4f215
+      SLES15HVM: ami-57c0ba36
+    us-gov-east-1:
+      AMZNLINUX2: ami-30e00c41
+      SLES15HVM: ami-05e4bedfad53425e9
+    us-east-2:
+      AMZNLINUX2: ami-07c8bc5c1ce9598c3
+      US2004HVM: ami-07fb7bd53bacdfc16
+      CENTOS7HVM: ami-01e36b7901e884a10
+      SLES15HVM: ami-05ea824317ffc0c20
+    us-west-1:
+      AMZNLINUX2: ami-05655c267c89566dd
+      US2004HVM: ami-0cd230f950c3de5d8
+      CENTOS7HVM: ami-098f55b4287a885ba
+      SLES15HVM: ami-00e34a7624e5a7107
+    us-west-2:
+      AMZNLINUX2: ami-0873b46c45c11058d
+      US2004HVM: ami-056cb9ae6e2df09e8
+      CENTOS7HVM: ami-0bc06212a56393ee1
+      SLES15HVM: ami-0f1e3b3fb0fec0361
+    cn-north-1:
+      AMZNLINUX2: ami-010e92a33d9d1fc40
+      CENTOS7HVM: ami-0e02aaefeb74c3373
+      SLES15HVM: ami-021392849b6221a81
+    cn-northwest-1:
+      AMZNLINUX2: ami-0959f8e18a2aac0fb
+      CENTOS7HVM: ami-07183a7702633260b
+      SLES15HVM: ami-00e1de3ee6d0d28ea
+  LinuxAMINameMap:
+    Amazon-Linux2-HVM:
+      Code: AMZNLINUX2
+      OS: Amazon
+    CentOS-7-HVM:
+      Code: CENTOS7HVM
+      OS: CentOS
+    Ubuntu-Server-18.04-LTS-HVM:
+      Code: US1804HVM
+      OS: Ubuntu
+    Ubuntu-Server-20.04-LTS-HVM:
+      Code: US2004HVM
+      OS: Ubuntu
+    SUSE-SLES-15-HVM:
+      Code: SLES15HVM
+      OS: SLES
+Conditions:
+  CreateIAMRole: !Equals
+    - !Ref AlternativeIAMRole
+    - ''
+Resources:
+  BastionMainLogGroup:
+    Type: 'AWS::Logs::LogGroup'
+  SSHMetricFilter:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties:
+      LogGroupName: !Ref BastionMainLogGroup
+      FilterPattern: ON FROM USER PWD
+      MetricTransformations:
+        - MetricName: SSHCommandCount
+          MetricValue: '1'
+          MetricNamespace: !Sub "AWSQuickStart/${AWS::StackName}"
+  BastionSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'Whitelist SSH, ICMP from the user workstation only'
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref ClientCIDR
+        - IpProtocol: icmp
+          FromPort: -1
+          ToPort: -1
+          CidrIp: !Ref ClientCIDR
+  BastionHostRole:
+    Condition: CreateIAMRole
+    Type: 'AWS::IAM::Role'
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - 'sts:AssumeRole'
+            Principal:
+              Service:
+                - !Sub 'ec2.${AWS::URLSuffix}'
+            Effect: Allow
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy'
+  BastionHostPolicy:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: BastionPolicy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 's3:GetObject'
+            Resource: !Sub
+              - arn:${AWS::Partition}:s3:::${S3Bucket}/${QSS3KeyPrefix}*
+              - S3Bucket: !Ref QSS3BucketName
+            Effect: Allow
+          - Action:
+              - 'logs:CreateLogStream'
+              - 'logs:GetLogEvents'
+              - 'logs:PutLogEvents'
+              - 'logs:DescribeLogGroups'
+              - 'logs:DescribeLogStreams'
+              - 'logs:PutRetentionPolicy'
+              - 'logs:PutMetricFilter'
+              - 'logs:CreateLogGroup'
+            Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*"
+            Effect: Allow
+          - Action:
+              - 'ec2:AssociateAddress'
+              - 'ec2:DescribeAddresses'
+            Resource: '*'
+            Effect: Allow
+      Roles:
+        - !If
+          - CreateIAMRole
+          - !Ref BastionHostRole
+          - !Ref AlternativeIAMRole
+  BastionHostProfile:
+    DependsOn: BastionHostPolicy
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Roles:
+        - !If
+          - CreateIAMRole
+          - !Ref BastionHostRole
+          - !Ref AlternativeIAMRole
+      Path: /
+  BastionHost:
+    Type: 'AWS::EC2::Instance'
+    Metadata:
+      'AWS::CloudFormation::Authentication':
+        S3AccessCreds:
+          type: S3
+          roleName: !If
+            - CreateIAMRole
+            - !Ref BastionHostRole
+            - !Ref AlternativeIAMRole
+          buckets:
+            - !Ref QSS3BucketName
+      'AWS::CloudFormation::Init':
+        config:
+          files:
+            /tmp/auditd.rules:
+              mode: '000550'
+              owner: root
+              group: root
+              content: |
+                -a exit,always -F arch=b64 -S execve
+                -a exit,always -F arch=b32 -S execve
+            /tmp/auditing_configure.sh:
+              source: !Sub
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/auditing_configure.sh
+                - S3Bucket: !Ref 'QSS3BucketName'
+                  S3Region: !Ref 'QSS3BucketRegion'
+              mode: '000550'
+              owner: root
+              group: root
+              authentication: S3AccessCreds
+            /tmp/bastion_bootstrap.sh:
+              source: !Sub
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh
+                - S3Bucket: !Ref 'QSS3BucketName'
+                  S3Region: !Ref 'QSS3BucketRegion'
+              mode: '000550'
+              owner: root
+              group: root
+              authentication: S3AccessCreds
+          commands:
+            a-add_auditd_rules:
+              cwd: '/tmp/'
+              env:
+                BASTION_OS: !FindInMap [LinuxAMINameMap, !Ref BastionAMIOS, OS]
+              command: "./auditing_configure.sh"
+              # command:
+              #   - !If [ ]
+              #   - "cat /tmp/auditd.rules >> /etc/audit/rules.d/audit.rules && service auditd restart"
+            b-bootstrap:
+              cwd: '/tmp/'
+              env:
+                REGION: !Sub ${AWS::Region}
+                URL_SUFFIX: !Sub ${AWS::URLSuffix}
+                BANNER_REGION: !Ref 'QSS3BucketRegion'
+              command: !Sub
+                - "./bastion_bootstrap.sh --banner ${BannerUrl} --enable ${EnableBanner} --tcp-forwarding ${EnableTCPForwarding} --x11-forwarding ${EnableX11Forwarding}"
+                - BannerUrl: !Ref BastionBanner
+    Properties:
+      # NetworkInterfaces:
+      #   - AssociatePublicIpAddress: true
+      #     DeleteOnTermination: true
+      #     DeviceIndex: '0'
+      #     SubnetId: 'subnet-01153d5e7e1bf7115'
+      # PlacementTenancy: !Ref BastionTenancy
+      KeyName: !Ref KeyName
+      IamInstanceProfile: !Ref BastionHostProfile
+      ImageId: !FindInMap
+        - AWSAMIRegionMap
+        - !Ref 'AWS::Region'
+        - !FindInMap
+          - LinuxAMINameMap
+          - !Ref BastionAMIOS
+          - Code
+      SecurityGroups:
+        - !Ref BastionSecurityGroup
+      InstanceType: !Ref BastionInstanceType
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: !Ref RootVolumeSize
+            VolumeType: gp2
+            Encrypted: true
+            DeleteOnTermination: true
+      UserData:
+        Fn::Base64: !Sub
+          - |
+            #!/bin/bash
+            set -x
+            export PATH=$PATH:/usr/local/bin
+
+            #cfn signaling functions
+            yum install git -y || apt-get install -y git || zypper -n install git
+
+            function cfn_fail
+            {
+              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource BastionHost
+              exit 1
+            }
+
+            function cfn_success
+            {
+              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource BastionHost
+              exit 0
+            }
+
+            until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git ; do echo "Retrying"; done
+            cd /quickstart-linux-utilities;
+            source quickstart-cfn-tools.source;
+            qs_update-os || qs_err;
+            qs_bootstrap_pip || qs_err " pip bootstrap failed ";
+            qs_aws-cfn-bootstrap || qs_err " cfn bootstrap failed ";
+
+            EIP_LIST="${EIP2}"
+            CLOUDWATCHGROUP=${BastionMainLogGroup}
+            cfn-init -v --stack '${AWS::StackName}' --resource BastionHost --region ${AWS::Region} || cfn_fail
+            [ $(qs_status) == 0 ] && cfn_success || cfn_fail
+          - EIP2: 'Null'
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT15M
+Outputs:
+  # CloudWatchLogs:
+  #   Description: CloudWatch Logs GroupName. Your SSH logs will be stored here.
+  #   Value: !Ref BastionMainLogGroup
+  #   Export:
+  #     Name: !Sub '${AWS::StackName}-CloudWatchLogs'
+  BastionSecurityGroupID:
+    Description: Bastion Security Group ID
+    Value: !Ref BastionSecurityGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-BastionSecurityGroupID'
+  BastionHostRole:
+    Description: Bastion IAM Role name
+    Value: !If
+      - CreateIAMRole
+      - !Ref BastionHostRole
+      - !Ref AlternativeIAMRole
+    Export:
+      Name: !Sub '${AWS::StackName}-BastionHostRole'
+  BastionPublicIP:
+    Description: Bastion Public IP address
+    Value: !GetAtt BastionHost.PublicIp
+  BastionPublicDNS:
+    Description: Bastion DNS name
+    Value: !GetAtt BastionHost.PublicDnsName

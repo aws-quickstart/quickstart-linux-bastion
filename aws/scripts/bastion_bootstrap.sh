@@ -375,6 +375,6 @@ else
 fi
 
 prevent_process_snooping
-request_eip
+#request_eip
 
 echo "Bootstrap complete."
