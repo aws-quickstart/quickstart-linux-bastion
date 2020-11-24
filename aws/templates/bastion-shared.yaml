@@ -22,8 +22,6 @@ Parameters:
       (.) and forward slash (/) and it should end with a forward slash (/).
     Type: String
 Resources:
-  BastionMainLogGroup:
-    Type: 'AWS::Logs::LogGroup'
   BastionHostRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -80,12 +78,26 @@ Resources:
       Roles:
         - !Ref BastionHostRole
       Path: /
+  BastionMainLogGroup:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      LogGroupName: Ref 'AWS::StackName'
+      RetentionInDays: 365
+  SSHMetricFilter:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties:
+      LogGroupName: !Ref BastionMainLogGroup
+      FilterPattern: ON FROM USER PWD
+      MetricTransformations:
+        - MetricName: SSHCommandCount
+          MetricValue: '1'
+          MetricNamespace: 'Bastion'
 Outputs:
-  # CloudWatchLogs:
-  #   Description: CloudWatch Logs GroupName. Your SSH logs will be stored here.
-  #   Value: !Ref BastionMainLogGroup
-  #   Export:
-  #     Name: !Sub '${AWS::StackName}-CloudWatchLogs'
+  CloudWatchLogs:
+    Description: CloudWatch Logs GroupName. Your SSH logs will be stored here.
+    Value: !Ref BastionMainLogGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-LogGroup'
   BastionHostRole:
     Description: Bastion IAM Role name
     Value: !Ref BastionHostRole

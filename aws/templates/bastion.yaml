@@ -2,6 +2,10 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: >-
   AWS CloudFormation Template for creating a linux bastion host.  Based on AWS Quickstart samples.
 Parameters:
+  BastionSharedStackName:
+    Description: Name of stack with common role, logging, etc for bastion hosts (required dependency)
+    Type: String
+    Default: bastion-shared
   BastionInstanceType:
     Description: Bastion Host EC2 instance type
     Type: String
@@ -226,17 +230,6 @@ Mappings:
       Code: SLES15HVM
       OS: SLES
 Resources:
-  BastionMainLogGroup:
-    Type: 'AWS::Logs::LogGroup'
-  # SSHMetricFilter:
-  #   Type: 'AWS::Logs::MetricFilter'
-  #   Properties:
-  #     LogGroupName: !Ref BastionMainLogGroup
-  #     FilterPattern: ON FROM USER PWD
-  #     MetricTransformations:
-  #       - MetricName: SSHCommandCount
-  #         MetricValue: '1'
-  #         MetricNamespace: !Sub "AWSQuickStart/${AWS::StackName}"
   BastionSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -361,10 +354,14 @@ Resources:
             qs_aws-cfn-bootstrap || qs_err " cfn bootstrap failed ";
 
             EIP_LIST="${EIP2}"
-            CLOUDWATCHGROUP=${BastionMainLogGroup}
+            CLOUDWATCHGROUP="${BastionSharedStackName}"
             cfn-init -v --stack '${AWS::StackName}' --resource BastionHost --region ${AWS::Region} || cfn_fail
             [ $(qs_status) == 0 ] && cfn_success || cfn_fail
           - EIP2: 'Null'
+            # BastionMainLogGroup: 'bastion-shared'
+            # BastionMainLogGroup: 
+            #   Fn::ImportValue:
+            #     !Sub "{BastionSharedStackName}-LogGroup"
     CreationPolicy:
       ResourceSignal:
         Timeout: PT15M
