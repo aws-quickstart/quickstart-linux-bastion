@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  AWS CloudFormation Template for creating a the security profile for a linux bastion host.  Based on AWS Quickstart samples.  
+  AWS CloudFormation Template to create the shared infrastructure for a linux bastion host.  Based on AWS Quickstart samples.  
 Parameters:
   S3BucketName:
     AllowedPattern: '^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$'
@@ -81,7 +81,7 @@ Resources:
   BastionMainLogGroup:
     Type: 'AWS::Logs::LogGroup'
     Properties:
-      LogGroupName: Ref 'AWS::StackName'
+      LogGroupName: !Ref 'AWS::StackName'
       RetentionInDays: 365
   SSHMetricFilter:
     Type: 'AWS::Logs::MetricFilter'
