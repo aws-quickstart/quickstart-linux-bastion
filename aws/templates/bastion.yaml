@@ -53,7 +53,7 @@ Parameters:
     Default: ""
     Description: Banner text to display upon login.
     Type: String
-  AlternativeIAMRole:
+  ExistingIAMRole:
     Description: An existing IAM Role name to attach to the bastion. If left blank,
       a new role will be created.
     Default: ''
@@ -222,7 +222,7 @@ Mappings:
       OS: SLES
 Conditions:
   CreateIAMRole: !Equals
-    - !Ref AlternativeIAMRole
+    - !Ref ExistingIAMRole
     - ''
 Resources:
   BastionMainLogGroup:
@@ -299,7 +299,7 @@ Resources:
         - !If
           - CreateIAMRole
           - !Ref BastionHostRole
-          - !Ref AlternativeIAMRole
+          - !Ref ExistingIAMRole
   BastionHostProfile:
     DependsOn: BastionHostPolicy
     Type: 'AWS::IAM::InstanceProfile'
@@ -308,7 +308,7 @@ Resources:
         - !If
           - CreateIAMRole
           - !Ref BastionHostRole
-          - !Ref AlternativeIAMRole
+          - !Ref ExistingIAMRole
       Path: /
   BastionHost:
     Type: 'AWS::EC2::Instance'
@@ -319,7 +319,7 @@ Resources:
           roleName: !If
             - CreateIAMRole
             - !Ref BastionHostRole
-            - !Ref AlternativeIAMRole
+            - !Ref ExistingIAMRole
           buckets:
             - !Ref QSS3BucketName
       'AWS::CloudFormation::Init':
@@ -447,7 +447,7 @@ Outputs:
     Value: !If
       - CreateIAMRole
       - !Ref BastionHostRole
-      - !Ref AlternativeIAMRole
+      - !Ref ExistingIAMRole
     Export:
       Name: !Sub '${AWS::StackName}-BastionHostRole'
   BastionPublicIP:

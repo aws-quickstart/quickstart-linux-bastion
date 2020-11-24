@@ -95,13 +95,21 @@ BASTION_NAME="${AWS_USER}-${BASTION_SUFFIX}"
 # (re)create EC2 key pair for bastion host
 printf "... (re)creating SSH key, saving to file: %s\n" $BASTION_NAME.pem
 aws ec2 delete-key-pair --key-name $BASTION_NAME
-EC2_KEYPAIR=$(aws ec2 create-key-pair --key-name $BASTION_NAME) > ./$BASTION_NAME.pem
-EC2_KEYPAIR_ID=$(echo $EC2_KEYPAIR | jq -r '.KeyPairId')
-aws ec2 create-tags --resources $EC2_KEYPAIR_ID --tags Key=environment,Value=DEV Key=owner,Value=$AWS_USER Key=expires,Value='2020-11-24 12:00:00'
+aws ec2 create-key-pair \
+    --key-name $BASTION_NAME \
+    --tag-specifications 'ResourceType=key-pair,Tags=[{Key=environment,Value=DEV},{Key=owner,Value=$AWS_USER},{Key=expires,Value="2020-11-24 13:00:00"}]' \
+    --query 'KeyMaterial' \
+    --output text > ./$BASTION_NAME.pem
+chmod 600 $BASTION_NAME.pem
+# EC2_KEYPAIR_ID=$(echo $EC2_KEYPAIR | jq -r '.KeyPairId')
+# EC2_KEYPAIR_NAME=$(echo $EC2_KEYPAIR | jq -r '.KeyName')
+# aws ec2 create-tags --resources $EC2_KEYPAIR_ID --tags Key=environment,Value=DEV Key=owner,Value=$AWS_USER Key=expires,Value='2020-11-24 12:00:00'
 
 # Now create the bastion host
 printf "... Creating bastion host: %s\n" $BASTION_NAME
-MY_BASTION=$(aws cloudformation create-stack --stack-name $BASTION_NAME --template-url $CFN_TEMPLATE_URL --parameters ParameterKey=KeyName,ParameterValue=$EC2_KEYPAIR ParameterKey=ClientCIDR,ParameterValue=$MY_IP/32 --capabilities "CAPABILITY_IAM")
+# aws cloudformation describe-stacks --stack-name $BASTION_NAME
+aws cloudformation delete-stack --stack-name $BASTION_NAME
+MY_BASTION=$(aws cloudformation create-stack --stack-name $BASTION_NAME --template-url $CFN_TEMPLATE_URL --parameters ParameterKey=KeyName,ParameterValue=$BASTION_NAME ParameterKey=ClientCIDR,ParameterValue=$MY_IP/32 --capabilities "CAPABILITY_IAM")
 
 #
 exit 0;

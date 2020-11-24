@@ -1,0 +1,114 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  AWS CloudFormation Template for creating a linux bastion host.  Based on AWS Quickstart samples.
+Parameters:
+  S3BucketName:
+    AllowedPattern: '^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$'
+    ConstraintDescription: Quick Start bucket name can include numbers, lowercase letters, uppercase
+      letters, and hyphens (-). It cannot start or end with a hyphen (-).
+    Default: lehto-bastion
+    Description: S3 bucket name for the Quick Start assets. Quick Start bucket name can
+      include numbers, lowercase letters, uppercase letters, and hyphens (-). It
+      cannot start or end with a hyphen (-).
+    Type: String
+  S3KeyPrefix:
+    AllowedPattern: '^([0-9a-zA-Z-.]+/)*$'
+    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters, uppercase
+      letters, hyphens (-), dots (.) and forward slash (/). The prefix should
+      end with a forward slash (/).
+    Default: ''
+    Description: S3 key prefix for the Quick Start assets. Quick Start key prefix can
+      include numbers, lowercase letters, uppercase letters, hyphens (-), dots
+      (.) and forward slash (/) and it should end with a forward slash (/).
+    Type: String
+Conditions:
+  CreateIAMRole: !Equals
+    - !Ref ExistingIAMRole
+    - ''
+Resources:
+  BastionMainLogGroup:
+    Type: 'AWS::Logs::LogGroup'
+  SSHMetricFilter:
+    Type: 'AWS::Logs::MetricFilter'
+    Properties:
+      LogGroupName: !Ref BastionMainLogGroup
+      FilterPattern: ON FROM USER PWD
+      MetricTransformations:
+        - MetricName: SSHCommandCount
+          MetricValue: '1'
+          MetricNamespace: !Sub "AWSQuickStart/${AWS::StackName}"
+  BastionHostRole:
+    Condition: CreateIAMRole
+    Type: 'AWS::IAM::Role'
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - 'sts:AssumeRole'
+            Principal:
+              Service:
+                - !Sub 'ec2.${AWS::URLSuffix}'
+            Effect: Allow
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy'
+  BastionHostPolicy:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: BastionPolicy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 's3:GetObject'
+            Resource: !Sub
+              - arn:${AWS::Partition}:s3:::${S3Bucket}/${S3KeyPrefix}*
+              - S3Bucket: !Ref S3BucketName
+            Effect: Allow
+          - Action:
+              - 'logs:CreateLogStream'
+              - 'logs:GetLogEvents'
+              - 'logs:PutLogEvents'
+              - 'logs:DescribeLogGroups'
+              - 'logs:DescribeLogStreams'
+              - 'logs:PutRetentionPolicy'
+              - 'logs:PutMetricFilter'
+              - 'logs:CreateLogGroup'
+            Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*"
+            Effect: Allow
+          - Action:
+              - 'ec2:AssociateAddress'
+              - 'ec2:DescribeAddresses'
+            Resource: '*'
+            Effect: Allow
+      Roles:
+        - !If
+          - CreateIAMRole
+          - !Ref BastionHostRole
+          - !Ref ExistingIAMRole
+  BastionHostProfile:
+    DependsOn: BastionHostPolicy
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Roles:
+        - !If
+          - CreateIAMRole
+          - !Ref BastionHostRole
+          - !Ref ExistingIAMRole
+      Path: /
+Outputs:
+  # CloudWatchLogs:
+  #   Description: CloudWatch Logs GroupName. Your SSH logs will be stored here.
+  #   Value: !Ref BastionMainLogGroup
+  #   Export:
+  #     Name: !Sub '${AWS::StackName}-CloudWatchLogs'
+  BastionHostRole:
+    Description: Bastion IAM Role name
+    Value: !If
+      - CreateIAMRole
+      - !Ref BastionHostRole
+      - !Ref ExistingIAMRole
+    Export:
+      Name: !Sub '${AWS::StackName}-BastionHostRole'
