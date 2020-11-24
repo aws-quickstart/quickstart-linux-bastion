@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  AWS CloudFormation Template to create the shared infrastructure for a linux bastion host.  Based on AWS Quickstart samples.  
+  AWS CloudFormation Template for the shared infrastructure for linux bastion hosts.  Based on AWS Quickstart samples.  
 Parameters:
   S3BucketName:
     AllowedPattern: '^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$'

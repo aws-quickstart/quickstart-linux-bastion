@@ -44,7 +44,6 @@ usage() {
 #     echo -e "--x11-forwarding \t Enable or Disable X11 Forwarding"
 # }
 
-
 while getopts "r:" o; do
     case "${o}" in
         r)
@@ -63,24 +62,11 @@ while getopts "r:" o; do
 done
 shift $((OPTIND-1))
 
-# Check required switches exist
-# if [ -z "${r}" ]; then
-#     usage
-# fi
-
 echo "This script will create a bastion host in AWS region '${REGION}'"
 
 # Fetch AWS IAM user name
 AWS_USER=$(aws iam get-user | jq -r '.User.UserName')
 echo "... found your AWS user name: ${AWS_USER}"
-
-# Test whether bastion exists for this user
-#AWS_CF_JSON=$(aws cloudformation describe-stacks --stack-name "${AWS_USER}-${BASTION_SUFFIX}") 2> /dev/null 
-#if $AWS_CF_JSON; then 
-    # Cloudformation stack was found
-#    echo "A bastion host already exists for ${AWS_USER}. Multiple bastions are not allowed. Exiting."
-#    exit
-#fi
 
 # Get my IP
 MY_IP=$(curl -s 'https://api.ipify.org')
@@ -101,14 +87,11 @@ aws ec2 create-key-pair \
     --query 'KeyMaterial' \
     --output text > ./$BASTION_NAME.pem
 chmod 600 $BASTION_NAME.pem
-# EC2_KEYPAIR_ID=$(echo $EC2_KEYPAIR | jq -r '.KeyPairId')
-# EC2_KEYPAIR_NAME=$(echo $EC2_KEYPAIR | jq -r '.KeyName')
 # aws ec2 create-tags --resources $EC2_KEYPAIR_ID --tags Key=environment,Value=DEV Key=owner,Value=$AWS_USER Key=expires,Value='2020-11-24 12:00:00'
 
 # Now create the bastion host
 printf "... Creating bastion host: %s\n" $BASTION_NAME
-# aws cloudformation describe-stacks --stack-name $BASTION_NAME
-aws cloudformation delete-stack --stack-name $BASTION_NAME
+aws cloudformation delete-stack --stack-name $BASTION_NAME # Delete any existing bastion host
 MY_BASTION=$(aws cloudformation create-stack --stack-name $BASTION_NAME --template-url $CFN_TEMPLATE_URL --parameters ParameterKey=KeyName,ParameterValue=$BASTION_NAME ParameterKey=ClientCIDR,ParameterValue=$MY_IP/32 --capabilities "CAPABILITY_IAM")
 
 #
