@@ -56,7 +56,12 @@ Parameters:
   ExistingIAMRole:
     Description: An existing IAM Role name to attach to the bastion. If left blank,
       a new role will be created.
-    Default: ''
+    Default: 'BastionRole'
+    Type: String
+  ExistingIAMInstanceProfile:
+    Description: An existing IAM Role name to attach to the bastion. If left blank,
+      a new role will be created.
+    Default: 'BastionRoleProfile'
     Type: String
   KeyName:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
@@ -75,7 +80,7 @@ Parameters:
     Description: The size in GB for the root EBS volume.
     Type: Number
     Default: '10'
-  QSS3BucketName:
+  S3BucketName:
     AllowedPattern: '^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$'
     ConstraintDescription: Quick Start bucket name can include numbers, lowercase letters, uppercase
       letters, and hyphens (-). It cannot start or end with a hyphen (-).
@@ -84,11 +89,11 @@ Parameters:
       include numbers, lowercase letters, uppercase letters, and hyphens (-). It
       cannot start or end with a hyphen (-).
     Type: String
-  QSS3BucketRegion:
+  S3BucketRegion:
     Default: 'us-west-2'
-    Description: The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.
+    Description: The AWS Region where the Quick Start S3 bucket (S3BucketName) is hosted. When using your own bucket, you must specify this value.
     Type: String
-  QSS3KeyPrefix:
+  S3KeyPrefix:
     AllowedPattern: '^([0-9a-zA-Z-.]+/)*$'
     ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters, uppercase
       letters, hyphens (-), dots (.) and forward slash (/). The prefix should
@@ -220,10 +225,6 @@ Mappings:
     SUSE-SLES-15-HVM:
       Code: SLES15HVM
       OS: SLES
-Conditions:
-  CreateIAMRole: !Equals
-    - !Ref ExistingIAMRole
-    - ''
 Resources:
   BastionMainLogGroup:
     Type: 'AWS::Logs::LogGroup'
@@ -249,79 +250,15 @@ Resources:
           FromPort: -1
           ToPort: -1
           CidrIp: !Ref ClientCIDR
-  BastionHostRole:
-    Condition: CreateIAMRole
-    Type: 'AWS::IAM::Role'
-    Properties:
-      Path: /
-      AssumeRolePolicyDocument:
-        Statement:
-          - Action:
-              - 'sts:AssumeRole'
-            Principal:
-              Service:
-                - !Sub 'ec2.${AWS::URLSuffix}'
-            Effect: Allow
-        Version: 2012-10-17
-      ManagedPolicyArns:
-        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore'
-        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy'
-  BastionHostPolicy:
-    Type: 'AWS::IAM::Policy'
-    Properties:
-      PolicyName: BastionPolicy
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Action:
-              - 's3:GetObject'
-            Resource: !Sub
-              - arn:${AWS::Partition}:s3:::${S3Bucket}/${QSS3KeyPrefix}*
-              - S3Bucket: !Ref QSS3BucketName
-            Effect: Allow
-          - Action:
-              - 'logs:CreateLogStream'
-              - 'logs:GetLogEvents'
-              - 'logs:PutLogEvents'
-              - 'logs:DescribeLogGroups'
-              - 'logs:DescribeLogStreams'
-              - 'logs:PutRetentionPolicy'
-              - 'logs:PutMetricFilter'
-              - 'logs:CreateLogGroup'
-            Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*"
-            Effect: Allow
-          - Action:
-              - 'ec2:AssociateAddress'
-              - 'ec2:DescribeAddresses'
-            Resource: '*'
-            Effect: Allow
-      Roles:
-        - !If
-          - CreateIAMRole
-          - !Ref BastionHostRole
-          - !Ref ExistingIAMRole
-  BastionHostProfile:
-    DependsOn: BastionHostPolicy
-    Type: 'AWS::IAM::InstanceProfile'
-    Properties:
-      Roles:
-        - !If
-          - CreateIAMRole
-          - !Ref BastionHostRole
-          - !Ref ExistingIAMRole
-      Path: /
   BastionHost:
     Type: 'AWS::EC2::Instance'
     Metadata:
       'AWS::CloudFormation::Authentication':
         S3AccessCreds:
           type: S3
-          roleName: !If
-            - CreateIAMRole
-            - !Ref BastionHostRole
-            - !Ref ExistingIAMRole
+          roleName: !Ref ExistingIAMRole
           buckets:
-            - !Ref QSS3BucketName
+            - !Ref S3BucketName
       'AWS::CloudFormation::Init':
         config:
           files:
@@ -334,18 +271,18 @@ Resources:
                 -a exit,always -F arch=b32 -S execve
             /tmp/auditing_configure.sh:
               source: !Sub
-                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/auditing_configure.sh
-                - S3Bucket: !Ref 'QSS3BucketName'
-                  S3Region: !Ref 'QSS3BucketRegion'
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${S3KeyPrefix}scripts/auditing_configure.sh
+                - S3Bucket: !Ref 'S3BucketName'
+                  S3Region: !Ref 'S3BucketRegion'
               mode: '000550'
               owner: root
               group: root
               authentication: S3AccessCreds
             /tmp/bastion_bootstrap.sh:
               source: !Sub
-                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh
-                - S3Bucket: !Ref 'QSS3BucketName'
-                  S3Region: !Ref 'QSS3BucketRegion'
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${S3KeyPrefix}scripts/bastion_bootstrap.sh
+                - S3Bucket: !Ref 'S3BucketName'
+                  S3Region: !Ref 'S3BucketRegion'
               mode: '000550'
               owner: root
               group: root
@@ -364,7 +301,7 @@ Resources:
               env:
                 REGION: !Sub ${AWS::Region}
                 URL_SUFFIX: !Sub ${AWS::URLSuffix}
-                BANNER_REGION: !Ref 'QSS3BucketRegion'
+                BANNER_REGION: !Ref 'S3BucketRegion'
               command: !Sub
                 - "./bastion_bootstrap.sh --banner ${BannerUrl} --enable ${EnableBanner} --tcp-forwarding ${EnableTCPForwarding} --x11-forwarding ${EnableX11Forwarding}"
                 - BannerUrl: !Ref BastionBanner
@@ -376,7 +313,7 @@ Resources:
       #     SubnetId: 'subnet-01153d5e7e1bf7115'
       # PlacementTenancy: !Ref BastionTenancy
       KeyName: !Ref KeyName
-      IamInstanceProfile: !Ref BastionHostProfile
+      IamInstanceProfile: !Ref ExistingIAMInstanceProfile
       ImageId: !FindInMap
         - AWSAMIRegionMap
         - !Ref 'AWS::Region'
@@ -431,6 +368,13 @@ Resources:
     CreationPolicy:
       ResourceSignal:
         Timeout: PT15M
+  DeleteAfterTTLStack:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: 'https://s3.amazonaws.com/cfn-expire-stacks/templates/cloudformation-stack-ttl.yaml'
+      Parameters:
+        StackName: !Ref 'AWS::StackName'
+        TTL: '10'
 Outputs:
   # CloudWatchLogs:
   #   Description: CloudWatch Logs GroupName. Your SSH logs will be stored here.
@@ -444,10 +388,7 @@ Outputs:
       Name: !Sub '${AWS::StackName}-BastionSecurityGroupID'
   BastionHostRole:
     Description: Bastion IAM Role name
-    Value: !If
-      - CreateIAMRole
-      - !Ref BastionHostRole
-      - !Ref ExistingIAMRole
+    Value: !Ref ExistingIAMRole
     Export:
       Name: !Sub '${AWS::StackName}-BastionHostRole'
   BastionPublicIP:

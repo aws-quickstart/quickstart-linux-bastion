@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  AWS CloudFormation Template for creating a linux bastion host.  Based on AWS Quickstart samples.
+  AWS CloudFormation Template for creating a the security profile for a linux bastion host.  Based on AWS Quickstart samples.  
 Parameters:
   S3BucketName:
     AllowedPattern: '^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$'
@@ -21,26 +21,13 @@ Parameters:
       include numbers, lowercase letters, uppercase letters, hyphens (-), dots
       (.) and forward slash (/) and it should end with a forward slash (/).
     Type: String
-Conditions:
-  CreateIAMRole: !Equals
-    - !Ref ExistingIAMRole
-    - ''
 Resources:
   BastionMainLogGroup:
     Type: 'AWS::Logs::LogGroup'
-  SSHMetricFilter:
-    Type: 'AWS::Logs::MetricFilter'
-    Properties:
-      LogGroupName: !Ref BastionMainLogGroup
-      FilterPattern: ON FROM USER PWD
-      MetricTransformations:
-        - MetricName: SSHCommandCount
-          MetricValue: '1'
-          MetricNamespace: !Sub "AWSQuickStart/${AWS::StackName}"
   BastionHostRole:
-    Condition: CreateIAMRole
     Type: 'AWS::IAM::Role'
     Properties:
+      RoleName: BastionRole
       Path: /
       AssumeRolePolicyDocument:
         Statement:
@@ -57,7 +44,7 @@ Resources:
   BastionHostPolicy:
     Type: 'AWS::IAM::Policy'
     Properties:
-      PolicyName: BastionPolicy
+      PolicyName: BastionRolePolicy
       PolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -84,19 +71,14 @@ Resources:
             Resource: '*'
             Effect: Allow
       Roles:
-        - !If
-          - CreateIAMRole
-          - !Ref BastionHostRole
-          - !Ref ExistingIAMRole
+        - !Ref BastionHostRole
   BastionHostProfile:
     DependsOn: BastionHostPolicy
     Type: 'AWS::IAM::InstanceProfile'
     Properties:
+      InstanceProfileName: BastionRoleProfile
       Roles:
-        - !If
-          - CreateIAMRole
-          - !Ref BastionHostRole
-          - !Ref ExistingIAMRole
+        - !Ref BastionHostRole
       Path: /
 Outputs:
   # CloudWatchLogs:
@@ -106,9 +88,6 @@ Outputs:
   #     Name: !Sub '${AWS::StackName}-CloudWatchLogs'
   BastionHostRole:
     Description: Bastion IAM Role name
-    Value: !If
-      - CreateIAMRole
-      - !Ref BastionHostRole
-      - !Ref ExistingIAMRole
+    Value: !Ref BastionHostRole
     Export:
       Name: !Sub '${AWS::StackName}-BastionHostRole'
