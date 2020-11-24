@@ -228,15 +228,15 @@ Mappings:
 Resources:
   BastionMainLogGroup:
     Type: 'AWS::Logs::LogGroup'
-  SSHMetricFilter:
-    Type: 'AWS::Logs::MetricFilter'
-    Properties:
-      LogGroupName: !Ref BastionMainLogGroup
-      FilterPattern: ON FROM USER PWD
-      MetricTransformations:
-        - MetricName: SSHCommandCount
-          MetricValue: '1'
-          MetricNamespace: !Sub "AWSQuickStart/${AWS::StackName}"
+  # SSHMetricFilter:
+  #   Type: 'AWS::Logs::MetricFilter'
+  #   Properties:
+  #     LogGroupName: !Ref BastionMainLogGroup
+  #     FilterPattern: ON FROM USER PWD
+  #     MetricTransformations:
+  #       - MetricName: SSHCommandCount
+  #         MetricValue: '1'
+  #         MetricNamespace: !Sub "AWSQuickStart/${AWS::StackName}"
   BastionSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:

@@ -2,3 +2,4 @@
 taskcat_outputs/*
 packages/
 *ignore*
+*.pem
