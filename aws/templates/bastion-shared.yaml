@@ -22,6 +22,19 @@ Parameters:
       (.) and forward slash (/) and it should end with a forward slash (/).
     Type: String
 Resources:
+  CFNAdminRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: "Allow"
+          Principal:
+            Service: ["cloudformation.amazonaws.com"]
+          Action: "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AdministratorAccess'
   BastionHostRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -103,3 +116,12 @@ Outputs:
     Value: !Ref BastionHostRole
     Export:
       Name: !Sub '${AWS::StackName}-BastionHostRole'
+  CFNAdminRole:
+    Description: CloudFormation admin access service role.
+    Value: !Ref CFNAdminRole
+  CFNAdminRoleArn:
+    Description: CloudFormation admin access service role ARN.
+    Value: !GetAtt CFNAdminRole.Arn  
+    Export:
+      Name: !Sub '${AWS::StackName}-CFNAdminRoleArn'
+

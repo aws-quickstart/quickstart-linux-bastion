@@ -92,7 +92,31 @@ chmod 600 $BASTION_NAME.pem
 # Now create the bastion host
 printf "... Creating bastion host: %s\n" $BASTION_NAME
 aws cloudformation delete-stack --stack-name $BASTION_NAME # Delete any existing bastion host
-MY_BASTION=$(aws cloudformation create-stack --stack-name $BASTION_NAME --template-url $CFN_TEMPLATE_URL --parameters ParameterKey=KeyName,ParameterValue=$BASTION_NAME ParameterKey=ClientCIDR,ParameterValue=$MY_IP/32 --capabilities "CAPABILITY_IAM")
+MY_BASTION=$(aws cloudformation create-stack --stack-name $BASTION_NAME --template-url $CFN_TEMPLATE_URL --parameters ParameterKey=KeyName,ParameterValue=$BASTION_NAME ParameterKey=ClientCIDR,ParameterValue=$MY_IP/32 --capabilities "CAPABILITY_IAM" --role-arn "arn:aws:iam::182548631247:role/bastion-cfn-role-CFNAdminRole-1AZ71HIFLLQXR")
 
-#
-exit 0;
+DONE=0
+PREV_STATUS=0
+printf "... Monitoring bastion host deployment:"
+while [ $DONE -eq 0 ]
+do
+    sleep 5
+    CFN=$(aws cloudformation describe-stacks --stack-name $BASTION_NAME)
+    CFN_STATUS=$(echo $CFN | jq -r '.Stacks[].StackStatus')
+    case $CFN_STATUS in 
+        "CREATE_COMPLETE" | "ROLLBACK_COMPLETE")
+            DONE=1
+            ;;
+        *)
+            ;;
+    esac
+    if [ "$CFN_STATUS" != "$PREV_STATUS" ]
+    then
+        printf "\n      %s" $CFN_STATUS
+    else
+        printf "."
+    fi
+    PREV_STATUS=$CFN_STATUS
+done
+printf "\n"
+
+exit 0
