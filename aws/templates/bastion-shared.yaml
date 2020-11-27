@@ -21,7 +21,14 @@ Parameters:
       include numbers, lowercase letters, uppercase letters, hyphens (-), dots
       (.) and forward slash (/) and it should end with a forward slash (/).
     Type: String
-
+Mappings:
+  RegionMap:
+    us-west-2:
+      BastionVPC: vpc-828464fb
+      BastionCIDR: 172.31.252.0/24
+    us-east-1:
+      BastionVPC: vpc-xxxxxxxxx
+      BastionCIDR: 172.0.0.0/24
 Resources:
   CFNAdminRole:
     Type: "AWS::IAM::Role"
@@ -106,6 +113,25 @@ Resources:
         - MetricName: SSHCommandCount
           MetricValue: '1'
           MetricNamespace: 'Bastion'
+  BastionSubnet:
+    Type: AWS::EC2::Subnet
+    Properties: 
+      # AvailabilityZone: !Sub ${AWS::Region}a
+      CidrBlock: !FindInMap
+        - RegionMap
+        - !Ref 'AWS::Region'
+        - BastionCIDR
+      MapPublicIpOnLaunch: true
+      # Tags: 
+      #   - Key: environment
+      #     Value: "OPS"
+      #   - Key: project
+      #     Value: "DEVOPS"
+      #   - Key: 
+      VpcId: !FindInMap
+        - RegionMap
+        - !Ref 'AWS::Region'
+        - BastionVPC
 Outputs:
   CloudWatchLogs:
     Description: CloudWatch Logs GroupName. Your SSH logs will be stored here.
