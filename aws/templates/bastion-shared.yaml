@@ -21,6 +21,7 @@ Parameters:
       include numbers, lowercase letters, uppercase letters, hyphens (-), dots
       (.) and forward slash (/) and it should end with a forward slash (/).
     Type: String
+
 Resources:
   CFNAdminRole:
     Type: "AWS::IAM::Role"

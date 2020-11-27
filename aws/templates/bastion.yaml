@@ -200,6 +200,8 @@ Mappings:
       US2004HVM: ami-056cb9ae6e2df09e8
       CENTOS7HVM: ami-0bc06212a56393ee1
       SLES15HVM: ami-0f1e3b3fb0fec0361
+      BastionVPC: vpc-092a02d29c48133cb
+      BastionCIDR: 172.31.254.0/24
     cn-north-1:
       AMZNLINUX2: ami-010e92a33d9d1fc40
       CENTOS7HVM: ami-0e02aaefeb74c3373
@@ -238,6 +240,26 @@ Resources:
           FromPort: -1
           ToPort: -1
           CidrIp: !Ref ClientCIDR
+  BastionSubnet:
+    Type: AWS::EC2::Subnet
+    Properties: 
+      AssignIpv6AddressOnCreation: false
+      # AvailabilityZone: !Sub ${AWS::Region}a
+      CidrBlock: !FindInMap
+        - AWSAMIRegionMap
+        - !Ref 'AWS::Region'
+        - BastionCIDR
+      MapPublicIpOnLaunch: true
+      # Tags: 
+      #   - Key: environment
+      #     Value: "OPS"
+      #   - Key: project
+      #     Value: "DEVOPS"
+      #   - Key: 
+      VpcId: !FindInMap
+        - AWSAMIRegionMap
+        - !Ref 'AWS::Region'
+        - BastionVPC
   BastionHost:
     Type: 'AWS::EC2::Instance'
     Metadata:
