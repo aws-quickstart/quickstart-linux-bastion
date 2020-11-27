@@ -243,7 +243,6 @@ Resources:
   BastionSubnet:
     Type: AWS::EC2::Subnet
     Properties: 
-      AssignIpv6AddressOnCreation: false
       # AvailabilityZone: !Sub ${AWS::Region}a
       CidrBlock: !FindInMap
         - AWSAMIRegionMap
