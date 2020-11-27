@@ -126,16 +126,27 @@ Resources:
         - !Ref 'AWS::Region'
         - BastionCIDR
       MapPublicIpOnLaunch: true
-      # Tags: 
-      #   - Key: environment
-      #     Value: "OPS"
-      #   - Key: project
-      #     Value: "DEVOPS"
-      #   - Key: 
+      Tags: 
+        - Key: Name
+          Value: bastion-subnet
       VpcId: !FindInMap
         - RegionMap
         - !Ref 'AWS::Region'
         - BastionVPC
+  # BastionPrefixList:
+  #   Type: "AWS::EC2::PrefixList"
+  #   Properties:
+  #     PrefixListName: bastion-prefixlist
+  #     AddressFamily: IPv4
+  #     MaxEntries: 200
+  #     Entries:
+  #       - Cidr: !Ref ClientCIDR
+  #         Description: !Ref 'AWS::StackName'
+  BastionSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupName: !Ref 'AWS::StackName'
+      GroupDescription: Provides bastion hosts access to other services
 Outputs:
   CloudWatchLogs:
     Description: CloudWatch Logs GroupName. Your SSH logs will be stored here.

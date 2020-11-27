@@ -93,7 +93,12 @@ chmod 600 $BASTION_NAME.pem
 printf "... Creating bastion host: %s\n" $BASTION_NAME
 aws cloudformation delete-stack --stack-name $BASTION_NAME # Delete any existing bastion host
 sleep 5
-MY_BASTION=$(aws cloudformation create-stack --stack-name $BASTION_NAME --template-url $CFN_TEMPLATE_URL --parameters ParameterKey=KeyName,ParameterValue=$BASTION_NAME ParameterKey=ClientCIDR,ParameterValue=$MY_IP/32 --capabilities "CAPABILITY_IAM" --role-arn "arn:aws:iam::182548631247:role/bastion-shared-CFNAdminRole-9IVPABIUV9JA")
+MY_BASTION=$(aws cloudformation create-stack \
+    --stack-name $BASTION_NAME \
+    --template-url $CFN_TEMPLATE_URL \
+    --parameters ParameterKey=KeyName,ParameterValue=$BASTION_NAME ParameterKey=ClientCIDR,ParameterValue=$MY_IP/32 \
+    --capabilities "CAPABILITY_IAM" \
+    --role-arn "arn:aws:iam::182548631247:role/bastion-cfn-admin-role")
 
 DONE=0
 PREV_STATUS=0

@@ -72,8 +72,8 @@ Parameters:
     Type: String
     MinLength: '9'
     MaxLength: '18'
-    Default: 0.0.0.0/0
-    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
+    Default: 0.0.0.0/32
+    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/32'
     ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
   RootVolumeSize:
     Description: The size in GB for the root EBS volume.
@@ -238,6 +238,16 @@ Resources:
           FromPort: -1
           ToPort: -1
           CidrIp: !Ref ClientCIDR
+  BastionPermissions:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties: 
+      Description: !Sub ${AWS::StackName} access to to other services
+      GroupName: !Ref BastionSharedStackName
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+      CidrIp: !Ref ClientCIDR
+      # GroupId: String
   BastionHost:
     Type: 'AWS::EC2::Instance'
     Metadata:
@@ -360,6 +370,15 @@ Resources:
     CreationPolicy:
       ResourceSignal:
         Timeout: PT15M
+  BastionPrefixList:
+    Type: "AWS::EC2::PrefixList"
+    Properties:
+      PrefixListName: bastion-prefixlist
+      AddressFamily: IPv4
+      MaxEntries: 200
+      Entries:
+        - Cidr: !Ref ClientCIDR
+          Description: !Ref 'AWS::StackName'
   DeleteAfterTTLStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:
