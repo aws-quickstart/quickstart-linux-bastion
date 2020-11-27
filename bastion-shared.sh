@@ -12,7 +12,7 @@ aws cloudformation create-stack \
 # Monitor stack creation progress
 DONE=0
 PREV_STATUS=0
-printf "... Monitoring bastion host deployment:"
+printf "... Monitoring stack deployment"
 while [ $DONE -eq 0 ]
 do
     sleep 5
@@ -27,7 +27,7 @@ do
     esac
     if [ "$CFN_STATUS" != "$PREV_STATUS" ]
     then
-        printf "\n      %s " $CFN_STATUS
+        printf "\n    %s " $CFN_STATUS
     else
         printf "."
     fi

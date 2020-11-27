@@ -21,6 +21,9 @@ Parameters:
       include numbers, lowercase letters, uppercase letters, hyphens (-), dots
       (.) and forward slash (/) and it should end with a forward slash (/).
     Type: String
+  CFNAdminRoleName:
+    Default: bastion-cfn-admin-role
+    Type: String
 Mappings:
   RegionMap:
     us-west-2:
@@ -41,6 +44,7 @@ Resources:
             Service: ["cloudformation.amazonaws.com"]
           Action: "sts:AssumeRole"
       Path: "/"
+      RoleName: !Ref CFNAdminRoleName
       ManagedPolicyArns:
         - 'arn:aws:iam::aws:policy/AdministratorAccess'
   BastionHostRole:
