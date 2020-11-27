@@ -96,7 +96,7 @@ MY_BASTION=$(aws cloudformation create-stack --stack-name $BASTION_NAME --templa
 
 DONE=0
 PREV_STATUS=0
-printf "... Monitoring bastion host deployment:"
+printf "... Monitoring bastion host deployment..."
 while [ $DONE -eq 0 ]
 do
     sleep 5
@@ -111,7 +111,7 @@ do
     esac
     if [ "$CFN_STATUS" != "$PREV_STATUS" ]
     then
-        printf "\n      %s" $CFN_STATUS
+        printf "\n    %s" $CFN_STATUS
     else
         printf "."
     fi
