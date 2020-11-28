@@ -166,4 +166,14 @@ Outputs:
     Value: !GetAtt CFNAdminRole.Arn  
     Export:
       Name: !Sub '${AWS::StackName}-CFNAdminRoleArn'
+  BastionPermissions:
+    Description: Security group for bastions to access other resources
+    Value: !Ref BastionSecurityGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-BastionPermissions'
+  BastionSubnet:
+    Description: Subnet for bastion hosts.
+    Value: !Ref BastionSubnet
+    Export:
+      Name: !Sub '${AWS::StackName}-BastionSubnet'
 

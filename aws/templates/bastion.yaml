@@ -322,6 +322,13 @@ Resources:
       SecurityGroups:
         - !Ref BastionSecurityGroup
       InstanceType: !Ref BastionInstanceType
+      NetworkInterfaces:
+        - DeviceIndex: '0'
+          GroupSet:
+            - !ImportValue
+          AssociatePublicIpAddress: true
+          SubnetId: !ImportValue
+            'Fn::Sub': "${BastionSharedStackName}-BastionSubnet"
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
@@ -377,7 +384,9 @@ Resources:
       AddressFamily: IPv4
       MaxEntries: 200
       Entries:
-        - Cidr: !GetAtt BastionHost.PrivateIp
+        - Cidr: !Sub 
+          - ${IP}/32
+          - IP: !GetAtt BastionHost.PrivateIp
           Description: !Ref 'AWS::StackName'
   DeleteAfterTTLStack:
     Type: "AWS::CloudFormation::Stack"
