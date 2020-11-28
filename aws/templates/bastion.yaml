@@ -319,8 +319,8 @@ Resources:
           - LinuxAMINameMap
           - !Ref BastionAMIOS
           - Code
-      SecurityGroups:
-        - !Ref BastionSecurityGroup
+      # SecurityGroups:
+      #   - !Ref BastionSecurityGroup
       InstanceType: !Ref BastionInstanceType
       NetworkInterfaces:
         - DeviceIndex: '0'
