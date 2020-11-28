@@ -372,12 +372,13 @@ Resources:
         Timeout: PT15M
   BastionPrefixList:
     Type: "AWS::EC2::PrefixList"
+    DependsOn: BastionHost
     Properties:
       PrefixListName: bastion-prefixlist
       AddressFamily: IPv4
       MaxEntries: 200
       Entries:
-        - Cidr: !Ref ClientCIDR
+        - Cidr: !GetAtt BastionHost.PrivateIpAddress
           Description: !Ref 'AWS::StackName'
   DeleteAfterTTLStack:
     Type: "AWS::CloudFormation::Stack"
