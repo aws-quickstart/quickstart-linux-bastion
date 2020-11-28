@@ -142,7 +142,7 @@ Resources:
   #     Entries:
   #       - Cidr: !Ref ClientCIDR
   #         Description: !Ref 'AWS::StackName'
-  BastionsPermissionsSG:
+  BastionPermissionsSG:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
       GroupName: !Ref 'AWS::StackName'
@@ -168,7 +168,8 @@ Outputs:
       Name: !Sub '${AWS::StackName}-CFNAdminRoleArn'
   BastionPermissionsSG:
     Description: Security group for bastions to access other resources
-    Value: !Ref BastionsPermissionsSG
+    Value: !GetAtt .GroupId
+    # Value: !Ref 
     Export:
       Name: !Sub '${AWS::StackName}-BastionPermissionsSG'
   BastionSubnet:
