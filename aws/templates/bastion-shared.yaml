@@ -170,7 +170,7 @@ Outputs:
     Description: Security group for bastions to access other resources
     Value: !Ref BastionsPermissionsSG
     Export:
-      Name: !Sub '${AWS::StackName}-BastionPermissions'
+      Name: !Sub '${AWS::StackName}-BastionPermissionsSG'
   BastionSubnet:
     Description: Subnet for bastion hosts.
     Value: !Ref BastionSubnet
