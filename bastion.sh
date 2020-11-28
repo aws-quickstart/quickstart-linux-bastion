@@ -91,8 +91,8 @@ chmod 600 $BASTION_NAME.pem
 
 # Now create the bastion host
 printf "... Creating bastion host: %s\n" $BASTION_NAME
-aws cloudformation delete-stack --stack-name $BASTION_NAME # Delete any existing bastion host
-sleep 5
+aws cloudformation delete-stack --stack-name $BASTION_NAME # First, delete any existing bastion host
+sleep 2
 MY_BASTION=$(aws cloudformation create-stack \
     --stack-name $BASTION_NAME \
     --template-url $CFN_TEMPLATE_URL \
