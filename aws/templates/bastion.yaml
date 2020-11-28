@@ -325,7 +325,8 @@ Resources:
       NetworkInterfaces:
         - DeviceIndex: '0'
           GroupSet:
-            - !ImportValue
+            - !ImportValue 
+              'Fn::Sub': '${BastionSharedStackName}-BastionPermissionsSG'
           AssociatePublicIpAddress: true
           SubnetId: !ImportValue
             'Fn::Sub': "${BastionSharedStackName}-BastionSubnet"
