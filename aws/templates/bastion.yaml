@@ -375,7 +375,7 @@ Resources:
       Description: !Sub Allow ${AWS::StackName} to MySQL
       # GroupName: !Ref BastionSharedStackName
       GroupName: !ImportValue 
-        'Fn::Sub': '${BastionSharedStackName}--RDSBastionSecurityGroup'
+        'Fn::Sub': '${BastionSharedStackName}-RDSBastionSecurityGroup'
       IpProtocol: tcp
       FromPort: 3306
       ToPort: 3306
@@ -398,7 +398,7 @@ Resources:
   AppBastionSGRuleICMP:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
-      Description: !Sub ${AWS::StackName} to SSH
+      Description: !Sub ${AWS::StackName} to ICMP
       GroupName: !ImportValue 
         'Fn::Sub': '${BastionSharedStackName}-AppBastionSecurityGroup'
       IpProtocol: icmp
