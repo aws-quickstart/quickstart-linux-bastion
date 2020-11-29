@@ -315,7 +315,7 @@ Resources:
       NetworkInterfaces:
         - DeviceIndex: '0'
           GroupSet: 
-            - !Ref BastionSecurityGroup
+            - 'Fn::GetAtt': 'BastionSecurityGroup.GroupId'
             # - !ImportValue 
             #   'Fn::Sub': '${BastionSharedStackName}-BastionMySQLRuleSG'
           AssociatePublicIpAddress: true
