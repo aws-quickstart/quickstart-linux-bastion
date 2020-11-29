@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  AWS CloudFormation Template for a linux bastion host.  Depends on pre-existing shared components from bastion-shared template. Based on AWS Quickstart samples.
+  AWS CloudFormation stack for a linux bastion host.  Depends on pre-existing shared components from the bastion-shared template. Borrows from AWS Quickstart templates.
 Parameters:
   BastionSharedStackName:
     Description: Name of stack with common role, logging, etc for bastion hosts (required dependency)
@@ -238,16 +238,6 @@ Resources:
           FromPort: -1
           ToPort: -1
           CidrIp: !Ref ClientCIDR
-  BastionPermissions:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties: 
-      Description: !Sub ${AWS::StackName} access to to other services
-      GroupName: !Ref BastionSharedStackName
-      IpProtocol: tcp
-      FromPort: 22
-      ToPort: 22
-      CidrIp: !Ref ClientCIDR
-      # GroupId: String
   BastionHost:
     Type: 'AWS::EC2::Instance'
     Metadata:
@@ -324,9 +314,10 @@ Resources:
       InstanceType: !Ref BastionInstanceType
       NetworkInterfaces:
         - DeviceIndex: '0'
-          GroupSet:
-            - !ImportValue 
-              'Fn::Sub': '${BastionSharedStackName}-BastionPermissionsSG'
+          GroupSet: 
+            - !Ref BastionSecurityGroup
+            # - !ImportValue 
+            #   'Fn::Sub': '${BastionSharedStackName}-BastionMySQLRuleSG'
           AssociatePublicIpAddress: true
           SubnetId: !ImportValue
             'Fn::Sub': "${BastionSharedStackName}-BastionSubnet"
@@ -378,17 +369,55 @@ Resources:
     CreationPolicy:
       ResourceSignal:
         Timeout: PT15M
-  BastionPrefixList:
-    Type: "AWS::EC2::PrefixList"
+  RDSBastionSGRuleMySQL:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties: 
+      Description: !Sub Allow ${AWS::StackName} to MySQL
+      # GroupName: !Ref BastionSharedStackName
+      GroupName: !ImportValue 
+        'Fn::Sub': '${BastionSharedStackName}--RDSBastionSecurityGroup'
+      IpProtocol: tcp
+      FromPort: 3306
+      ToPort: 3306
+      CidrIp: !Sub 
+        - ${IP}/32
+        - IP: !GetAtt BastionHost.PrivateIp
+      # GroupId: String
+  AppBastionSGRuleSSH:
+    Type: AWS::EC2::SecurityGroupIngress
     Properties:
-      PrefixListName: bastion-prefixlist
-      AddressFamily: IPv4
-      MaxEntries: 200
-      Entries:
-        - Cidr: !Sub 
-          - ${IP}/32
-          - IP: !GetAtt BastionHost.PrivateIp
-          Description: !Ref 'AWS::StackName'
+      Description: !Sub ${AWS::StackName} to SSH
+      GroupName: !ImportValue 
+        'Fn::Sub': '${BastionSharedStackName}-AppBastionSecurityGroup'
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+      CidrIp: !Sub 
+        - ${IP}/32
+        - IP: !GetAtt BastionHost.PrivateIp
+  AppBastionSGRuleICMP:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: !Sub ${AWS::StackName} to SSH
+      GroupName: !ImportValue 
+        'Fn::Sub': '${BastionSharedStackName}-AppBastionSecurityGroup'
+      IpProtocol: icmp
+      FromPort: -1
+      ToPort: -1
+      CidrIp: !Sub 
+        - ${IP}/32
+        - IP: !GetAtt BastionHost.PrivateIp
+  # BastionPrefixList:
+  #   Type: "AWS::EC2::PrefixList"
+  #   Properties:
+  #     PrefixListName: bastion-prefixlist
+  #     AddressFamily: IPv4
+  #     MaxEntries: 200
+  #     Entries:
+  #       - Cidr: !Sub 
+  #         - ${IP}/32
+  #         - IP: !GetAtt BastionHost.PrivateIp
+  #         Description: !Ref 'AWS::StackName'
   DeleteAfterTTLStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:

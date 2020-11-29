@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  AWS CloudFormation Template for the shared infrastructure for linux bastion hosts.  Based on AWS Quickstart samples.  
+  AWS CloudFormation stack for the infrastructure shared by linux bastion hosts.  Must be deployed before any bastion stacks. Borrows from AWS Quickstart templates.  
 Parameters:
   S3BucketName:
     AllowedPattern: '^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$'
@@ -142,11 +142,16 @@ Resources:
   #     Entries:
   #       - Cidr: !Ref ClientCIDR
   #         Description: !Ref 'AWS::StackName'
-  BastionsPermissionsSG:
+  RDSBastionSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
-      GroupName: !Ref 'AWS::StackName'
-      GroupDescription: Provides bastion hosts access to other services
+      GroupName: !Sub ${AWS::StackName}-to-rds
+      GroupDescription: Provides bastion hosts access to RDS databases
+  AppBastionSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupName: !Sub ${AWS::StackName}-to-app
+      GroupDescription: Provides bastion hosts access to App hosts
 Outputs:
   CloudWatchLogs:
     Description: CloudWatch Logs GroupName. Your SSH logs will be stored here.
@@ -166,12 +171,18 @@ Outputs:
     Value: !GetAtt CFNAdminRole.Arn  
     Export:
       Name: !Sub '${AWS::StackName}-CFNAdminRoleArn'
-  BastionPermissionsSG:
-    Description: Security group for bastions to access other resources
-    Value: !GetAtt BastionsPermissionsSG.GroupId
-    # Value: !Ref BastionsPermissionsSG
+  RDSBastionSecurityGroup:
+    Description: Security group for bastion hosts to access RDS databases
+    Value: !GetAtt RDSBastionSecurityGroup.GroupId
+    # Value: !Ref RDSBastionSecurityGroup
     Export:
-      Name: !Sub '${AWS::StackName}-BastionPermissionsSG'
+      Name: !Sub '${AWS::StackName}-RDSBastionSecurityGroup'
+  AppBastionSecurityGroup:
+    Description: Security group for bastion hosts to access App hosts
+    Value: !GetAtt AppBastionSecurityGroup.GroupId
+    # Value: !Ref RDSBastionSecurityGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-AppBastionSecurityGroup'
   BastionSubnet:
     Description: Subnet for bastion hosts.
     Value: !Ref BastionSubnet
