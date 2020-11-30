@@ -145,7 +145,7 @@ Resources:
       #     - 1
       #     - 8
       # CidrBlock: !Select [ 0, !Cidr [ !GetAtt RDSBastionSecurityGroup.VpcId, 1, 8 ]]
-      CidrBlock: !Select [ 0, !Cidr [ 'Fn::FindInMap': [ RegionMap, !Ref 'AWS::Region', BastionVPC ], 1, 8 ]]
+      CidrBlock: !Select [ 0, !Cidr [ 'Fn::FindInMap': [ RegionMap, !Ref 'AWS::Region', BastionVPCCIDR ], 1, 8 ]]
      # CidrBlock: !Select [ 0, !Cidr [ !GetAtt ExampleVpc.CidrBlock, 1, 8 ]]
       MapPublicIpOnLaunch: true
       Tags: 
