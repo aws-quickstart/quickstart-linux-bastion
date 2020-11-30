@@ -28,7 +28,7 @@ Mappings:
   RegionMap:
     us-west-2:
       BastionVPC: vpc-828464fb
-      BastionCIDR: 172.31.252.0/24
+      BastionVPCCIDR: 172.31.0.0/16
     us-east-1:
       BastionVPC: vpc-xxxxxxxxx
       BastionCIDR: 172.0.0.0/24
@@ -125,7 +125,27 @@ Resources:
       #   - RegionMap
       #   - !Ref 'AWS::Region'
       #   - BastionCIDR
-      CidrBlock: !Select [ 0, !Cidr [ !FindInMap [ RegionMap, !Ref 'AWS::Region', BastionVPC], 1, 8 ]]
+      # CidrBlock: !Select [ 0, !Cidr [ !FindInMap [ RegionMap, !Ref 'AWS::Region', BastionVPC], 1, 8 ]]
+      # CidrBlock: !Select [ 0, !Cidr [ !GetAtt 'Fn::FindInMap': '[ RegionMap, !Ref 'AWS::Region', BastionVPC]', 1, 8 ]]
+      # CidrBlock: !Select
+      #   - 0
+      #   - !Cidr
+      #     - 'Fn::GetAtt': 'Fn::FindInMap'
+      #       - RegionMap
+      #       - 'Fn::Ref': 'AWS::Region'
+      #       - BastionVPC].CidrBlock
+      #     - 1
+      #     - 8
+      # CidrBlock: Fn::Select
+      #   - 0
+      #   - Fn::Cidr
+      #     - !Sub
+      #       - ${VPC}.CidrBlock
+      #       - VPC: Fn::FindInMap: [ RegionMap, !Ref 'AWS::Region', BastionVPC ]
+      #     - 1
+      #     - 8
+      # CidrBlock: !Select [ 0, !Cidr [ !GetAtt RDSBastionSecurityGroup.VpcId, 1, 8 ]]
+      CidrBlock: !Select [ 0, !Cidr [ 'Fn::FindInMap': [ RegionMap, !Ref 'AWS::Region', BastionVPC ], 1, 8 ]]
      # CidrBlock: !Select [ 0, !Cidr [ !GetAtt ExampleVpc.CidrBlock, 1, 8 ]]
       MapPublicIpOnLaunch: true
       Tags: 
@@ -149,11 +169,13 @@ Resources:
     Properties:
       GroupName: !Sub ${AWS::StackName}-to-rds
       GroupDescription: Provides bastion hosts access to RDS databases
+      VpcId: !FindInMap [RegionMap, !Ref AWS::Region, BastionVPC]
   AppBastionSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
       GroupName: !Sub ${AWS::StackName}-to-app
       GroupDescription: Provides bastion hosts access to App hosts
+      VpcId: !FindInMap [RegionMap, !Ref AWS::Region, BastionVPC]
 Outputs:
   CloudWatchLogs:
     Description: CloudWatch Logs GroupName. Your SSH logs will be stored here.
