@@ -1,5 +1,6 @@
 STACK_NAME="bastion-shared"
-CFN_TEMPLATE_URL="https://s3.amazonaws.com/lehto-bastion/templates/bastion-shared.yaml"
+GLOBAL_TEMPLATE_URL="https://s3.amazonaws.com/lehto-bastion/templates/bastion-global.yaml"
+SHARED_TEMPLATE_URL="https://s3.amazonaws.com/lehto-bastion/templates/bastion-shared.yaml"
 
 function usage() {
     echo "$0 <usage>"
@@ -28,13 +29,21 @@ shift $((OPTIND-1))
 
 echo "This script will create shared resources for bastion hosts in AWS region '${REGION}'"
 
-# Create Cloudformation stack
+# Create Cloudformation stack for bastion-global
 aws cloudformation create-stack \
     --stack-name $STACK_NAME \
     --region $REGION \
-    --template-url $CFN_TEMPLATE_URL \
+    --template-url $GLOBAL_TEMPLATE_URL \
     --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" \
     --tags Key="environment",Value="DEV" Key="owner",Value="eric" Key="project",Value="INFRA" 
+
+# Create Cloudformation stack for bastion-shared in each region
+# aws cloudformation create-stack \
+#     --stack-name $STACK_NAME \
+#     --region $REGION \
+#     --template-url $SHARED_TEMPLATE_URL \
+#     --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" \
+#     --tags Key="environment",Value="DEV" Key="owner",Value="eric" Key="project",Value="INFRA" 
 
 # Monitor stack creation progress
 DONE=0

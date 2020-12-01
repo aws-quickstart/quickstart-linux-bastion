@@ -1,29 +1,29 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  AWS CloudFormation stack for the infrastructure shared by linux bastion hosts.  Must be deployed before any bastion stacks. Borrows from AWS Quickstart templates.  
-Parameters:
-  S3BucketName:
-    AllowedPattern: '^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$'
-    ConstraintDescription: Quick Start bucket name can include numbers, lowercase letters, uppercase
-      letters, and hyphens (-). It cannot start or end with a hyphen (-).
-    Default: lehto-bastion
-    Description: S3 bucket name for the Quick Start assets. Quick Start bucket name can
-      include numbers, lowercase letters, uppercase letters, and hyphens (-). It
-      cannot start or end with a hyphen (-).
-    Type: String
-  S3KeyPrefix:
-    AllowedPattern: '^([0-9a-zA-Z-.]+/)*$'
-    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters, uppercase
-      letters, hyphens (-), dots (.) and forward slash (/). The prefix should
-      end with a forward slash (/).
-    Default: ''
-    Description: S3 key prefix for the Quick Start assets. Quick Start key prefix can
-      include numbers, lowercase letters, uppercase letters, hyphens (-), dots
-      (.) and forward slash (/) and it should end with a forward slash (/).
-    Type: String
-  CFNAdminRoleName:
-    Default: bastion-cfn-admin-role
-    Type: String
+  AWS CloudFormation stack for the regional infrastructure shared by linux bastion hosts.  Must be deployed before any bastion stacks. Borrows from AWS Quickstart templates.  
+# Parameters:
+  # S3BucketName:
+  #   AllowedPattern: '^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$'
+  #   ConstraintDescription: Quick Start bucket name can include numbers, lowercase letters, uppercase
+  #     letters, and hyphens (-). It cannot start or end with a hyphen (-).
+  #   Default: lehto-bastion
+  #   Description: S3 bucket name for the Quick Start assets. Quick Start bucket name can
+  #     include numbers, lowercase letters, uppercase letters, and hyphens (-). It
+  #     cannot start or end with a hyphen (-).
+  #   Type: String
+  # S3KeyPrefix:
+  #   AllowedPattern: '^([0-9a-zA-Z-.]+/)*$'
+  #   ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters, uppercase
+  #     letters, hyphens (-), dots (.) and forward slash (/). The prefix should
+  #     end with a forward slash (/).
+  #   Default: ''
+  #   Description: S3 key prefix for the Quick Start assets. Quick Start key prefix can
+  #     include numbers, lowercase letters, uppercase letters, hyphens (-), dots
+  #     (.) and forward slash (/) and it should end with a forward slash (/).
+  #   Type: String
+  # CFNAdminRoleName:
+  #   Default: bastion-cfn-admin-role
+  #   Type: String
 Mappings:
   RegionMap:
     us-west-2:
@@ -33,90 +33,90 @@ Mappings:
       BastionVPC: vpc-03261b90f9d914c30
       BastionCIDR: 172.20.252.0/24
 Resources:
-  CFNAdminRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-        - Effect: "Allow"
-          Principal:
-            Service: ["cloudformation.amazonaws.com"]
-          Action: "sts:AssumeRole"
-      Path: "/"
-      RoleName: !Ref CFNAdminRoleName
-      ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/AdministratorAccess'
-  BastionHostRole:
-    Type: 'AWS::IAM::Role'
-    Properties:
-      RoleName: BastionRole
-      Path: /
-      AssumeRolePolicyDocument:
-        Statement:
-          - Action:
-              - 'sts:AssumeRole'
-            Principal:
-              Service:
-                - !Sub 'ec2.${AWS::URLSuffix}'
-            Effect: Allow
-        Version: 2012-10-17
-      ManagedPolicyArns:
-        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore'
-        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy'
-  BastionHostPolicy:
-    Type: 'AWS::IAM::Policy'
-    Properties:
-      PolicyName: BastionRolePolicy
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Action:
-              - 's3:GetObject'
-            Resource: !Sub
-              - arn:${AWS::Partition}:s3:::${S3Bucket}/${S3KeyPrefix}*
-              - S3Bucket: !Ref S3BucketName
-            Effect: Allow
-          - Action:
-              - 'logs:CreateLogStream'
-              - 'logs:GetLogEvents'
-              - 'logs:PutLogEvents'
-              - 'logs:DescribeLogGroups'
-              - 'logs:DescribeLogStreams'
-              - 'logs:PutRetentionPolicy'
-              - 'logs:PutMetricFilter'
-              - 'logs:CreateLogGroup'
-            Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*"
-            Effect: Allow
-          - Action:
-              - 'ec2:AssociateAddress'
-              - 'ec2:DescribeAddresses'
-            Resource: '*'
-            Effect: Allow
-      Roles:
-        - !Ref BastionHostRole
-  BastionHostProfile:
-    DependsOn: BastionHostPolicy
-    Type: 'AWS::IAM::InstanceProfile'
-    Properties:
-      InstanceProfileName: BastionRoleProfile
-      Roles:
-        - !Ref BastionHostRole
-      Path: /
-  BastionMainLogGroup:
-    Type: 'AWS::Logs::LogGroup'
-    Properties:
-      LogGroupName: !Ref 'AWS::StackName'
-      RetentionInDays: 365
-  SSHMetricFilter:
-    Type: 'AWS::Logs::MetricFilter'
-    Properties:
-      LogGroupName: !Ref BastionMainLogGroup
-      FilterPattern: ON FROM USER PWD
-      MetricTransformations:
-        - MetricName: SSHCommandCount
-          MetricValue: '1'
-          MetricNamespace: 'Bastion'
+  # CFNAdminRole:
+  #   Type: "AWS::IAM::Role"
+  #   Properties:
+  #     AssumeRolePolicyDocument:
+  #       Version: "2012-10-17"
+  #       Statement:
+  #       - Effect: "Allow"
+  #         Principal:
+  #           Service: ["cloudformation.amazonaws.com"]
+  #         Action: "sts:AssumeRole"
+  #     Path: "/"
+  #     RoleName: !Sub ${AWS::StackName}-cfn-role
+  #     ManagedPolicyArns:
+  #       - 'arn:aws:iam::aws:policy/AdministratorAccess'
+  # BastionHostRole:
+  #   Type: 'AWS::IAM::Role'
+  #   Properties:
+  #     RoleName: BastionRole
+  #     Path: /
+  #     AssumeRolePolicyDocument:
+  #       Statement:
+  #         - Action:
+  #             - 'sts:AssumeRole'
+  #           Principal:
+  #             Service:
+  #               - !Sub 'ec2.${AWS::URLSuffix}'
+  #           Effect: Allow
+  #       Version: 2012-10-17
+  #     ManagedPolicyArns:
+  #       - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore'
+  #       - !Sub 'arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy'
+  # BastionHostPolicy:
+  #   Type: 'AWS::IAM::Policy'
+  #   Properties:
+  #     PolicyName: BastionRolePolicy
+  #     PolicyDocument:
+  #       Version: 2012-10-17
+  #       Statement:
+  #         - Action:
+  #             - 's3:GetObject'
+  #           Resource: !Sub
+  #             - arn:${AWS::Partition}:s3:::${S3Bucket}/${S3KeyPrefix}*
+  #             - S3Bucket: !Ref S3BucketName
+  #           Effect: Allow
+  #         - Action:
+  #             - 'logs:CreateLogStream'
+  #             - 'logs:GetLogEvents'
+  #             - 'logs:PutLogEvents'
+  #             - 'logs:DescribeLogGroups'
+  #             - 'logs:DescribeLogStreams'
+  #             - 'logs:PutRetentionPolicy'
+  #             - 'logs:PutMetricFilter'
+  #             - 'logs:CreateLogGroup'
+  #           Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*"
+  #           Effect: Allow
+  #         - Action:
+  #             - 'ec2:AssociateAddress'
+  #             - 'ec2:DescribeAddresses'
+  #           Resource: '*'
+  #           Effect: Allow
+  #     Roles:
+  #       - !Ref BastionHostRole
+  # BastionHostProfile:
+  #   DependsOn: BastionHostPolicy
+  #   Type: 'AWS::IAM::InstanceProfile'
+  #   Properties:
+  #     InstanceProfileName: BastionRoleProfile
+  #     Roles:
+  #       - !Ref BastionHostRole
+  #     Path: /
+  # BastionMainLogGroup:
+  #   Type: 'AWS::Logs::LogGroup'
+  #   Properties:
+  #     LogGroupName: !Ref 'AWS::StackName'
+  #     RetentionInDays: 365
+  # SSHMetricFilter:
+  #   Type: 'AWS::Logs::MetricFilter'
+  #   Properties:
+  #     LogGroupName: !Ref BastionMainLogGroup
+  #     FilterPattern: ON FROM USER PWD
+  #     MetricTransformations:
+  #       - MetricName: SSHCommandCount
+  #         MetricValue: '1'
+  #         MetricNamespace: 'Bastion'
   BastionSubnet:
     Type: AWS::EC2::Subnet
     Properties: 
@@ -133,7 +133,7 @@ Resources:
         - BastionVPC
       Tags: 
         - Key: Name
-          Value: bastion-subnet
+          Value: !Sub ${AWS::StackName}-subnet
   RDSBastionSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
@@ -147,24 +147,24 @@ Resources:
       GroupDescription: Provides bastion hosts access to App hosts
       VpcId: !FindInMap [RegionMap, !Ref AWS::Region, BastionVPC]
 Outputs:
-  CloudWatchLogs:
-    Description: CloudWatch Logs GroupName. Your SSH logs will be stored here.
-    Value: !Ref BastionMainLogGroup
-    Export:
-      Name: !Sub '${AWS::StackName}-LogGroup'
-  BastionHostRole:
-    Description: Bastion IAM Role name
-    Value: !Ref BastionHostRole
-    Export:
-      Name: !Sub '${AWS::StackName}-BastionHostRole'
-  CFNAdminRole:
-    Description: CloudFormation admin access service role.
-    Value: !Ref CFNAdminRole
-  CFNAdminRoleArn:
-    Description: CloudFormation admin access service role ARN.
-    Value: !GetAtt CFNAdminRole.Arn  
-    Export:
-      Name: !Sub '${AWS::StackName}-CFNAdminRoleArn'
+  # CloudWatchLogs:
+  #   Description: CloudWatch Logs GroupName. Your SSH logs will be stored here.
+  #   Value: !Ref BastionMainLogGroup
+  #   Export:
+  #     Name: !Sub '${AWS::StackName}-LogGroup'
+  # BastionHostRole:
+  #   Description: Bastion IAM Role name
+  #   Value: !Ref BastionHostRole
+  #   Export:
+  #     Name: !Sub '${AWS::StackName}-BastionHostRole'
+  # CFNAdminRole:
+  #   Description: CloudFormation admin access service role.
+  #   Value: !Sub ${AWS::StackName}-cfn-role
+  # CFNAdminRoleArn:
+  #   Description: CloudFormation admin access service role ARN.
+  #   Value: !GetAtt CFNAdminRole.Arn  
+  #   Export:
+  #     Name: !Sub '${AWS::StackName}-CFNAdminRoleArn'
   RDSBastionSecurityGroup:
     Description: Security group for bastion hosts to access RDS databases
     Value: !GetAtt RDSBastionSecurityGroup.GroupId
