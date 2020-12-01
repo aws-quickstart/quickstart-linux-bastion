@@ -28,7 +28,7 @@ Mappings:
   RegionMap:
     us-west-2:
       BastionVPC: vpc-828464fb
-      BastionCIDR: 172.31.0.0/16
+      BastionCIDR: 172.31.252.0/24
     us-east-1:
       BastionVPC: vpc-xxxxxxxxx
       BastionCIDR: 172.0.0.0/24
