@@ -28,27 +28,23 @@ function script_init() {
 }
 
 # Echo usage if something isn't right.
-usage() { 
-    echo "Usage: $0 [-r <AWS region name>]" 1>&2; 
-    exit 1; 
-}
-
-# function usage() {
-#     echo "$0 <usage>"
-#     echo " "
-#     echo "options:"
-#     echo -e "--help \t Show options for this script"
-#     echo -e "--banner \t Enable or Disable Bastion Message"
-#     echo -e "--enable \t SSH Banner"
-#     echo -e "--tcp-forwarding \t Enable or Disable TCP Forwarding"
-#     echo -e "--x11-forwarding \t Enable or Disable X11 Forwarding"
+# usage() { 
+#     echo "Usage: $0 [-r <AWS region name>]" 1>&2; 
+#     exit 1; 
 # }
+
+function usage() {
+    echo "$0 <usage>"
+    echo " "
+    echo "options:"
+    echo -e "-r <region> \t Specify AWS region for the bastion.  Defaults to the region in your AWS CLI profile."
+}
 
 while getopts "r:" o; do
     case "${o}" in
         r)
             REGION=${OPTARG}
-            # todo: validate region else usage
+            # todo: validate region, else usage
             ;;
         :)  
             echo "ERROR: Option -$OPTARG requires an argument"

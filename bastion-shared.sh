@@ -1,10 +1,37 @@
 STACK_NAME="bastion-shared"
 CFN_TEMPLATE_URL="https://s3.amazonaws.com/lehto-bastion/templates/bastion-shared.yaml"
 
+function usage() {
+    echo "$0 <usage>"
+    echo " "
+    echo "options:"
+    echo -e "-r <region> \t Specify AWS region for the bastion.  Defaults to the region in your AWS CLI profile."
+}
+
+while getopts "r:" o; do
+    case "${o}" in
+        r)
+            REGION=${OPTARG}
+            # todo: validate region, else usage
+            ;;
+        :)  
+            echo "ERROR: Option -$OPTARG requires an argument"
+            usage
+            ;;
+        \?)
+            echo "ERROR: Invalid option -$OPTARG"
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
+echo "This script will create shared resources for bastion hosts in AWS region '${REGION}'"
+
 # Create Cloudformation stack
 aws cloudformation create-stack \
     --stack-name $STACK_NAME \
-    --region "us-west-2" \
+    --region $REGION \
     --template-url $CFN_TEMPLATE_URL \
     --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" \
     --tags Key="environment",Value="DEV" Key="owner",Value="eric" Key="project",Value="INFRA" 
