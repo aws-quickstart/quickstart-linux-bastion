@@ -182,6 +182,6 @@ Outputs:
       Name: !Sub '${AWS::StackName}-BastionSubnet'
   BastionVPC:
     Description: VPC for bastion hosts.
-    Value: !FindInMap [RegionMap, !Ref ${AWS::Region}, BastionVPC]
+    Value: !FindInMap [ RegionMap, !Ref AWS::Region, BastionVPC]
     Export:
       Name: !Sub '${AWS::StackName}-BastionVPC'
