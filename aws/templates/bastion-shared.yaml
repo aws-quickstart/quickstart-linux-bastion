@@ -28,7 +28,7 @@ Mappings:
   RegionMap:
     us-west-2:
       BastionVPC: vpc-828464fb
-      BastionVPCCIDR: 172.31.0.0/16
+      BastionCIDR: 172.31.0.0/16
     us-east-1:
       BastionVPC: vpc-xxxxxxxxx
       BastionCIDR: 172.0.0.0/24
@@ -120,11 +120,12 @@ Resources:
   BastionSubnet:
     Type: AWS::EC2::Subnet
     Properties: 
+      # Let Cloudformation choose an available AZ (recommended), or uncomment to specify your AZ.
       # AvailabilityZone: !Sub ${AWS::Region}a
-      # CidrBlock: !FindInMap
-      #   - RegionMap
-      #   - !Ref 'AWS::Region'
-      #   - BastionCIDR
+      CidrBlock: !FindInMap
+        - RegionMap
+        - !Ref 'AWS::Region'
+        - BastionCIDR
       # CidrBlock: !Select [ 0, !Cidr [ !FindInMap [ RegionMap, !Ref 'AWS::Region', BastionVPC], 1, 8 ]]
       # CidrBlock: !Select [ 0, !Cidr [ !GetAtt 'Fn::FindInMap': '[ RegionMap, !Ref 'AWS::Region', BastionVPC]', 1, 8 ]]
       # CidrBlock: !Select
@@ -145,7 +146,7 @@ Resources:
       #     - 1
       #     - 8
       # CidrBlock: !Select [ 0, !Cidr [ !GetAtt RDSBastionSecurityGroup.VpcId, 1, 8 ]]
-      CidrBlock: !Select [ 0, !Cidr [ 'Fn::FindInMap': [ RegionMap, !Ref 'AWS::Region', BastionVPCCIDR ], 1, 8 ]]
+      # CidrBlock: !Select [ 0, !Cidr [ 'Fn::FindInMap': [ RegionMap, !Ref 'AWS::Region', BastionVPCCIDR ], 1, 8 ]]
      # CidrBlock: !Select [ 0, !Cidr [ !GetAtt ExampleVpc.CidrBlock, 1, 8 ]]
       MapPublicIpOnLaunch: true
       Tags: 
