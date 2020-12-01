@@ -229,6 +229,8 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
       GroupDescription: 'Whitelist SSH, ICMP from the user workstation only'
+      VpcId: !ImportValue 
+        'Fn::Sub': "${BastionSharedStackName}-BastionVPC"
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 22

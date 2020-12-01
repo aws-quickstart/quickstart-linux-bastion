@@ -3,6 +3,7 @@
 REGION="us-west-2"
 BASTION_SUFFIX="bastion"
 CFN_TEMPLATE_URL="https://s3.amazonaws.com/lehto-bastion/templates/bastion.yaml"
+CFN_ROLE="arn:aws:iam::182548631247:role/bastion-global-cfn-role"
 
 # ----------------------------------------------------------------
 # Function for exit due to fatal program error
@@ -75,15 +76,15 @@ printf "... found your IP address: %s\n" $MY_IP
 BASTION_NAME="${AWS_USER}-${BASTION_SUFFIX}"
 
 # (re)create EC2 key pair for bastion host
-printf "... (re)creating SSH key, saving to file: %s\n" $BASTION_NAME.pem
-aws ec2 delete-key-pair --key-name $BASTION_NAME
-aws ec2 create-key-pair \
-    --key-name $BASTION_NAME \
+KEYPAIR_NAME=$BASTION_NAME-$REGION
+printf "... (re)creating SSH key, saving to file: %s\n" $KEYPAIR_NAME.pem
+aws ec2 --region $REGION delete-key-pair --key-name $KEYPAIR_NAME
+aws ec2 --region $REGION create-key-pair \
+    --key-name $KEYPAIR_NAME \
     --tag-specifications 'ResourceType=key-pair,Tags=[{Key=environment,Value=DEV},{Key=owner,Value=$AWS_USER},{Key=expires,Value="2020-11-24 13:00:00"}]' \
     --query 'KeyMaterial' \
-    --output text > ./$BASTION_NAME.pem
-chmod 600 $BASTION_NAME.pem
-# aws ec2 create-tags --resources $EC2_KEYPAIR_ID --tags Key=environment,Value=DEV Key=owner,Value=$AWS_USER Key=expires,Value='2020-11-24 12:00:00'
+    --output text > ./$KEYPAIR_NAME.pem
+chmod 600 $KEYPAIR_NAME.pem
 
 # Now create the bastion host
 printf "... Creating bastion host: %s\n" $BASTION_NAME
@@ -91,10 +92,11 @@ aws cloudformation delete-stack --stack-name $BASTION_NAME # First, delete any e
 sleep 2
 MY_BASTION=$(aws cloudformation create-stack \
     --stack-name $BASTION_NAME \
+    --region $REGION \
     --template-url $CFN_TEMPLATE_URL \
-    --parameters ParameterKey=KeyName,ParameterValue=$BASTION_NAME ParameterKey=ClientCIDR,ParameterValue=$MY_IP/32 \
+    --parameters ParameterKey=KeyName,ParameterValue=$KEYPAIR_NAME ParameterKey=ClientCIDR,ParameterValue=$MY_IP/32 \
     --capabilities "CAPABILITY_IAM" \
-    --role-arn "arn:aws:iam::182548631247:role/bastion-cfn-admin-role")
+    --role-arn $CFN_ROLE)
 
 DONE=0
 PREV_STATUS=0
@@ -106,6 +108,9 @@ do
     CFN_STATUS=$(echo $CFN | jq -r '.Stacks[].StackStatus')
     case $CFN_STATUS in 
         "CREATE_COMPLETE" | "ROLLBACK_COMPLETE")
+            DONE=1
+            ;;
+        "DELETE_IN_PROGRESS")
             DONE=1
             ;;
         *)

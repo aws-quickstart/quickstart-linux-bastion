@@ -31,23 +31,23 @@ shift $((OPTIND-1))
 echo "This script will create shared resources for bastion hosts in AWS region '${REGION}'"
 
 # Create Cloudformation stack for bastion-global
-STACK_NAME="bastion-global"
+# STACK_NAME="bastion-global"
 
-aws cloudformation create-stack \
-    --stack-name $STACK_NAME \
-    --region $REGION \
-    --template-url $GLOBAL_TEMPLATE_URL \
-    --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" \
-    --tags Key="environment",Value="DEV" Key="owner",Value="eric" Key="project",Value="INFRA" 
-
-# STACK_NAME="bastion-shared"
-# Create Cloudformation stack for bastion-shared in each region
 # aws cloudformation create-stack \
 #     --stack-name $STACK_NAME \
 #     --region $REGION \
-#     --template-url $SHARED_TEMPLATE_URL \
+#     --template-url $GLOBAL_TEMPLATE_URL \
 #     --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" \
 #     --tags Key="environment",Value="DEV" Key="owner",Value="eric" Key="project",Value="INFRA" 
+
+# Create Cloudformation stack bastion-shared in each region
+STACK_NAME="bastion-shared"
+aws cloudformation create-stack \
+    --stack-name $STACK_NAME \
+    --region $REGION \
+    --template-url $SHARED_TEMPLATE_URL \
+    --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" \
+    --tags Key="environment",Value="DEV" Key="owner",Value="eric" Key="project",Value="INFRA" 
 
 # Monitor stack creation progress
 DONE=0
