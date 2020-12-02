@@ -104,7 +104,7 @@ printf "... Monitoring bastion host deployment"
 while [ $DONE -eq 0 ]
 do
     sleep 5
-    CFN=$(aws cloudformation describe-stacks --stack-name $BASTION_NAME)
+    CFN=$(aws cloudformation --region $REGION describe-stacks --stack-name $BASTION_NAME)
     CFN_STATUS=$(echo $CFN | jq -r '.Stacks[].StackStatus')
     case $CFN_STATUS in 
         "CREATE_COMPLETE" | "ROLLBACK_COMPLETE")

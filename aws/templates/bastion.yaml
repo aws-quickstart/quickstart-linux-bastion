@@ -2,6 +2,10 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: >-
   AWS CloudFormation stack for a linux bastion host.  Depends on pre-existing shared components from the bastion-shared template. Borrows from AWS Quickstart templates.
 Parameters:
+  BastionTTL:
+    Description: 'Time to live in minutes before deleting the bastion host'
+    Type: String
+    Default: '10'
   BastionSharedStackName:
     Description: Name of stack with common role, logging, etc for bastion hosts (required dependency)
     Type: String
@@ -426,7 +430,7 @@ Resources:
       TemplateURL: 'https://s3.amazonaws.com/cfn-expire-stacks/templates/cloudformation-stack-ttl.yaml'
       Parameters:
         StackName: !Ref 'AWS::StackName'
-        TTL: '6'
+        TTL: !Ref BastionTTL
 Outputs:
   # CloudWatchLogs:
   #   Description: CloudWatch Logs GroupName. Your SSH logs will be stored here.
