@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  AWS CloudFormation stack for the global infrastructure shared by linux bastion hosts.  Must be deployed before any bastion stacks. Borrows from AWS Quickstart templates.  
+  .AWS CloudFormation stack for the global infrastructure shared by linux bastion hosts.  Must be deployed before any bastion stacks. Borrows from AWS Quickstart templates.  
 Parameters:
   S3BucketName:
     AllowedPattern: '^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$'
