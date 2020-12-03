@@ -426,7 +426,7 @@ Resources:
       TemplateURL: 'https://s3.amazonaws.com/cfn-expire-stacks/templates/cloudformation-stack-ttl.yaml'
       Parameters:
         StackName: !Ref 'AWS::StackName'
-        TTL: '6'
+        TTL: '60'
 Outputs:
   # CloudWatchLogs:
   #   Description: CloudWatch Logs GroupName. Your SSH logs will be stored here.
