@@ -97,6 +97,9 @@ MY_BASTION=$(aws cloudformation create-stack \
     --parameters ParameterKey=KeyName,ParameterValue=$KEYPAIR_NAME ParameterKey=ClientCIDR,ParameterValue=$MY_IP/32 \
     --capabilities "CAPABILITY_IAM" \
     --role-arn $CFN_ROLE)
+if [ "$?" != "0" ]; then
+    error_exit "Exiting due to Cloudformation create-stack error"
+fi
 
 DONE=0
 PREV_STATUS=0
@@ -104,7 +107,11 @@ printf "... Monitoring bastion host deployment"
 while [ $DONE -eq 0 ]
 do
     sleep 5
-    CFN=$(aws cloudformation describe-stacks --stack-name $BASTION_NAME)
+    CFN=$(aws cloudformation --region $REGION describe-stacks --stack-name $BASTION_NAME)
+    if [ "$?" != "0" ]; then
+        error_exit "Exiting due to Cloudformation stack error"
+    fi
+
     CFN_STATUS=$(echo $CFN | jq -r '.Stacks[].StackStatus')
     case $CFN_STATUS in 
         "CREATE_COMPLETE" | "ROLLBACK_COMPLETE")

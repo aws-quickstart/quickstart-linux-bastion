@@ -89,7 +89,7 @@ Parameters:
       cannot start or end with a hyphen (-).
     Type: String
   S3BucketRegion:
-    Default: 'us-west-2'
+    Default: 'us-east-1'
     Description: The AWS Region where the Quick Start S3 bucket (S3BucketName) is hosted. When using your own bucket, you must specify this value.
     Type: String
   S3KeyPrefix:
