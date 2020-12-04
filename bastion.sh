@@ -96,7 +96,8 @@ MY_BASTION=$(aws cloudformation create-stack \
     --template-url $CFN_TEMPLATE_URL \
     --parameters ParameterKey=KeyName,ParameterValue=$KEYPAIR_NAME ParameterKey=ClientCIDR,ParameterValue=$MY_IP/32 \
     --capabilities "CAPABILITY_IAM" \
-    --role-arn $CFN_ROLE)
+    --role-arn $CFN_ROLE \
+    --on-failure DO_NOTHING)
 if [ "$?" != "0" ]; then
     error_exit "Exiting due to Cloudformation create-stack error"
 fi
