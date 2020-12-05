@@ -21,6 +21,9 @@ Parameters:
       include numbers, lowercase letters, uppercase letters, hyphens (-), dots
       (.) and forward slash (/) and it should end with a forward slash (/).
     Type: String
+  BastionMainLogGroup:
+    Type: String
+    Default: bastion
   # CFNAdminRoleName:
   #   Default: bastion-cfn-admin-role
   #   Type: String
@@ -86,7 +89,8 @@ Resources:
               - 'logs:PutRetentionPolicy'
               - 'logs:PutMetricFilter'
               - 'logs:CreateLogGroup'
-            Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*"
+            Resource: !Sub "arn:${AWS::Partition}:logs:*:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*"
+            # Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*"
             Effect: Allow
           - Action:
               - 'ec2:AssociateAddress'
@@ -103,20 +107,20 @@ Resources:
       Roles:
         - !Ref BastionHostRole
       Path: /
-  BastionMainLogGroup:
-    Type: 'AWS::Logs::LogGroup'
-    Properties:
-      LogGroupName: !Ref 'AWS::StackName'
-      RetentionInDays: 365
-  SSHMetricFilter:
-    Type: 'AWS::Logs::MetricFilter'
-    Properties:
-      LogGroupName: !Ref BastionMainLogGroup
-      FilterPattern: ON FROM USER PWD
-      MetricTransformations:
-        - MetricName: SSHCommandCount
-          MetricValue: '1'
-          MetricNamespace: 'Bastion'
+  # BastionMainLogGroup:
+  #   Type: 'AWS::Logs::LogGroup'
+  #   Properties:
+  #     LogGroupName: bastion
+  #     RetentionInDays: 365
+  # SSHMetricFilter:
+  #   Type: 'AWS::Logs::MetricFilter'
+  #   Properties:
+  #     LogGroupName: !Ref BastionMainLogGroup
+  #     FilterPattern: ON FROM USER PWD
+  #     MetricTransformations:
+  #       - MetricName: SSHCommandCount
+  #         MetricValue: '1'
+  #         MetricNamespace: 'Bastion'
   # BastionSubnet:
   #   Type: AWS::EC2::Subnet
   #   Properties: 
