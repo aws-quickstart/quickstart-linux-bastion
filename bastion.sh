@@ -118,6 +118,8 @@ do
         "CREATE_COMPLETE" | "ROLLBACK_COMPLETE")
             DONE=1
             ;;
+        "CREATE_FAILED")
+            ;;
         "DELETE_IN_PROGRESS")
             DONE=1
             ;;

@@ -360,7 +360,8 @@ Resources:
             qs_aws-cfn-bootstrap || qs_err " cfn bootstrap failed ";
 
             EIP_LIST="${EIP2}"
-            CLOUDWATCHGROUP="${BastionSharedStackName}"
+            #CLOUDWATCHGROUP="${BastionSharedStackName}"
+            CLOUDWATCHGROUP="bastion"
             cfn-init -v --stack '${AWS::StackName}' --resource BastionHost --region ${AWS::Region} || cfn_fail
             [ $(qs_status) == 0 ] && cfn_success || cfn_fail
           - EIP2: 'Null'
