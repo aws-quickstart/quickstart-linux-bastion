@@ -110,27 +110,32 @@ do
     fi
 
     # Print the SSH info as soon as available
-    if [ $BASTION_UP == "0" ]; then
-        BASTION_INSTANCE=$(aws cloudformation --region $REGION describe-stack-resource --stack-name $BASTION_NAME --logical-resource-id BastionHost | jq -r '.StackResourceDetail.PhysicalResourceId')
-        if [ $? == 0 ]; then
-            BASTION_PUBLIC_IP=$(aws ec2 --region $REGION describe-instances --instance-id $BASTION_INSTANCE | jq -r '.Reservations[].Instances[].PublicIpAddress')
-            if [[ $BASTION_PUBLIC_IP != "null" ]]; then
-                echo "SSH command:"
-                echo "ssh -i $KEYPAIR_NAME.pem ec2-user@$BASTION_PUBLIC_IP"
-                BASTION_UP=1
-            else
-                continue
-            fi
-        fi
-    fi
+    # if [ $BASTION_UP == "0" ]; then
+    #     BASTION_INSTANCE=$(aws cloudformation --region $REGION describe-stack-resource --stack-name $BASTION_NAME --logical-resource-id BastionHost | jq -r '.StackResourceDetail.PhysicalResourceId')
+    #     if [ $? == 0 ]; then
+    #         BASTION_PUBLIC_IP=$(aws ec2 --region $REGION describe-instances --instance-id $BASTION_INSTANCE | jq -r '.Reservations[].Instances[].PublicIpAddress')
+    #         if [[ $BASTION_PUBLIC_IP != "null" ]]; then
+    #             echo "SSH command:"
+    #             echo "ssh -i $KEYPAIR_NAME.pem ec2-user@$BASTION_PUBLIC_IP"
+    #             BASTION_UP=1
+    #         else
+    #             continue
+    #         fi
+    #     fi
+    # fi
 
     CFN_STATUS=$(echo $CFN | jq -r '.Stacks[].StackStatus')
     case $CFN_STATUS in 
         "CREATE_COMPLETE" | "CREATE_FAILED")
-            DONE=1
+            BASTION_INSTANCE=$(aws cloudformation --region $REGION describe-stack-resource --stack-name $BASTION_NAME --logical-resource-id BastionHost | jq -r '.StackResourceDetail.PhysicalResourceId')
+            BASTION_PUBLIC_IP=$(aws ec2 --region $REGION describe-instances --instance-id $BASTION_INSTANCE | jq -r '.Reservations[].Instances[].PublicIpAddress')
+            echo ""
+            echo "SSH command:"
+            echo "ssh -i $KEYPAIR_NAME.pem ec2-user@$BASTION_PUBLIC_IP"
+            break
             ;;
         "DELETE_IN_PROGRESS" | "ROLLBACK_COMPLETE")
-            DONE=1
+            error_exit "Bastion host failed"
             ;;
         *)
             ;;

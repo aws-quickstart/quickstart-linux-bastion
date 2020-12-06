@@ -1,3 +1,4 @@
+STACK_NAME="bastion-shared"
 REGION="us-west-2"
 CFN_TEMPLATE_URL="https://s3.amazonaws.com/lehto-bastion/templates/bastion-shared.yaml"
 
@@ -36,7 +37,6 @@ shift $((OPTIND-1))
 echo "This script will create shared resources for bastion hosts in AWS region '${REGION}'"
 
 # Create Cloudformation stack bastion-shared in each region
-STACK_NAME="bastion-shared"
 aws cloudformation create-stack \
     --stack-name $STACK_NAME \
     --region $REGION \
