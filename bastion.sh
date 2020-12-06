@@ -3,7 +3,7 @@
 REGION="us-west-2"
 BASTION_SUFFIX="bastion"
 CFN_TEMPLATE_URL="https://s3.amazonaws.com/lehto-bastion/templates/bastion.yaml"
-CFN_ROLE="arn:aws:iam::182548631247:role/bastion-global-cfn-role"
+CFN_ROLE="arn:aws:iam::182548631247:role/bastion-cfn-role"
 
 function error_exit()
 {
