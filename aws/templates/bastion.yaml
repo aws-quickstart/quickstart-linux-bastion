@@ -390,7 +390,7 @@ Resources:
     Type: AWS::EC2::SecurityGroupIngress
     Properties: 
       Description: !Sub Allow ${AWS::StackName} to MySQL
-      GroupName: !Ref RDSBastionSecurityGroup
+      GroupId: !Ref RDSBastionSecurityGroup
       IpProtocol: tcp
       FromPort: 3306
       ToPort: 3306
@@ -401,7 +401,7 @@ Resources:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
       Description: !Sub ${AWS::StackName} to SSH
-      GroupName: !Ref AppBastionSecurityGroup
+      GroupId: !Ref AppBastionSecurityGroup
       IpProtocol: tcp
       FromPort: 22
       ToPort: 22
@@ -412,7 +412,7 @@ Resources:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
       Description: !Sub ${AWS::StackName} to ICMP
-      GroupName: !Ref AppBastionSecurityGroup
+      GroupId: !Ref AppBastionSecurityGroup
       IpProtocol: icmp
       FromPort: -1
       ToPort: -1
