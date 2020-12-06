@@ -295,6 +295,7 @@ Resources:
               command: !Sub
                 - "./bastion_bootstrap.sh --banner ${BannerUrl} --enable ${EnableBanner} --tcp-forwarding ${EnableTCPForwarding} --x11-forwarding ${EnableX11Forwarding}"
                 - BannerUrl: !Ref BastionBanner
+              ignoreErrors: "true"
     Properties:
       KeyName: !Ref KeyName
       IamInstanceProfile: !Ref ExistingIAMInstanceProfile
