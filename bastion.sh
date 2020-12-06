@@ -103,28 +103,33 @@ BASTION_UP=0
 printf "... Monitoring bastion host deployment"
 while [ $DONE -eq 0 ]
 do
-    sleep 10
+    sleep 5
     CFN=$(aws cloudformation --region $REGION describe-stacks --stack-name $BASTION_NAME)
     if [ "$?" != "0" ]; then
         error_exit "Exiting due to Cloudformation stack error"
     fi
 
-    if [ $BASTION_UP == "0" ]
+    # Print the SSH info as soon as available
+    if [ $BASTION_UP == "0" ]; then
         BASTION_INSTANCE=$(aws cloudformation --region $REGION describe-stack-resource --stack-name $BASTION_NAME --logical-resource-id BastionHost | jq -r '.StackResourceDetail.PhysicalResourceId')
         BASTION_PUBLIC_IP=$(aws ec2 --region $REGION describe-instances --instance-id $BASTION_INSTANCE | jq -r '.Reservations[].Instances[].PublicIpAddress')
-        echo "SSH command:"
-        echo "ssh -i $KEYPAIR_NAME.pem ec2-user@$BASTION_PUBLIC_IP"
-        BASTION_UP=1
+        if [ -z $BASTION_PUBLIC_IP ]; then
+            continue
+        else
+            echo "SSH command:"
+            echo "ssh -i $KEYPAIR_NAME.pem ec2-user@$BASTION_PUBLIC_IP"
+            BASTION_UP=1
+        fi
     fi
 
     CFN_STATUS=$(echo $CFN | jq -r '.Stacks[].StackStatus')
     case $CFN_STATUS in 
         "CREATE_COMPLETE" | "CREATE_FAILED")
             DONE=1
-            BASTION_INSTANCE=$(aws cloudformation --region us-west-2 describe-stack-resource --stack-name eric-bastion --logical-resource-id BastionHost | jq -r '.StackResourceDetail.PhysicalResourceId')
-            BASTION_PUBLIC_IP=$(aws ec2 describe-instances --instance-id $BASTION_INSTANCE | jq -r '.Reservations[].Instances[].PublicIpAddress')
-            echo "SSH command:"
-            echo "ssh -i $KEYPAIR_NAME ec2-user@$BASTION_PUBLIC_IP"
+            # BASTION_INSTANCE=$(aws cloudformation --region us-west-2 describe-stack-resource --stack-name eric-bastion --logical-resource-id BastionHost | jq -r '.StackResourceDetail.PhysicalResourceId')
+            # BASTION_PUBLIC_IP=$(aws ec2 describe-instances --instance-id $BASTION_INSTANCE | jq -r '.Reservations[].Instances[].PublicIpAddress')
+            # echo "SSH command:"
+            # echo "ssh -i $KEYPAIR_NAME ec2-user@$BASTION_PUBLIC_IP"
             ;;
         "DELETE_IN_PROGRESS" | "ROLLBACK_COMPLETE")
             DONE=1

@@ -21,9 +21,12 @@ Parameters:
   #     include numbers, lowercase letters, uppercase letters, hyphens (-), dots
   #     (.) and forward slash (/) and it should end with a forward slash (/).
   #   Type: String
-  BastionGlobalStackName:
-    Default: bastion-global
+  # BastionGlobalStackName:
+  #   Default: bastion-global
+  #   Type: String
+  BastionLogGroupName:
     Type: String
+    Default: bastion
 Mappings:
   RegionMap:
     us-west-2:
@@ -106,8 +109,9 @@ Resources:
   BastionMainLogGroup:
     Type: 'AWS::Logs::LogGroup'
     Properties:
-      LogGroupName: !ImportValue
-        'Fn::Sub': "${BastionGlobalStackName}-LogGroup"
+      LogGroupName: !Ref BastionLogGroupName
+      # LogGroupName: !ImportValue
+      #   'Fn::Sub': "${BastionGlobalStackName}-LogGroup"
       RetentionInDays: 365
   SSHMetricFilter:
     Type: 'AWS::Logs::MetricFilter'
