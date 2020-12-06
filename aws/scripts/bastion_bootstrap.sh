@@ -104,7 +104,7 @@ function setup_logs () {
         rm ./amazon-cloudwatch-agent.deb
     elif [[ "${release}" == "AMZN" ]]; then
         curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm" -O
-        rpm -U ./amazon-cloudwatch-agent.rpm
+        # rpm -U ./amazon-cloudwatch-agent.rpm
         rm ./amazon-cloudwatch-agent.rpm
     fi
 
