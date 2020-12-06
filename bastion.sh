@@ -5,11 +5,6 @@ BASTION_SUFFIX="bastion"
 CFN_TEMPLATE_URL="https://s3.amazonaws.com/lehto-bastion/templates/bastion.yaml"
 CFN_ROLE="arn:aws:iam::182548631247:role/bastion-global-cfn-role"
 
-# ----------------------------------------------------------------
-# Function for exit due to fatal program error
-#   Accepts 1 argument:
-#     string containing descriptive error message
-# ----------------------------------------------------------------
 function error_exit()
 {
   echo "$(basename $0): ${1:-"Unknown Error"}" 1>&2
@@ -104,13 +99,22 @@ fi
 
 DONE=0
 PREV_STATUS=0
+BASTION_UP=0
 printf "... Monitoring bastion host deployment"
 while [ $DONE -eq 0 ]
 do
-    sleep 5
+    sleep 10
     CFN=$(aws cloudformation --region $REGION describe-stacks --stack-name $BASTION_NAME)
     if [ "$?" != "0" ]; then
         error_exit "Exiting due to Cloudformation stack error"
+    fi
+
+    if [ $BASTION_UP == "0" ]
+        BASTION_INSTANCE=$(aws cloudformation --region $REGION describe-stack-resource --stack-name $BASTION_NAME --logical-resource-id BastionHost | jq -r '.StackResourceDetail.PhysicalResourceId')
+        BASTION_PUBLIC_IP=$(aws ec2 --region $REGION describe-instances --instance-id $BASTION_INSTANCE | jq -r '.Reservations[].Instances[].PublicIpAddress')
+        echo "SSH command:"
+        echo "ssh -i $KEYPAIR_NAME.pem ec2-user@$BASTION_PUBLIC_IP"
+        BASTION_UP=1
     fi
 
     CFN_STATUS=$(echo $CFN | jq -r '.Stacks[].StackStatus')
