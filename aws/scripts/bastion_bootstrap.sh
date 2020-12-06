@@ -108,6 +108,8 @@ function setup_logs () {
         rm ./amazon-cloudwatch-agent.rpm
     fi
 
+    echo "${FUNCNAME[0]} amazon-cloudwatch-agent installed"
+
     cat <<EOF >> /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 {
     "logs": {
@@ -129,12 +131,16 @@ function setup_logs () {
 }
 EOF
 
+    echo "${FUNCNAME[0]} Enable amazon-cloudwatch-agent"
+
     if [ -x /bin/systemctl ] || [ -x /usr/bin/systemctl ]; then
         systemctl enable amazon-cloudwatch-agent.service
         systemctl restart amazon-cloudwatch-agent.service
     else
         start amazon-cloudwatch-agent
     fi
+    
+    echo "${FUNCNAME[0]} Ended"
 }
 
 function setup_os () {
