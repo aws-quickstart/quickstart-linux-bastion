@@ -372,26 +372,36 @@ Resources:
     CreationPolicy:
       ResourceSignal:
         Timeout: PT15M
+  RDSBastionSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupName: !Sub ${AWS::StackName}-to-rds
+      GroupDescription: Provides bastion hosts access to RDS databases
+      # VpcId: !FindInMap [RegionMap, !Ref AWS::Region, BastionVPC]
+      VpcId: vpc-828464fb
+  AppBastionSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupName: !Sub ${AWS::StackName}-to-app
+      GroupDescription: Provides bastion hosts access to App hosts
+      # VpcId: !FindInMap [RegionMap, !Ref AWS::Region, BastionVPC]
+      VpcId: vpc-828464fb
   RDSBastionSGRuleMySQL:
     Type: AWS::EC2::SecurityGroupIngress
     Properties: 
       Description: !Sub Allow ${AWS::StackName} to MySQL
-      # GroupName: !Ref BastionSharedStackName
-      GroupName: !ImportValue 
-        'Fn::Sub': '${BastionSharedStackName}-RDSBastionSecurityGroup'
+      GroupName: !Ref RDSBastionSecurityGroup
       IpProtocol: tcp
       FromPort: 3306
       ToPort: 3306
       CidrIp: !Sub 
         - ${IP}/32
         - IP: !GetAtt BastionHost.PrivateIp
-      # GroupId: String
   AppBastionSGRuleSSH:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
       Description: !Sub ${AWS::StackName} to SSH
-      GroupName: !ImportValue 
-        'Fn::Sub': '${BastionSharedStackName}-AppBastionSecurityGroup'
+      GroupName: !Ref AppBastionSecurityGroup
       IpProtocol: tcp
       FromPort: 22
       ToPort: 22
@@ -402,14 +412,51 @@ Resources:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
       Description: !Sub ${AWS::StackName} to ICMP
-      GroupName: !ImportValue 
-        'Fn::Sub': '${BastionSharedStackName}-AppBastionSecurityGroup'
+      GroupName: !Ref AppBastionSecurityGroup
       IpProtocol: icmp
       FromPort: -1
       ToPort: -1
       CidrIp: !Sub 
         - ${IP}/32
         - IP: !GetAtt BastionHost.PrivateIp
+# RDSBastionSGRuleMySQL:
+  #   Type: AWS::EC2::SecurityGroupIngress
+  #   Properties: 
+  #     Description: !Sub Allow ${AWS::StackName} to MySQL
+  #     # GroupName: !Ref BastionSharedStackName
+  #     GroupName: !ImportValue 
+  #       'Fn::Sub': '${BastionSharedStackName}-RDSBastionSecurityGroup'
+  #     IpProtocol: tcp
+  #     FromPort: 3306
+  #     ToPort: 3306
+  #     CidrIp: !Sub 
+  #       - ${IP}/32
+  #       - IP: !GetAtt BastionHost.PrivateIp
+  #     # GroupId: String
+  # AppBastionSGRuleSSH:
+  #   Type: AWS::EC2::SecurityGroupIngress
+  #   Properties:
+  #     Description: !Sub ${AWS::StackName} to SSH
+  #     GroupName: !ImportValue 
+  #       'Fn::Sub': '${BastionSharedStackName}-AppBastionSecurityGroup'
+  #     IpProtocol: tcp
+  #     FromPort: 22
+  #     ToPort: 22
+  #     CidrIp: !Sub 
+  #       - ${IP}/32
+  #       - IP: !GetAtt BastionHost.PrivateIp
+  # AppBastionSGRuleICMP:
+  #   Type: AWS::EC2::SecurityGroupIngress
+  #   Properties:
+  #     Description: !Sub ${AWS::StackName} to ICMP
+  #     GroupName: !ImportValue 
+  #       'Fn::Sub': '${BastionSharedStackName}-AppBastionSecurityGroup'
+  #     IpProtocol: icmp
+  #     FromPort: -1
+  #     ToPort: -1
+  #     CidrIp: !Sub 
+  #       - ${IP}/32
+  #       - IP: !GetAtt BastionHost.PrivateIp
   # BastionPrefixList:
   #   Type: "AWS::EC2::PrefixList"
   #   Properties:
