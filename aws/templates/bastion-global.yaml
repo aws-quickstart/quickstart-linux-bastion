@@ -89,8 +89,8 @@ Resources:
               - 'logs:PutRetentionPolicy'
               - 'logs:PutMetricFilter'
               - 'logs:CreateLogGroup'
-            # Resource: !Sub "arn:${AWS::Partition}:logs::${AWS::AccountId}:log-group:${BastionMainLogGroup}:*"
-            Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*"
+            Resource: !Sub "arn:${AWS::Partition}:logs::${AWS::AccountId}:log-group:${BastionMainLogGroup}:*"
+            # Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*"
             Effect: Allow
           - Action:
               - 'ec2:AssociateAddress'
