@@ -3,7 +3,7 @@ Description: >-
   AWS CloudFormation stack for a linux bastion host.  Depends on pre-existing shared components from the bastion-shared template. Borrows from AWS Quickstart templates.
 Parameters:
   BastionSharedStackName:
-    Description: Name of stack with common role, logging, etc for bastion hosts (required dependency)
+    Description: Name of stack with common infrastructure for bastion hosts (required dependency)
     Type: String
     Default: bastion-shared
   BastionInstanceType:
@@ -55,12 +55,12 @@ Parameters:
   ExistingIAMRole:
     Description: An existing IAM Role name to attach to the bastion. If left blank,
       a new role will be created.
-    Default: 'BastionRole'
+    Default: 'bastion-role'
     Type: String
   ExistingIAMInstanceProfile:
     Description: An existing IAM Role name to attach to the bastion. If left blank,
       a new role will be created.
-    Default: 'BastionRoleProfile'
+    Default: 'bastion-role-profile'
     Type: String
   KeyName:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
@@ -283,9 +283,6 @@ Resources:
               env:
                 BASTION_OS: !FindInMap [LinuxAMINameMap, !Ref BastionAMIOS, OS]
               command: "./auditing_configure.sh"
-              # command:
-              #   - !If [ ]
-              #   - "cat /tmp/auditd.rules >> /etc/audit/rules.d/audit.rules && service auditd restart"
             b-bootstrap:
               cwd: '/tmp/'
               env:

@@ -92,7 +92,7 @@ MY_BASTION=$(aws cloudformation create-stack \
     --parameters ParameterKey=KeyName,ParameterValue=$KEYPAIR_NAME ParameterKey=ClientCIDR,ParameterValue=$MY_IP/32 \
     --capabilities "CAPABILITY_IAM" \
     --role-arn $CFN_ROLE \
-    --on-failure DO_NOTHING)
+    --on-failure ROLLBACK)
 if [ "$?" != "0" ]; then
     error_exit "Exiting due to Cloudformation create-stack error"
 fi
@@ -105,20 +105,22 @@ while [ $DONE -eq 0 ]
 do
     sleep 5
     CFN=$(aws cloudformation --region $REGION describe-stacks --stack-name $BASTION_NAME)
-    if [ "$?" != "0" ]; then
+    if [ $? != 0 ]; then
         error_exit "Exiting due to Cloudformation stack error"
     fi
 
     # Print the SSH info as soon as available
     if [ $BASTION_UP == "0" ]; then
         BASTION_INSTANCE=$(aws cloudformation --region $REGION describe-stack-resource --stack-name $BASTION_NAME --logical-resource-id BastionHost | jq -r '.StackResourceDetail.PhysicalResourceId')
-        BASTION_PUBLIC_IP=$(aws ec2 --region $REGION describe-instances --instance-id $BASTION_INSTANCE | jq -r '.Reservations[].Instances[].PublicIpAddress')
-        if [ -z $BASTION_PUBLIC_IP || $BASTION_PUBLIC_IP == "null" ]; then
-            continue
-        else
-            echo "SSH command:"
-            echo "ssh -i $KEYPAIR_NAME.pem ec2-user@$BASTION_PUBLIC_IP"
-            BASTION_UP=1
+        if [ $? == 0 ]; then
+            BASTION_PUBLIC_IP=$(aws ec2 --region $REGION describe-instances --instance-id $BASTION_INSTANCE | jq -r '.Reservations[].Instances[].PublicIpAddress')
+            if [[ $BASTION_PUBLIC_IP != "null" ]]; then
+                echo "SSH command:"
+                echo "ssh -i $KEYPAIR_NAME.pem ec2-user@$BASTION_PUBLIC_IP"
+                BASTION_UP=1
+            else
+                continue
+            fi
         fi
     fi
 
