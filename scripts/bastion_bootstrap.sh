@@ -6,7 +6,7 @@
 
 # Configuration
 PROGRAM='Linux Bastion'
-
+IMDS_BASE_URL='http://169.254.169.254/latest'
 ##################################### Functions Definitions
 function checkos () {
     platform='unknown'
@@ -20,8 +20,20 @@ function checkos () {
     echo "${FUNCNAME[0]} Ended"
 }
 
+function imdsv2_token() {
+    curl -X PUT "${IMDS_BASE_URL}/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 600"
+}
+
+function imds_request() {
+    REQUEST_PATH=$1
+    if [[ -z $TOKEN ]]; then
+        TOKEN=$(imdsv2_token)
+    fi
+    curl -sH "X-aws-ec2-metadata-token: $TOKEN" "${IMDS_BASE_URL}/${REQUEST_PATH}"
+}
+
 function setup_environment_variables() {
-    REGION=$(curl -sq http://169.254.169.254/latest/meta-data/placement/availability-zone/)
+    REGION=$(imds_request meta-data/placement/availability-zone/)
       #ex: us-east-1a => us-east-1
     REGION=${REGION: :-1}
 
@@ -29,10 +41,10 @@ function setup_environment_variables() {
 
     _userdata_file="/var/lib/cloud/instance/user-data.txt"
 
-    INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+    INSTANCE_ID=$(imds_request meta-data/instance-id)
     EIP_LIST=$(grep EIP_LIST ${_userdata_file} | sed -e 's/EIP_LIST=//g' -e 's/\"//g')
 
-    LOCAL_IP_ADDRESS=$(curl -sq 169.254.169.254/latest/meta-data/network/interfaces/macs/${ETH0_MAC}/local-ipv4s/)
+    LOCAL_IP_ADDRESS=$(imds_request meta-data/network/interfaces/macs/${ETH0_MAC}/local-ipv4s/)
 
     CWG=$(grep CLOUDWATCHGROUP ${_userdata_file} | sed 's/CLOUDWATCHGROUP=//g')
 
@@ -236,7 +248,7 @@ function _query_assigned_public_ip() {
   # Note: ETH0 Only.
   # - Does not distinguish between EIP and Standard IP. Need to cross-ref later.
   echo "Querying the assigned public IP"
-  PUBLIC_IP_ADDRESS=$(curl -sq 169.254.169.254/latest/meta-data/public-ipv4/${ETH0_MAC}/public-ipv4s/)
+  PUBLIC_IP_ADDRESS=$(imds_request meta-data/public-ipv4/${ETH0_MAC}/public-ipv4s/)
 }
 
 function _determine_eip_assc_status(){
