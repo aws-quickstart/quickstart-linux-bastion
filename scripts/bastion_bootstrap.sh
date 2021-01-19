@@ -128,7 +128,7 @@ function setup_logs () {
             "files": {
                 "collect_list": [
                     {
-                        "file_path": "/var/log/auditd/auditd.log",
+                        "file_path": "/var/log/audit/audit.log",
                         "log_group_name": "${CWG}",
                         "log_stream_name": "{instance_id}",
                         "timestamp_format": "%Y-%m-%d %H:%M:%S",
