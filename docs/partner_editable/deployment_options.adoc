@@ -1,4 +1,4 @@
-// Edit this placeholder text to accurately describe your architecture.
+// Edit this placeholder text to accurately describe your architecture.√
 
 This Quick Start provides two deployment options:
 

@@ -21,6 +21,9 @@ endif::marketplace_subscription[]
 
 === Launch the Quick Start
 // Adapt the following warning to your Quick Start.
+WARNING: If you are using the CentOS operating system, subscribe to the https://aws.amazon.com/marketplace/pp/B00O7WM7QW[CentOS AMI in AWS
+Marketplace.]
+
 WARNING: If you’re deploying {partner-product-short-name} into an existing VPC, make sure that your VPC has two private subnets in different Availability Zones for the workload instances and that the subnets aren’t shared. This Quick Start doesn’t support https://docs.aws.amazon.com/vpc/latest/userguide/vpc-sharing.html[shared subnets^]. These subnets require https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html[NAT gateways^] in their route tables to allow the instances to download packages and software without exposing them to the internet. Also make sure that the domain name option in the DHCP options is configured as explained in http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_DHCP_Options.html[DHCP options sets^]. You provide your VPC settings when you launch the Quick Start.
 
 Each deployment takes about {deployment_time} to complete.
@@ -29,11 +32,11 @@ Each deployment takes about {deployment_time} to complete.
 
 [cols="3,1"]
 |===
-^|http://qs_launch_permalink[Deploy {partner-product-short-name} into a new VPC on AWS^]
-^|http://qs_template_permalink[View template^]
+^|https://fwd.aws/rQWep[Deploy {partner-product-short-name} into a new VPC on AWS^]
+^|https://fwd.aws/Jrm54[View template^]
 
-^|http://qs_launch_permalink[Deploy {partner-product-short-name} into an existing VPC on AWS^]
-^|http://qs_template_permalink[View template^]
+^|https://fwd.aws/Jwzqv[Deploy {partner-product-short-name} into an existing VPC on AWS^]
+^|https://fwd.aws/vWMxm[View template^]
 |===
 
 [start=2]

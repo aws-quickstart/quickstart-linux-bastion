@@ -1,6 +1,9 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: LinuxBastion+VPC Jul,30,2020 (qs-1qup6ra99) (Please do not remove)
 Metadata:
+  QuickStartDocumentation:
+    EntrypointName: "Launch into an existing VPC"
+    Order: 2
   LICENSE: Apache License, Version 2.0
   'AWS::CloudFormation::Interface':
     ParameterGroups:
