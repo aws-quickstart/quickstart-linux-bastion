@@ -1,0 +1,42 @@
+
+.Network configuration
+[width="100%",cols="16%,11%,73%",options="header",]
+|===
+|Parameter label (name) |Default value|Description|Availability Zones
+(`AvailabilityZones`)|`**__Requires input__**`|List of Availability Zones to use for the subnets in the VPC. Note: ( The logical order is preserved and only 2 AZs are used for this deployment.|VPC CIDR
+(`VPCCIDR`)|`10.0.0.0/16`|CIDR Block for the VPC.|Private subnet 1 CIDR
+(`PrivateSubnet1CIDR`)|`10.0.0.0/19`|CIDR block for private subnet 1 located in Availability Zone 1.|Private subnet 2 CIDR
+(`PrivateSubnet2CIDR`)|`10.0.32.0/19`|CIDR block for private subnet 2 located in Availability Zone 2.|Public subnet 1 CIDR
+(`PublicSubnet1CIDR`)|`10.0.128.0/20`|CIDR Block for the public DMZ subnet 1 located in Availability Zone 1.|Public subnet 2 CIDR
+(`PublicSubnet2CIDR`)|`10.0.144.0/20`|CIDR Block for the public DMZ subnet 2 located in Availability Zone 2.|Allowed bastion external access CIDR
+(`RemoteAccessCIDR`)|`**__Requires input__**`|Allowed CIDR block for external SSH access to the bastions|VPC tenancy
+(`VPCTenancy`)|`default`|The allowed tenancy of instances launched into the VPC.
+|===
+.Amazon EC2 configuration
+[width="100%",cols="16%,11%,73%",options="header",]
+|===
+|Parameter label (name) |Default value|Description|Key pair name
+(`KeyPairName`)|`**__Requires input__**`|Name of an existing public/private key pair, which allows you to securely connect to your instance after it launches.|Bastion AMI operating system
+(`BastionAMIOS`)|`Amazon-Linux2-HVM`|The Linux distribution for the AMI to be used for the bastion instances.|Bastion instance type
+(`BastionInstanceType`)|`t2.micro`|Amazon EC2 instance type for the bastion instances.
+|===
+.Linux bastion configuration
+[width="100%",cols="16%,11%,73%",options="header",]
+|===
+|Parameter label (name) |Default value|Description|Number of bastion hosts
+(`NumBastionHosts`)|`1`|The number of bastion hosts to create. The maximum number is four.|Bastion Host Name
+(`BastionHostName`)|`LinuxBastion`|The value used for the name tag of the bastion host|Bastion tenancy
+(`BastionTenancy`)|`default`|VPC tenancy to launch the bastion in. Options: 'dedicated' or 'default'|Bastion banner
+(`EnableBanner`)|`false`|To include a banner to be displayed when connecting via SSH to the bastion, choose true.|Banner text
+(`BastionBanner`)|`**__Blank string__**`|Banner text to display upon login.|TCP forwarding
+(`EnableTCPForwarding`)|`false`|To enable TCP forwarding, choose true.|X11 forwarding
+(`EnableX11Forwarding`)|`false`|To enable X11 forwarding, choose true.
+|===
+.AWS Quick Start configuration
+[width="100%",cols="16%,11%,73%",options="header",]
+|===
+|Parameter label (name) |Default value|Description|Quick Start S3 bucket name
+(`QSS3BucketName`)|`aws-quickstart`|S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).|Quick Start S3 key prefix
+(`QSS3KeyPrefix`)|`quickstart-linux-bastion/`|S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), dots (.) and forward slash (/) and it should end with a forward slash (/).|Quick Start S3 bucket region
+(`QSS3BucketRegion`)|`us-east-1`|The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.
+|===
