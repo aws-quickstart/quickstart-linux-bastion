@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: LinuxBastion+VPC Jul,30,2020 (qs-1qup6ra99) (Please do not remove)
 Metadata:
   QuickStartDocumentation:
-    EntrypointName: "Launch into an existing VPC"
+    EntrypointName: Launch into an existing VPC
     Order: 2
   LICENSE: Apache License, Version 2.0
   'AWS::CloudFormation::Interface':
@@ -52,7 +52,7 @@ Metadata:
       BastionAMIOS:
         default: Bastion AMI operating system
       BastionHostName:
-        default: Bastion Host Name
+        default: Bastion host Name
       BastionTenancy:
         default: Bastion tenancy
       BastionBanner:
@@ -102,14 +102,14 @@ Parameters:
     Type: String
   BastionHostName:
     Default: 'LinuxBastion'
-    Description: The value used for the name tag of the bastion host
+    Description: The value used for the name tag of the bastion host.
     Type: String
   BastionBanner:
     Default: ""
     Description: Banner text to display upon login.
     Type: String
   BastionTenancy:
-    Description: 'VPC tenancy to launch the bastion in. Options: ''dedicated'' or ''default'''
+    Description: Bastion VPC tenancy (dedicated or default).
     Type: String
     Default: default
     AllowedValues:
@@ -140,19 +140,18 @@ Parameters:
       - 'true'
       - 'false'
     Default: 'false'
-    Description: To include a banner to be displayed when connecting via SSH to the
-      bastion, choose true.
+    Description: Choose *true* to display a banner when connecting via SSH to the bastion.
     Type: String
   EnableTCPForwarding:
     Type: String
-    Description: To enable TCP forwarding, choose true.
+    Description: To enable TCP forwarding, choose *true*.
     Default: 'false'
     AllowedValues:
       - 'true'
       - 'false'
   EnableX11Forwarding:
     Type: String
-    Description: To enable X11 forwarding, choose true.
+    Description: To enable X11 forwarding, choose *true*.
     Default: 'false'
     AllowedValues:
       - 'true'
@@ -171,35 +170,40 @@ Parameters:
     Description: The number of bastion hosts to create. The maximum number is four.
     Type: String
   PublicSubnet1ID:
-    Description: ID of the public subnet 1 that you want to provision the first bastion
-      into (e.g., subnet-a0246dcd).
+    Description: ID of the public subnet 1 that you want to provision the first bastion into (e.g., subnet-a0246dcd).
     Type: 'AWS::EC2::Subnet::Id'
   PublicSubnet2ID:
-    Description: ID of the public subnet 2 that you want to provision the second bastion into
-      (e.g., subnet-e3246d8e).
+    Description: ID of the public subnet 2 that you want to provision the second bastion into (e.g., subnet-e3246d8e).
     Type: 'AWS::EC2::Subnet::Id'
   QSS3BucketName:
-    AllowedPattern: '^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$'
-    ConstraintDescription: Quick Start bucket name can include numbers, lowercase letters, uppercase
-      letters, and hyphens (-). It cannot start or end with a hyphen (-).
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: The Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a 
+      hyphen (-).
     Default: aws-quickstart
-    Description: S3 bucket name for the Quick Start assets. Quick Start bucket name can
-      include numbers, lowercase letters, uppercase letters, and hyphens (-). It
-      cannot start or end with a hyphen (-).
+    Description: Name of the S3 bucket for your copy of the Quick Start assets. 
+      Keep the default name unless you are customizing the template. 
+      Changing the name updates code references to point to a new Quick 
+      Start location. This name can include numbers, lowercase letters, 
+      uppercase letters, and hyphens, but do not start or end with a hyphen (-). 
+      See https://aws-quickstart.github.io/option1.html.
     Type: String
   QSS3BucketRegion:
     Default: 'us-east-1'
     Description: The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.
     Type: String
   QSS3KeyPrefix:
-    AllowedPattern: '^([0-9a-zA-Z-.]+/)*$'
-    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters, uppercase
-      letters, hyphens (-), dots (.) and forward slash (/). The prefix should
-      end with a forward slash (/).
+    AllowedPattern: ^([0-9a-zA-Z-.]+/)*$
+    ConstraintDescription: The Quick Start S3 key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), and forward slashes (/).
     Default: quickstart-linux-bastion/
-    Description: S3 key prefix for the Quick Start assets. Quick Start key prefix can
-      include numbers, lowercase letters, uppercase letters, hyphens (-), dots
-      (.) and forward slash (/) and it should end with a forward slash (/).
+    Description: S3 key prefix that is used to simulate a directory for your copy of the 
+      Quick Start assets. Keep the default prefix unless you are customizing 
+      the template. Changing this prefix updates code references to point to 
+      a new Quick Start location. This prefix can include numbers, lowercase 
+      letters, uppercase letters, hyphens (-), and forward slashes (/). End with a forward slash. 
+      See https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html 
+      and https://aws-quickstart.github.io/option1.html.
     Type: String
   RemoteAccessCIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
@@ -207,11 +211,11 @@ Parameters:
     Description: Allowed CIDR block for external SSH access to the bastions.
     Type: String
   VPCID:
-    Description: 'ID of the VPC (e.g., vpc-0343606e).'
+    Description: ID of the VPC (e.g., vpc-0343606e).
     Type: 'AWS::EC2::VPC::Id'
   AlternativeInitializationScript:
     AllowedPattern: ^http.*|^$
-    ConstraintDescription: URL must begin with http
+    ConstraintDescription: URL must begin with http.
     Description: An alternative initialization script to run during setup.
     Default: ''
     Type: String
@@ -220,7 +224,7 @@ Parameters:
     Type: String
     Default: ''
   AlternativeIAMRole:
-    Description: An existing IAM Role name to attach to the bastion. If left blank,
+    Description: An existing IAM role name to attach to the bastion. If left blank,
       a new role will be created.
     Default: ''
     Type: String
@@ -243,7 +247,7 @@ Rules:
                 - 'AWS::EC2::Subnet::Id'
                 - VpcId
             - 'Fn::RefAll': 'AWS::EC2::VPC::Id'
-        AssertDescription: All subnets must exist in the VPC
+        AssertDescription: All subnets must exist in the VPC.
 Mappings:
   AWSAMIRegionMap:
     af-south-1:
@@ -691,30 +695,30 @@ Resources:
           CidrIp: !Ref RemoteAccessCIDR
 Outputs:
   BastionAutoScalingGroup:
-    Description: Auto Scaling Group Reference ID
+    Description: Auto Scaling group reference ID.
     Value: !Ref BastionAutoScalingGroup
     Export:
       Name: !Sub '${AWS::StackName}-BastionAutoScalingGroup'
   EIP1:
-    Description: Elastic IP 1 for Bastion
+    Description: Elastic IP 1 for bastion.
     Value: !Ref EIP1
     Export:
       Name: !Sub '${AWS::StackName}-EIP1'
   EIP2:
     Condition: 2BastionCondition
-    Description: Elastic IP 2 for Bastion
+    Description: Elastic IP 2 for bastion.
     Value: !Ref EIP2
     Export:
       Name: !Sub '${AWS::StackName}-EIP2'
   EIP3:
     Condition: 3BastionCondition
-    Description: Elastic IP 3 for Bastion
+    Description: Elastic IP 3 for bastion.
     Value: !Ref EIP3
     Export:
       Name: !Sub '${AWS::StackName}-EIP3'
   EIP4:
     Condition: 4BastionCondition
-    Description: Elastic IP 4 for Bastion
+    Description: Elastic IP 4 for bastion.
     Value: !Ref EIP4
     Export:
       Name: !Sub '${AWS::StackName}-EIP4'
@@ -724,15 +728,18 @@ Outputs:
     Export:
       Name: !Sub '${AWS::StackName}-CloudWatchLogs'
   BastionSecurityGroupID:
-    Description: Bastion Security Group ID
+    Description: Bastion security group ID.
     Value: !Ref BastionSecurityGroup
     Export:
       Name: !Sub '${AWS::StackName}-BastionSecurityGroupID'
   BastionHostRole:
-    Description: Bastion IAM Role name
+    Description: Bastion IAM role name.
     Value: !If
       - CreateIAMRole
       - !Ref BastionHostRole
       - !Ref AlternativeIAMRole
     Export:
       Name: !Sub '${AWS::StackName}-BastionHostRole'
+  Postdeployment:
+    Description: See the deployment guide for post-deployment steps.
+    Value: https://aws.amazon.com/quickstart/?quickstart-all.sort-by=item.additionalFields.sortDate&quickstart-all.sort-order=desc&awsm.page-quickstart-all=5

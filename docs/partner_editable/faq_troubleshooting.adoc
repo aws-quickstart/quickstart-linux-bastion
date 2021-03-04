@@ -4,63 +4,9 @@
 
 *Q.* I encountered a *CREATE_FAILED* error when I launched the Quick Start.
 
-*A.* If AWS CloudFormation fails to create the stack, relaunch the template with *Rollback on failure* set to *Disabled*. This setting is under *Advanced* in the AWS CloudFormation console on the *Configure stack options* page. With this setting, the stack’s state is retained, and the instance keeps running so that you can troubleshoot the issue. 
-// Customize this answer if needed. For example, if you’re deploying on Linux instances, either provide the location for log files on Linux or omit the final sentence. If the Quick Start has no EC2 instances, revise accordingly (something like "and the assets keep running").
+*A.* If AWS CloudFormation fails to create the stack, relaunch the template with *Rollback on failure* set to *Disabled*. This setting is under *Advanced* in the AWS CloudFormation console on the *Configure stack options* page. With this setting, the stack’s state is retained, and you can troubleshoot the issue. 
 
-WARNING: When you set *Rollback on failure* to *Disabled*, you continue to incur AWS charges for this stack. Delete the stack when you finish troubleshooting.
-
-The following table lists specific CREATE_FAILED error messages you might encounter.
-
-|===
-|Error message|Possible cause|What to do
-
-|API: ec2: RunInstances
-Not authorized for
-images: ami-ID
-|The template is referencing
-an AMI that has expired.
-|We refresh AMIs on a regular basis, but our
-schedule isn’t always synchronized with AWS AMI
-updates. If you get this error message, notify us,
-and we’ll update the template with the new AMI ID.
-If you’d like to fix the template yourself, you can
-download it and update the Mappings section with
-the latest AMI ID for your region.
-
-|We currently do not have
-sufficient instance-type capacity in the AZ you
-requested
-|AYour resources require a
-larger or different instance
-type.
-|Switch to an instance type that supports higher
-capacity. If a higher-capacity instance type isn’t
-available, try a different Availability Zone or region.
-Or you can complete the https://console.aws.amazon.com/support/home#/case/create?issueType=service-limit-increase&limitType=service-code-[request form] in the AWS Support Center to increase the Amazon EC2 quota
-for the instance type or region. Quota increases are
-tied to the region they were requested for.
-
-|Instance ID did not
-stabilize
-|You have exceeded your IOPS
-for the region.
-|Request a quota increase through the https://console.aws.amazon.com/servicequotas/home?region=us-west-2#!/[Service Quota
-console]. For more information, see the https://docs.aws.amazon.com/servicequotas/latest/userguide/intro.html[AWS
-documentation].
-
-|In order to use this AWS
-Marketplace product you
-need to accept terms and
-subscribe. To do so please
-visit URL.
-|You’ve changed the
-BastionAMIOS parameter
-setting to CentOS, but you
-don’t have a subscription to
-the CentOS operating system.
-|Subscribe to the https://aws.amazon.com/marketplace/pp/B00O7WM7QW[CentOS AMI in AWS Marketplace],
-and then redeploy the Quick Start.
-|===
+WARNING: When you set *Rollback on failure* to *Disabled*, you continue to incur AWS charges for this stack. Ensure that you delete stack after troubleshooting.
 
 For more information, see https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html[Troubleshooting AWS CloudFormation^].
 
@@ -69,7 +15,7 @@ For more information, see https://docs.aws.amazon.com/AWSCloudFormation/latest/U
 *A.* Launch the Quick Start templates from the links in this guide or from another S3 bucket. If you deploy the templates from a local copy on your computer or from a location other than an S3 bucket, you might encounter template-size limitations. For more information, see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html[AWS CloudFormation quotas^].
 
 *Q.* . I changed the instance type parameter after deployment and updated the stack, but the
-instance types didn’t change or the Elastic IP addresses weren’t reassociated after the stack
+instance types did not change or the Elastic IP addresses were not reassociated after the stack
 update. 
 
 *A.* Terminate your bastion host instances. They will be replaced by Auto Scaling. The new
