@@ -312,4 +312,7 @@ Resources:
         VPCID: !GetAtt 
           - VPCStack
           - Outputs.VPCID
-
+Outputs:
+  Postdeployment:
+    Description: See the deployment guide for post-deployment steps.
+    Value: https://aws.amazon.com/quickstart/?quickstart-all.sort-by=item.additionalFields.sortDate&quickstart-all.sort-order=desc&awsm.page-quickstart-all=5

@@ -695,30 +695,30 @@ Resources:
           CidrIp: !Ref RemoteAccessCIDR
 Outputs:
   BastionAutoScalingGroup:
-    Description: Auto Scaling Group Reference ID
+    Description: Auto Scaling group reference ID.
     Value: !Ref BastionAutoScalingGroup
     Export:
       Name: !Sub '${AWS::StackName}-BastionAutoScalingGroup'
   EIP1:
-    Description: Elastic IP 1 for Bastion
+    Description: Elastic IP 1 for bastion.
     Value: !Ref EIP1
     Export:
       Name: !Sub '${AWS::StackName}-EIP1'
   EIP2:
     Condition: 2BastionCondition
-    Description: Elastic IP 2 for Bastion
+    Description: Elastic IP 2 for bastion.
     Value: !Ref EIP2
     Export:
       Name: !Sub '${AWS::StackName}-EIP2'
   EIP3:
     Condition: 3BastionCondition
-    Description: Elastic IP 3 for Bastion
+    Description: Elastic IP 3 for bastion.
     Value: !Ref EIP3
     Export:
       Name: !Sub '${AWS::StackName}-EIP3'
   EIP4:
     Condition: 4BastionCondition
-    Description: Elastic IP 4 for Bastion
+    Description: Elastic IP 4 for bastion.
     Value: !Ref EIP4
     Export:
       Name: !Sub '${AWS::StackName}-EIP4'
@@ -728,15 +728,18 @@ Outputs:
     Export:
       Name: !Sub '${AWS::StackName}-CloudWatchLogs'
   BastionSecurityGroupID:
-    Description: Bastion Security Group ID
+    Description: Bastion security group ID.
     Value: !Ref BastionSecurityGroup
     Export:
       Name: !Sub '${AWS::StackName}-BastionSecurityGroupID'
   BastionHostRole:
-    Description: Bastion IAM Role name
+    Description: Bastion IAM role name.
     Value: !If
       - CreateIAMRole
       - !Ref BastionHostRole
       - !Ref AlternativeIAMRole
     Export:
       Name: !Sub '${AWS::StackName}-BastionHostRole'
+  Postdeployment:
+    Description: See the deployment guide for post-deployment steps.
+    Value: https://aws.amazon.com/quickstart/?quickstart-all.sort-by=item.additionalFields.sortDate&quickstart-all.sort-order=desc&awsm.page-quickstart-all=5
