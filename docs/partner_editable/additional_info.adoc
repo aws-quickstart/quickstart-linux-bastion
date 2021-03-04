@@ -129,7 +129,7 @@ This Quick Start provisions one Linux bastion host in each Availability Zone wit
 security group as a virtual firewall. This security group is required for remote access from
 the Internet. The security group is configured as follows:
 
-==== Inbound:
+=== Inbound:
 |===
 |Source|Protocol|Ports
 
@@ -137,7 +137,7 @@ the Internet. The security group is configured as follows:
 |Remote access CIDR|ICMP|N/A
 |===
 
-==== Outbound:
+=== Outbound:
 |===
 |Destination|Protocol|Ports
 
