@@ -46,7 +46,7 @@ Metadata:
       BastionAMIOS:
         default: Bastion AMI operating system
       BastionHostName:
-        default: Bastion Host Name
+        default: Bastion host name
       BastionTenancy:
         default: Bastion tenancy
       BastionBanner:
@@ -54,7 +54,7 @@ Metadata:
       BastionInstanceType:
         default: Bastion instance type
       QSS3BucketRegion:
-        default: Quick Start S3 bucket region
+        default: Quick Start S3 bucket Region
       EnableBanner:
         default: Bastion banner
       EnableTCPForwarding:
@@ -86,7 +86,7 @@ Metadata:
   cfn-lint: { config: { ignore_checks: [E9007] } }
 Parameters:
   AvailabilityZones:
-    Description: 'List of Availability Zones to use for the subnets in the VPC. Note: ( The logical order is preserved and only 2 AZs are used for this deployment.'
+    Description: List of Availability Zones to use for the subnets in the VPC.
     Type: 'List<AWS::EC2::AvailabilityZone::Name>'
   BastionAMIOS:
     AllowedValues:
@@ -99,14 +99,14 @@ Parameters:
     Type: String
   BastionHostName:
     Default: 'LinuxBastion'
-    Description: The value used for the name tag of the bastion host
+    Description: The value used for the name tag of the bastion host.
     Type: String
   BastionBanner:
     Default: ""
     Description: Banner text to display upon login.
     Type: String
   BastionTenancy:
-    Description: 'VPC tenancy to launch the bastion in. Options: ''dedicated'' or ''default'''
+    Description: Bastion VPC tenancy (dedicated or default).
     Type: String
     Default: default
     AllowedValues:
@@ -140,19 +140,18 @@ Parameters:
       - 'true'
       - 'false'
     Default: 'false'
-    Description: To include a banner to be displayed when connecting via SSH to the
-      bastion, choose true.
+    Description: Choose *true* to display a banner when connecting via SSH to the bastion.
     Type: String
   EnableTCPForwarding:
     Type: String
-    Description: To enable TCP forwarding, choose true.
+    Description: To enable TCP forwarding, choose *true*.
     Default: 'false'
     AllowedValues:
       - 'true'
       - 'false'
   EnableX11Forwarding:
     Type: String
-    Description: To enable X11 forwarding, choose true.
+    Description: To enable X11 forwarding, choose *true*.
     Default: 'false'
     AllowedValues:
       - 'true'
@@ -174,25 +173,25 @@ Parameters:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
     Default: 10.0.0.0/19
-    Description: CIDR block for private subnet 1 located in Availability Zone 1.
+    Description: CIDR block for private subnet 1, located in Availability Zone 1.
     Type: String
   PrivateSubnet2CIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
     Default: 10.0.32.0/19
-    Description: CIDR block for private subnet 2 located in Availability Zone 2.
+    Description: CIDR block for private subnet 2, located in Availability Zone 2.
     Type: String
   PublicSubnet1CIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
     Default: 10.0.128.0/20
-    Description: CIDR Block for the public DMZ subnet 1 located in Availability Zone 1.
+    Description: CIDR Block for the public DMZ subnet 1, located in Availability Zone 1.
     Type: String
   PublicSubnet2CIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
     Default: 10.0.144.0/20
-    Description: CIDR Block for the public DMZ subnet 2 located in Availability Zone 2.
+    Description: CIDR Block for the public DMZ subnet 2, located in Availability Zone 2.
     Type: String
   VPCTenancy:
     AllowedValues:
@@ -203,23 +202,37 @@ Parameters:
     Type: String
   QSS3BucketName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
-    ConstraintDescription: Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).
+    ConstraintDescription: The Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a 
+      hyphen (-).
     Default: aws-quickstart
-    Description: S3 bucket name for the Quick Start assets. Quick Start bucket name can
-      include numbers, lowercase letters, uppercase letters, and hyphens (-). It
-      cannot start or end with a hyphen (-).
+    Description: Name of the S3 bucket for your copy of the Quick Start assets. 
+      Keep the default name unless you are customizing the template. 
+      Changing the name updates code references to point to a new Quick 
+      Start location. This name can include numbers, lowercase letters, 
+      uppercase letters, and hyphens, but do not start or end with a hyphen (-). 
+      See https://aws-quickstart.github.io/option1.html.
     Type: String
   QSS3KeyPrefix:
     AllowedPattern: ^([0-9a-zA-Z-.]+/)*$
-    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), dots (.) and forward slash (/). The prefix should end with a forward slash (/).
+    ConstraintDescription: The Quick Start S3 key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), and forward slashes (/).
     Default: quickstart-linux-bastion/
-    Description:       S3 key prefix for the Quick Start assets. Quick Start key prefix can
-      include numbers, lowercase letters, uppercase letters, hyphens (-), dots
-      (.) and forward slash (/) and it should end with a forward slash (/).
+    Description: S3 key prefix that is used to simulate a directory for your copy of the 
+      Quick Start assets. Keep the default prefix unless you are customizing 
+      the template. Changing this prefix updates code references to point to 
+      a new Quick Start location. This prefix can include numbers, lowercase 
+      letters, uppercase letters, hyphens (-), and forward slashes (/). End with a forward slash. 
+      See https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html 
+      and https://aws-quickstart.github.io/option1.html.
     Type: String
   QSS3BucketRegion:
     Default: 'us-east-1'
-    Description: The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.
+    Description: 'AWS Region where the Quick Start S3 bucket (QSS3BucketName) is 
+    hosted. Keep the default Region unless you are customizing the template. 
+    Changing this Region updates code references to point to a new Quick Start location. 
+    When using your own bucket, specify the Region. 
+    See https://aws-quickstart.github.io/option1.html.'
     Type: String
   RemoteAccessCIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
