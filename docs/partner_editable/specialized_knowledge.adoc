@@ -16,7 +16,7 @@ to launch virtual machine instances with a variety of operating systems. You can
 from existing Amazon Machine Images (AMIs) or import your own virtual machine
 images.
 
-* http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AmazonEBS.html[Amazon EBS] – Amazon Elastic Block Store (Amazon EBS) provides persistent blocklevel storage volumes for use with Amazon EC2 instances in the AWS Cloud. Each
+* http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AmazonEBS.html[Amazon EBS] – Amazon Elastic Block Store (Amazon EBS) provides persistent block level storage volumes for use with Amazon EC2 instances in the AWS Cloud. Each
 Amazon EBS volume is automatically replicated within its Availability Zone to protect
 you from component failure, offering high availability and durability. Amazon EBS
 volumes provide consistent and low-latency performance to run your workloads.

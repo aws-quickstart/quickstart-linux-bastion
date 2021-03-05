@@ -25,9 +25,7 @@ To create a http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.htm
 . On the *Services* menu, choose *EC2*.
 . Under *Network and Security*, choose *Key Pairs*.
 . Choose *Create Key Pair*.
-. Enter a name and choose *Create*.To do this, in the navigation pane of the
-Amazon EC2 console, choose Key Pairs, Create Key Pair, type a name, and then
-choose Create.
+. Enter a name and choose *Create*.
 +
 :xrefstyle: short
 [#keypair]

@@ -10,21 +10,21 @@ choice of Linux distribution (Bastion AMI Operating System parameter setting):
 * CentOS: *centos*
 * Ubuntu: *ubuntu*
 
-=== Customizing the Linux Bastion Host Banner
+=== Customizing the Linux bastion host banner
 This Quick Start provides the default banner illustrated in Figure 4 for the Linux bastion
 hosts. The banner is suppressed by default, but you can enable it by setting the
 *EnableBanner* parameter to *true* during deployment.
-+
+
 :xrefstyle: short
 [#banner]
-.Customizing the Linux Bastion Host Banner
+.Customizing the Linux bastion host banner
 image::../images/banner.png[banner,width=100%,height=100%]
-+
+
 To customize the banner, you can create a ASCII text file with your own banner content,
-upload it to an S3 bucket or other publicly accessible location, and make sure that it is
+upload it to an S3 bucket or other publicly accessible location, and verify that it is
 accessible from the host. 
 
-=== Bastion Logging
+=== Bastion logging
 The bastion hosts deployed by this Quick Start provide a command logger in the
 `/var/log/audit/audit.log` file. This log file contains the following information: the
 date, the SSH client connection IP address, the user name, the working directory, and the
@@ -41,7 +41,7 @@ to root access and tried to remove the bastion log.
 
 :xrefstyle: short
 [#logging]
-.Bastion Logging
+.Bastion logging
 image::../images/logging.png[Regloggingion,width=100%,height=100%]
 
 If you’d like to notify your users that all their commands will be monitored and logged, we
@@ -129,7 +129,7 @@ This Quick Start provisions one Linux bastion host in each Availability Zone wit
 security group as a virtual firewall. This security group is required for remote access from
 the Internet. The security group is configured as follows:
 
-=== Inbound:
+=== Inbound
 |===
 |Source|Protocol|Ports
 
@@ -137,7 +137,7 @@ the Internet. The security group is configured as follows:
 |Remote access CIDR|ICMP|N/A
 |===
 
-=== Outbound:
+=== Outbound
 |===
 |Destination|Protocol|Ports
 
