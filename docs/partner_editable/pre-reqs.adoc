@@ -4,8 +4,7 @@
 
 ==== Choose a Region
 
-* Use the region selector in the navigation bar to choose the AWS Region where you want
-to deploy the Quick Start on AWS.
+* Before deploying the stack, in the AWS Management Console, choose an AWS Region from the top toolbar.
 +
 :xrefstyle: short
 [#region]
