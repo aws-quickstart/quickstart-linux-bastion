@@ -5,8 +5,8 @@
 :partner-product-short-name: Linux Bastion Host
 // If there's no partner, comment partner-company-name and partner-contributors.
 // :partner-company-name: Example Company Name, Ltd.
-:doc-month: May
-:doc-year: 2018
+:doc-month: March
+:doc-year: 2021
 // For the following two "contributor" attributes, if the partner agrees to include names in the byline, 
 // enter names for both partner-contributors and quickstart-contributors. 
 // If partner doesn't want to include names, delete all placeholder names and keep only  
