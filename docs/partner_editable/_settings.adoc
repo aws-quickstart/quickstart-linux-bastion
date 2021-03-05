@@ -1,8 +1,8 @@
 // Change the following attributes.
 :quickstart-project-name: quickstart-linux-bastion
-:partner-product-name: Linux Bastion Host
+:partner-product-name: Linux Bastion Hosts
 // For the following attribute, if you have no short name, enter the same name as partner-product-name.
-:partner-product-short-name: Linux Bastion Host
+:partner-product-short-name: Linux Bastion Hosts
 // If there's no partner, comment partner-company-name and partner-contributors.
 // :partner-company-name: Example Company Name, Ltd.
 :doc-month: March
