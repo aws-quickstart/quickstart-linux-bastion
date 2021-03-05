@@ -16,7 +16,7 @@ to launch virtual machine instances with a variety of operating systems. You can
 from existing Amazon Machine Images (AMIs) or import your own virtual machine
 images.
 
-* http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AmazonEBS.html[Amazon EBS] – Amazon Elastic Block Store (Amazon EBS) provides persistent blocklevel storage volumes for use with Amazon EC2 instances in the AWS Cloud. Each
+* http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AmazonEBS.html[Amazon EBS] – Amazon Elastic Block Store (Amazon EBS) provides persistent block-level storage volumes for use with Amazon EC2 instances in the AWS Cloud. Each
 Amazon EBS volume is automatically replicated within its Availability Zone to protect
 you from component failure, offering high availability and durability. Amazon EBS
 volumes provide consistent and low-latency performance to run your workloads.
@@ -25,7 +25,7 @@ volumes provide consistent and low-latency performance to run your workloads.
 provide outbound Internet access to instances in a private subnets, but prevent the
 Internet from accessing those instances. NAT gateways provide better availability and
 bandwidth than NAT instances. The NAT Gateway service is a managed service that
-takes care of administering NAT gateways for you. 
+administers NAT gateways for you. 
 
 * http://docs.aws.amazon.com/autoscaling/latest/userguide/[Auto Scaling]– Auto Scaling helps you ensure that you have the desired number of EC2
 instances available to handle the load for your application. You create collections of EC2
@@ -35,5 +35,5 @@ that your group has this number of instances at all times.
 
 * http://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/[Amazon CloudWatch Logs] – You can use Amazon CloudWatch Logs to monitor, store,
 and access your log files from EC2 instances, AWS CloudTrail, and other sources. You
-can retrieve the log data from CloudWatch Logs, and monitor your EC2 instances in real
+can retrieve the log data from CloudWatch Logs, and monitor your EC2 instances in near-real
 time.
