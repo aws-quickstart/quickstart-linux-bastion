@@ -121,8 +121,6 @@ filter and isolate logs messages from individual bastion hosts more easily. Ever
 instance that is launched by the bastion Auto Scaling group will create its own log
 stream based on the instance ID.
 
-_Add any best practices for using the software._
-
 == Security
 // Provide post-deployment best practices for using the technology on AWS, including considerations such as migrating data, backups, ensuring high performance, high availability, etc. Link to software documentation for detailed information.
 This Quick Start provisions one Linux bastion host in each Availability Zone with a single
@@ -148,7 +146,7 @@ For additional details, see https://docs.aws.amazon.com/AmazonVPC/latest/UserGui
 
 == Other useful information
 //Provide any other information of interest to users, especially focusing on areas where AWS or cloud usage differs from on-premises usage.
-AWS services
+
 * https://aws.amazon.com/documentation/cloudformation/[AWS CloudFormation]
 
 * Amazon EC2
