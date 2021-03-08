@@ -13,12 +13,12 @@ As shown in <<architecture1>>, the Quick Start sets up the following:
 * A highly available architecture that spans two Availability Zones.*
 * A VPC configured with public and private subnets, according to AWS
 best practices, to provide you with your own virtual network on AWS.*
-* An Internet gateway to allow access to the Internet. This gateway is used by the bastion
+* An internet gateway to allow access to the internet. This gateway is used by the bastion
 hosts to send and receive traffic.*
-* Managed NAT gateways to allow outbound Internet access for resources in the private
+* Managed NAT gateways to allow outbound internet access for resources in the private
 subnets.*
 * A Linux bastion host in each public subnet with an Elastic IP address to allow inbound
-Secure Shell (SSH) access to EC2 instances in public and private subnets.
+SSH (Secure Shell) access to EC2 instances in public and private subnets.
 * A security group for fine-grained inbound access control.
 * An Amazon EC2 Auto Scaling group with a configurable number of instances.
 * A set of Elastic IP addresses that match the number of bastion host instances. If the
