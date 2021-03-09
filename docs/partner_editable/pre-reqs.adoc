@@ -17,7 +17,7 @@ on your corporate network.
 
 ==== Create a key pair
 
-To create a http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html[key pair] in your preferred region, do the following:
+To create a http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html[key pair] in your preferred Region, do the following:
 
 [start=1]
 . In your AWS Management Console, choose an AWS Region.

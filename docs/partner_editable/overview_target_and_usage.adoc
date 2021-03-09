@@ -4,14 +4,14 @@
 
 This Quick Start deployment guide provides instructions for deploying Linux bastion hosts
 in an Amazon Virtual Private Cloud (Amazon VPC) environment on the Amazon Web
-Services (AWS) Cloud. The Quick Start also provides http://aws.amazon.com/cloudformation/[AWS CloudFormation] templates that
+Services (AWS) Cloud. The Quick Start also provides http://aws.amazon.com/cloudformation/[AWS CloudFormation^] templates that
 automate the deployment.
 
 The guide is for IT infrastructure architects, DevOps engineers, and administrators who are
-building an AWS Cloud environment for their workloads and would like to securely deploy
+building an AWS Cloud environment for their workloads and want to securely deploy
 Linux bastion hosts to manage their deployments remotely.
 
-http://aws.amazon.com/quickstart/[Quick Starts] are automated reference deployments for AWS Cloud infrastructure
+http://aws.amazon.com/quickstart/[Quick Starts^] are automated reference deployments for AWS Cloud infrastructure
 components and key enterprise workloads on the AWS Cloud. Each Quick Start launches,
 configures, and runs AWS compute, network, storage, and other services, using AWS best
 practices for security and availability.
