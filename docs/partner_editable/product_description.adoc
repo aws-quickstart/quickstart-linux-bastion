@@ -1,0 +1,22 @@
+// Replace the content in <>
+// Briefly describe the software. Use consistent and clear branding. 
+// Include the benefits of using the software on AWS, and provide details on usage scenarios.
+
+This Quick Start provides Linux bastion host functionality for AWS Cloud infrastructures. It
+deploys a virtual private cloud (VPC) using the https://fwd.aws/9VdxN[Amazon VPC Quick Start reference
+deployment]. Then, it sets up private and public subnets and deploys Linux bastion instances into
+the VPC. You can also choose to deploy Linux bastion hosts into your existing AWS
+infrastructure.
+
+The bastion hosts provide secure access to Linux instances located in the private and public
+subnets. The Quick Start architecture deploys Linux bastion host instances into every public
+subnet to provide readily available administrative access to the environment. The Quick
+Start sets up a Multi-AZ environment consisting of two Availability Zones. If highly
+available bastion access is not necessary, you can stop the instance in the second
+Availability Zone and start it up when needed.
+
+You can use this Quick Start as a building block for your own Linux-based deployments.
+You can add other infrastructure components and software layers to complete your Linux
+environment in the AWS Cloud. To build an AWS Cloud infrastructure for accessing
+Microsoft Windows-based instances, see the https://fwd.aws/5VrKP[Quick Start for Remote Desktop (RD)
+Gateway]. 

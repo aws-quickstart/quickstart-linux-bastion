@@ -1,0 +1,30 @@
+Deploying this Quick Start for a new virtual private cloud (VPC) with
+default parameters builds the following {partner-product-short-name} environment in the
+AWS Cloud.
+
+// Replace this example diagram with your own. Send us your source PowerPoint file. Be sure to follow our guidelines here : http://(we should include these points on our contributors giude)
+:xrefstyle: short
+[#architecture1]
+.Quick Start architecture for {partner-product-short-name} on AWS
+image::../images/architecture_diagram.png[Architecture,width=100%,height=100%]
+
+As shown in <<architecture1>>, the Quick Start sets up the following:
+
+* A highly available architecture that spans two Availability Zones.*
+* A VPC configured with public and private subnets, according to AWS
+best practices, to provide you with your own virtual network on AWS.*
+* An internet gateway to allow access to the internet. This gateway is used by the bastion
+hosts to send and receive traffic.*
+* Managed NAT gateways to allow outbound internet access for resources in the private
+subnets.*
+* A Linux bastion host in each public subnet with an Elastic IP address. These allow inbound
+SSH (Secure Shell) access to EC2 instances in public and private subnets.
+* A security group for fine-grained inbound access control.
+* An Amazon EC2 Auto Scaling group with a configurable number of instances.
+* A set of Elastic IP addresses that match the number of bastion host instances. If the
+Auto Scaling group relaunches any instances, these addresses are reassociated with the
+new instances.
+* An Amazon CloudWatch Logs log group to hold the Linux bastion host shell history logs.
+// Add bullet points for any additional components that are included in the deployment. Make sure that the additional components are also represented in the architecture diagram. End each bullet with a period.
+
+[.small]#*The template that deploys the Quick Start into an existing VPC skips the components marked by asterisks and prompts you for your existing VPC configuration.#
