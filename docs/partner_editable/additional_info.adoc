@@ -4,18 +4,20 @@
 == Post-deployment steps
 // If post-deployment steps are required, add them here. If not, remove the heading
 Log in to the bastion host. Use one of the following user names, depending on your
-choice of Linux distribution (Bastion AMI Operating System parameter setting):
+choice of Linux distribution:
 
 * Amazon Linux: *ec2-user*
 * CentOS: *centos*
 * Ubuntu: *ubuntu*
 
+The Linux distribution is specified in the *Bastion AMI operating system* parameter when you deploy the templates. For more information, see link:#_parameter_reference[Parameter reference].
+
 === Customizing the Linux bastion host banner
-This Quick Start provides the default banner illustrated in Figure 4 for the Linux bastion
+:xrefstyle: short
+This Quick Start provides the default banner illustrated in <#banner> for the Linux bastion
 hosts. The banner is suppressed by default, but you can enable it by setting the
 *EnableBanner* parameter to *true* during deployment.
 
-:xrefstyle: short
 [#banner]
 .Customizing the Linux bastion host banner
 image::../images/banner.png[banner,width=100%,height=100%]
