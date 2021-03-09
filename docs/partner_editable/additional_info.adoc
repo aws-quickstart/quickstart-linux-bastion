@@ -49,21 +49,17 @@ If you’d like to notify your users that all their commands will be monitored a
 recommend that you enable the bastion host banner, as described in link:#_enabling_and_customizing_the_linux_bastion_host_banner[Enabling and Customizing the Linux bastion host banner].
 The default banner text includes the alert shown in <<banner>>, which you can customize.
 
-The `bastion.log` file has the immutable bit set, so it cannot be easily removed or tampered
-with. There is a shadow file containing a copy of `bastion.log` located in `/var/log/audit/audit.log`. 
-
-If a malicious user does find the `bastion.log` file, somehow gains root privileges,
-removes the protections, and deletes the log file, there is a shadow file that contains a copy
-of the log. The shadow file is located in `/var/log/audit/audit.log`. The shadow
-file is just a copy—an attacker can find and delete it. For this reason, the Quick Start also
-stores the contents of the bastion.log file remotely using the CloudWatch Logs service. The
+The `bastion.log` file has the immutable attribute set, and cannot be easily deleted or tampered
+with. However, in the event it is deleted by a malicious actor, there is a shadow file containing a copy of `bastion.log` located in `/var/log/audit/audit.log`. 
+As this shadow file is a copy that itself can be deleted, the Quick Start also
+stores the contents of `bastion.log` remotely using the CloudWatch Logs service. The
 log files can be found under CloudWatch Logs using the instance ID as the log stream
 name.
 
 == Best practices for using {partner-product-short-name} on AWS
 // Provide post-deployment best practices for using the technology on AWS, including considerations such as migrating data, backups, ensuring high performance, high availability, etc. Link to software documentation for detailed information.
 The architecture built by this Quick Start supports AWS best practices for high availability
-and security:
+and security.
 
 * Linux bastion hosts are deployed in two Availability Zones to support immediate access
 across the VPC. You can configure the number of bastion host instances at launch.
@@ -79,33 +75,32 @@ terminated and the Auto Scaling group launches a new instance in its place, the 
 Elastic IP addresses are reassociated with the new instances. This ensures that the same
 trusted Elastic IP addresses are used at all times.
 
-* Access to the bastion hosts are locked down to known CIDR scopes for ingress. This is
+* Inbound access to the bastion hosts are locked down to known CIDR scopes. This is
 achieved by associating the bastion instances with a security group. The Quick Start
 creates a `BastionSecurityGroup` resource for this purpose.
 
 * Ports are limited to allow only the necessary access to the bastion hosts. For Linux
 bastion hosts, TCP port 22 for SSH connections is typically the only port allowed.
 
-We recommend that you follow these best practices when you’re using the architecture built
+We recommend that you follow these best practices when using the architecture built
 by the Quick Start:
 
 * When you add new instances to the VPC that require management access from the
-bastion host, make sure to associate a security group ingress rule, which references the
-bastion security group as the source, with each instance. It is also important to limit this
-access to the required ports for administration.
+bastion host, associate a security group inbound rule with each instance. The rule should reference the
+bastion security group as the source. It is also important to limit access to the required ports for administration.
 
 * During deployment, the public key from the selected Amazon EC2 key pair is associated
-with the user `ec2-user` in the Linux instance. For additional users, you should create
+with the user `ec2-user` in the Linux instance. For additional users, create
 users with the required permissions and associate them with their individual authorized
 public keys for SSH connectivity.
 
-* For the bastion host instances, you should select the number and type of instances
+* For the bastion host instances, select the number and type of instances
 according to the number of users and operations to be performed. The Quick Start
 creates one bastion host instance and uses the t2.micro instance type by default, but you
 can change these settings during deployment. 
 +
 NOTE: You can also change the number and type of bastion host instances after
-deployment, by updating the AWS CloudFormation stack and changing the parameters.
+deployment by updating the AWS CloudFormation stack and changing the parameters.
 Reconfiguring the bastion host instances updates the related Elastic IP addresses and
 changes the bootstrapping logic in the launch configuration and Auto Scaling group.
 However, before you update the stack, you must terminate the instances you want to
@@ -119,7 +114,7 @@ collected from each bastion instance. This ensures that bastion log history is r
 only for the amount of time you need.
 
 * Keep your CloudWatch log files separated for each bastion host instance so that you can
-filter and isolate logs messages from individual bastion hosts more easily. Every
+filter and isolate log messages from individual bastion hosts more easily. Every
 instance that is launched by the bastion Auto Scaling group will create its own log
 stream based on the instance ID.
 
@@ -144,20 +139,20 @@ the Internet. The security group is configured as follows:
 |0.0.0.0/0 |All|All
 |===
 
-For additional details, see https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Security.html[Security in Your VPC] in the Amazon VPC documentation.
+For more information, see https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Security.html[Internetwork traffic privacy in Amazon VPC^].
 
 == Other useful information
 //Provide any other information of interest to users, especially focusing on areas where AWS or cloud usage differs from on-premises usage.
 
-* https://aws.amazon.com/documentation/cloudformation/[AWS CloudFormation]
+* https://aws.amazon.com/documentation/cloudformation/[AWS CloudFormation Documentation^]
 
 * Amazon EC2
-** https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/[User guide for Linux]
+** https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/[What is Amazon EC2?^]
 
-** https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresseseip.html[Elastic IPs]
+** https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html[Elastic IP addresses^]
 
-* https://aws.amazon.com/documentation/vpc/[Amazon VPC]
+* https://aws.amazon.com/documentation/vpc/[Amazon Virtual Private Cloud Documentation^]
 
-** https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_SecurityGroups.html[Security groups]
+** https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_SecurityGroups.html[Security groups for your VPC^]
 
-** https://blogs.aws.amazon.com/security/post/Tx3N8GFK85UN1G6/Securely-connect-to-Linux-instances-running-in-a-private-Amazon-VPC[Bastion host servers]
+** https://blogs.aws.amazon.com/security/post/Tx3N8GFK85UN1G6/Securely-connect-to-Linux-instances-running-in-a-private-Amazon-VPC[Securely Connect to Linux Instances Running a Private Amazon VPC^]
