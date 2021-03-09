@@ -4,8 +4,8 @@
 
 This Quick Start provides Linux bastion host functionality for AWS Cloud infrastructures. It
 deploys a virtual private cloud (VPC) using the https://fwd.aws/9VdxN[Amazon VPC Quick Start reference
-deployment], sets up private and public subnets, and deploys Linux bastion instances into
-that VPC. You can also choose to deploy Linux bastion hosts into your existing AWS
+deployment]. Then, it sets up private and public subnets and deploys Linux bastion instances into
+the VPC. You can also choose to deploy Linux bastion hosts into your existing AWS
 infrastructure.
 
 The bastion hosts provide secure access to Linux instances located in the private and public

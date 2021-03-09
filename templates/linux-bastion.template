@@ -230,7 +230,7 @@ Parameters:
     Type: String
   EnvironmentVariables:
     Description: A comma-separated list of environment variables for use in
-      bootstrapping. Variables must be in the format KEY=VALUE. VALUE cannot
+      bootstrapping. Variables must be in the format `key=value`. `Value` cannot
       contain commas.
     Type: String
     Default: ''
