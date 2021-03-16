@@ -36,7 +36,7 @@
 (`AlternativeInitializationScript`)|`**__Blank string__**`|An alternative initialization script to run during setup.|Operating system override
 (`OSImageOverride`)|`**__Blank string__**`|The Region-specific image to use for the instance.|Alternative IAM role
 (`AlternativeIAMRole`)|`**__Blank string__**`|An existing IAM role name to attach to the bastion. If left blank, a new role will be created.|Environment variables
-(`EnvironmentVariables`)|`**__Blank string__**`|A comma-separated list of environment variables for use in bootstrapping. Variables must be in the format KEY=VALUE. VALUE cannot contain commas.
+(`EnvironmentVariables`)|`**__Blank string__**`|A comma-separated list of environment variables for use in bootstrapping. Variables must be in the format `key=value`. `Value` cannot contain commas.
 |===
 .AWS Quick Start configuration
 [width="100%",cols="16%,11%,73%",options="header",]
