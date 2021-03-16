@@ -13,7 +13,8 @@
 // "{partner-company-name}" and "AWS Quick Start team." 
 // Use the comma before "and" only when three or more names.
 //:partner-contributors: Shuai Ye, Michael McConnell, and John Smith, {partner-company-name}
-:quickstart-contributors: Santiago Cardenas, Tony Vattathil, and Ian Hill, AWS Quick Start team
+:aws-contributors: Santiago Cardenas, AWS Serverless Partners 
+:quickstart-contributors: Tony Vattathil and Ian Hill, AWS Quick Start team
 // For deployment_time, use minutes if deployment takes an hour or less, 
 // for example, 30 minutes or 60 minutes. 
 // Use hours for deployment times greater than 60 minutes (rounded to a quarter hour),
