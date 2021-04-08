@@ -553,7 +553,7 @@ Resources:
                 - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/auditing_configure.sh
                 - S3Bucket: !If
                     - UsingDefaultBucket
-                    - !Sub 'aws-quickstart-${AWS::Region}'
+                    - !Sub '${QSS3BucketName}-${AWS::Region}'
                     - !Ref 'QSS3BucketName'
                   S3Region: !If
                     - UsingDefaultBucket
@@ -571,7 +571,7 @@ Resources:
                   - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh
                   - S3Bucket: !If
                       - UsingDefaultBucket
-                      - !Sub 'aws-quickstart-${AWS::Region}'
+                      - !Sub '${QSS3BucketName}-${AWS::Region}'
                       - !Ref 'QSS3BucketName'
                     S3Region: !If
                       - UsingDefaultBucket
@@ -602,7 +602,7 @@ Resources:
                   - DefaultBanner
                   - !Sub
                     - s3://${S3Bucket}/${QSS3KeyPrefix}scripts/banner_message.txt
-                    - S3Bucket: !If [ UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref 'QSS3BucketName' ]
+                    - S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref 'QSS3BucketName' ]
                   - !Ref BastionBanner
     Properties:
       AssociatePublicIpAddress: true
