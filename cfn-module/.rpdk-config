@@ -1,0 +1,5 @@
+{
+    "artifact_type": "MODULE",
+    "typeName": "AWSQS::EC2::LinuxBastionQS::MODULE",
+    "settings": {}
+}

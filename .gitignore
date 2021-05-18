@@ -1,3 +1,9 @@
 .DS_Store
 taskcat_outputs/*
 packages/
+
+# cfn module build
+cfn-module/*.zip
+cfn-module/*.json
+cfn-module/fragments/
+cfn-module/rpdk.log
