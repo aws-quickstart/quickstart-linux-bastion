@@ -464,10 +464,17 @@ Resources:
             Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*"
             Effect: Allow
           - Action:
-              - 'ec2:AssociateAddress'
               - 'ec2:DescribeAddresses'
             Resource: '*'
             Effect: Allow
+          - Effect: Allow
+            Action:
+              - 'ec2:AssociateAddress'
+            Resource:
+              - !Ref EIP1
+              - !If [2BastionCondition, !Ref EIP2, !Ref AWS::NoValue]
+              - !If [3BastionCondition, !Ref EIP3, !Ref AWS::NoValue]
+              - !If [4BastionCondition, !Ref EIP4, !Ref AWS::NoValue]
       Roles:
         - !If
           - CreateIAMRole
