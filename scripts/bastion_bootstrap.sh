@@ -54,7 +54,7 @@ function setup_environment_variables() {
 
 function verify_dependencies(){
     if [[ "a$(which aws)" == "a" ]]; then
-      pip install awscli
+      pip install awscli==1.19.79
     fi
     echo "${FUNCNAME[0]} Ended"
 }
