@@ -471,10 +471,10 @@ Resources:
             Action:
               - 'ec2:AssociateAddress'
             Resource:
-              - !Ref EIP1
-              - !If [2BastionCondition, !Ref EIP2, !Ref AWS::NoValue]
-              - !If [3BastionCondition, !Ref EIP3, !Ref AWS::NoValue]
-              - !If [4BastionCondition, !Ref EIP4, !Ref AWS::NoValue]
+              - !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:eip/${EIP1.AllocationId}"
+              - !If [2BastionCondition, !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:eip/${EIP2.AllocationId}", !Ref AWS::NoValue]
+              - !If [3BastionCondition, !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:eip/${EIP3.AllocationId}", !Ref AWS::NoValue]
+              - !If [4BastionCondition, !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:eip/${EIP4.AllocationId}", !Ref AWS::NoValue]
       Roles:
         - !If
           - CreateIAMRole
