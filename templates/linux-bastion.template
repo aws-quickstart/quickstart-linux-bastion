@@ -214,8 +214,8 @@ Parameters:
     Description: ID of the VPC (e.g., vpc-0343606e).
     Type: 'AWS::EC2::VPC::Id'
   AlternativeInitializationScript:
-    AllowedPattern: ^http.*|^$
-    ConstraintDescription: URL must begin with http.
+    AllowedPattern: ^https.*|^$
+    ConstraintDescription: URL must begin with https.
     Description: An alternative initialization script to run during setup.
     Default: ''
     Type: String
