@@ -213,16 +213,6 @@ function request_eip() {
       set +e
       _determine_eip_assc_status ${eip}
       set -e
-      if [[ ${_eip_associated} -eq 0 ]]; then
-        echo "Elastic IP [${eip}] already has an association. Moving on."
-        let _eip_assigned_count+=1
-        if [[ "${_eip_assigned_count}" -eq "${#EIP_ARRAY[@]}" ]]; then
-          echo "All of the stack EIPs have been assigned (${_eip_assigned_count}/${#EIP_ARRAY[@]}). I can't assign anything else. Exiting."
-          exit 1
-        fi
-        continue
-      fi
-
       _determine_eip_allocation ${eip}
 
       # Attempt to assign EIP to the ENI.
@@ -233,14 +223,11 @@ function request_eip() {
       set -e
 
       if [[ ${rc} -ne 0 ]]; then
-
-        let _eip_assigned_count+=1
-        continue
-      else
-        echo "The newly-assigned EIP is ${eip}. It is mapped under EIP Allocation ${eip_allocation}"
-        break
+        echo "Unable to associate EIP ${eip}. Failure. Exiting"
+        exit 1
       fi
     done
+
     echo "${FUNCNAME[0]} Ended"
 }
 
