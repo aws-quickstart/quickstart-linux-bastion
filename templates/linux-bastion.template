@@ -128,6 +128,13 @@ Parameters:
       - t3.large
       - t3.xlarge
       - t3.2xlarge
+      - t4g.nano
+      - t4g.micro
+      - t4g.small
+      - t4g.medium
+      - t4g.large
+      - t4g.xlarge
+      - t4g.2xlarge
       - m4.large
       - m4.xlarge
       - m4.2xlarge
