@@ -27,7 +27,7 @@ project:
   template: templates/linux-bastion-master.template
   parameters:
     AvailabilityZones: $[taskcat_getaz_2]
-    BastionInstanceType: t3.medium
+    #BastionInstanceType: t3.medium
     KeyPairName: $[taskcat_getkeypair]
     PrivateSubnet1CIDR: 10.0.0.0/19
     PrivateSubnet2CIDR: 10.0.32.0/19
@@ -41,6 +41,7 @@ tests:
   amznlinux2hvm:
     parameters:
       BastionAMIOS: Amazon-Linux2-HVM
+      BastionInstanceType: t3.medium
     regions:
       - ap-northeast-1
       - ap-northeast-2
@@ -65,6 +66,7 @@ tests:
   centos7hvm:
     parameters:
       BastionAMIOS: CentOS-7-HVM
+      BastionInstanceType: t3.medium
     regions:
       - ap-south-1
       - ca-central-1
@@ -75,6 +77,7 @@ tests:
   sles15hvm:
     parameters:
       BastionAMIOS: SUSE-SLES-15-HVM
+      BastionInstanceType: t3.medium
     regions:
       - ap-south-1
       - ca-central-1
@@ -85,6 +88,18 @@ tests:
   us2004hvm:
     parameters:
       BastionAMIOS: Ubuntu-Server-20.04-LTS-HVM
+      BastionInstanceType: t3.medium
+    regions:
+      - ap-south-1
+      - ca-central-1
+      - eu-central-1
+      - eu-north-1
+      - eu-west-1
+      - us-east-1
+  arminst:
+    parameters:
+      BastionAMIOS: Amazon-Linux2-HVM-ARM
+      BastionInstanceType: t4g.nano
     regions:
       - ap-south-1
       - ca-central-1
