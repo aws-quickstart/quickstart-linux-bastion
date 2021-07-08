@@ -100,7 +100,7 @@ function setup_logs () {
 
     echo "${FUNCNAME[0]} Started"
     URL_SUFFIX="${URL_SUFFIX:-amazonaws.com}"
-
+    HARDWARE=`uname -m`
     if [[ "${release}" == "SLES" ]]; then
         curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/suse/amd64/latest/amazon-cloudwatch-agent.rpm" -O
         zypper install --allow-unsigned-rpm -y ./amazon-cloudwatch-agent.rpm
@@ -114,8 +114,12 @@ function setup_logs () {
         curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb" -O
         dpkg -i -E ./amazon-cloudwatch-agent.deb
         rm ./amazon-cloudwatch-agent.deb
-    elif [[ "${release}" == "AMZN" ]]; then
+    elif [[ "${release}" == "AMZN" ]] && [[ "${HARDWARE}" == "x86_64" ]]; then
         curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm" -O
+        rpm -U ./amazon-cloudwatch-agent.rpm
+        rm ./amazon-cloudwatch-agent.rpm
+    elif [[ "${release}" == "AMZN" ]] && [[ "${HARDWARE}" == "aarch64" ]]; then
+        curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/amazon_linux/arm64/latest/amazon-cloudwatch-agent.rpm" -O
         rpm -U ./amazon-cloudwatch-agent.rpm
         rm ./amazon-cloudwatch-agent.rpm
     fi

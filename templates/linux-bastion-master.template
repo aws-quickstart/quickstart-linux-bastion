@@ -91,6 +91,7 @@ Parameters:
   BastionAMIOS:
     AllowedValues:
       - Amazon-Linux2-HVM
+      - Amazon-Linux2-HVM-ARM
       - CentOS-7-HVM
       - Ubuntu-Server-20.04-LTS-HVM
       - SUSE-SLES-15-HVM
@@ -128,7 +129,7 @@ Parameters:
       - t3.large
       - t3.xlarge
       - t3.2xlarge
-      - 4g.nano
+      - t4g.nano
       - t4g.micro
       - t4g.small
       - t4g.medium
