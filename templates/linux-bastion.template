@@ -698,6 +698,7 @@ Resources:
             set -x
             for e in $(echo "${EnvironmentVariables}" | tr ',' ' '); do
               export $e
+              echo "$e" >> /root/.bashrc
             done
             export PATH=$PATH:/usr/local/bin
             #cfn signaling functions
