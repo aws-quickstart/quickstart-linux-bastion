@@ -171,7 +171,6 @@ function setup_os () {
 
     if [[ "${release}" == "CentOS" ]]; then
         /sbin/restorecon -v /etc/ssh/sshd_config
-        systemctl restart sshd
     fi
 
     if [[ "${release}" == "SLES" ]]; then
@@ -185,7 +184,7 @@ function setup_os () {
 
     crontab ~/mycron
     rm ~/mycron
-
+    systemctl restart sshd
     echo "${FUNCNAME[0]} Ended"
 }
 
