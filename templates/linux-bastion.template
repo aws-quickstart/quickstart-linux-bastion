@@ -15,6 +15,11 @@ Metadata:
           - PublicSubnet2ID
           - RemoteAccessCIDR
       - Label:
+          default: IAM configuration
+        Parameters:
+          - RolePath
+          - PermissionsBoundaryArn
+      - Label:
           default: Amazon EC2 configuration
         Parameters:
           - KeyPairName
@@ -89,6 +94,10 @@ Metadata:
         default: VPC ID
       RootVolumeSize:
         default: Root volume size
+      PermissionsBoundaryArn:
+        default: Permissions boundary ARN
+      RolePath:
+        default: Role path
   cfn-lint: { config: { ignore_checks: [E9007] } }
 Parameters:
   BastionAMIOS:
@@ -246,6 +255,14 @@ Parameters:
     Description: The size in GB for the root EBS volume.
     Type: Number
     Default: '10'
+  PermissionsBoundaryArn:
+    Description: Will be attached to all created IAM Roles to satisfy security requirements
+    Type: String
+    Default: ''
+  RolePath:
+    Description: Will be attached to all created IAM Roles to satisfy security requirements
+    Type: String
+    Default: ''
 Rules:
   SubnetsInVPC:
     Assertions:
@@ -437,6 +454,8 @@ Mappings:
       Code: SLES15HVM
       OS: SLES
 Conditions:
+  RolePathProvided: !Not [!Equals ["", !Ref RolePath]]
+  PermissionsBoundaryProvided: !Not [!Equals ["", !Ref PermissionsBoundaryArn]]
   2BastionCondition: !Or
     - !Equals
       - !Ref NumBastionHosts
@@ -482,7 +501,13 @@ Resources:
     Condition: CreateIAMRole
     Type: 'AWS::IAM::Role'
     Properties:
-      Path: /
+      Path: !If [RolePathProvided, !Ref RolePath, !Ref AWS::NoValue]
+      PermissionsBoundary:
+        !If [
+          PermissionsBoundaryProvided,
+          !Ref PermissionsBoundaryArn,
+          !Ref AWS::NoValue,
+        ]
       AssumeRolePolicyDocument:
         Statement:
           - Action:
