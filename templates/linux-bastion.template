@@ -486,9 +486,10 @@ Conditions:
     - !Ref QSS3BucketName
     - 'aws-quickstart'
   DefaultBanner: !Equals [!Ref BastionBanner, ""]
-  UseKeyPair: !Equals
-    - !Ref KeyPairName
-    - ''  
+  UseKeyPair: !Not
+    - !Equals
+      - !Ref KeyPairName
+      - ''  
 Resources:
   BastionMainLogGroup:
     Type: 'AWS::Logs::LogGroup'
