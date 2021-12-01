@@ -175,8 +175,9 @@ Parameters:
       - 'false'
   KeyPairName:
     Description: Name of an existing public/private key pair. If you do not have one in this AWS Region,
-      please create it before continuing.
-    Type: 'AWS::EC2::KeyPair::KeyName'
+      please create it before continuing. If left empty, AWS Systems Manager Session Manager can still be used to connect to the instance.
+    Type: String
+    Default: ""
   NumBastionHosts:
     AllowedValues:
       - '1'
@@ -485,6 +486,10 @@ Conditions:
     - !Ref QSS3BucketName
     - 'aws-quickstart'
   DefaultBanner: !Equals [!Ref BastionBanner, ""]
+  UseKeyPair: !Not
+    - !Equals
+      - !Ref KeyPairName
+      - ''  
 Resources:
   BastionMainLogGroup:
     Type: 'AWS::Logs::LogGroup'
@@ -694,7 +699,7 @@ Resources:
     Properties:
       AssociatePublicIpAddress: true
       PlacementTenancy: !Ref BastionTenancy
-      KeyName: !Ref KeyPairName
+      KeyName: !If [UseKeyPair, !Ref KeyPairName, !Ref AWS::NoValue]
       IamInstanceProfile: !Ref BastionHostProfile
       ImageId: !If
         - UseOSImageOverride
