@@ -527,6 +527,7 @@ Resources:
         - !Sub 'arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy'
   BastionHostPolicy:
     Type: 'AWS::IAM::Policy'
+    Condition: CreateIAMRole
     Properties:
       PolicyName: BastionPolicy
       PolicyDocument:
@@ -566,7 +567,6 @@ Resources:
           - !Ref BastionHostRole
           - !Ref AlternativeIAMRole
   BastionHostProfile:
-    DependsOn: BastionHostPolicy
     Type: 'AWS::IAM::InstanceProfile'
     Properties:
       Roles:
@@ -574,7 +574,10 @@ Resources:
           - CreateIAMRole
           - !Ref BastionHostRole
           - !Ref AlternativeIAMRole
-      Path: /
+      Path: !If
+          - CreateIAMRole
+          - /
+          - /account-managed/
   EIP1:
     Type: 'AWS::EC2::EIP'
     Properties:
