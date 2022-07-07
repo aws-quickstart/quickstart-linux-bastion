@@ -112,7 +112,6 @@ tests:
       - eu-west-1
       - us-east-1
   onlyssmaccess:
-    #Simply leaves RemoteAccessCIDR blank to avoid adding port 22 to SG
     parameters:
       BastionAMIOS: Amazon-Linux2-HVM-ARM
       BastionInstanceType: t4g.nano
