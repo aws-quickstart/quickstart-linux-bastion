@@ -140,8 +140,9 @@ Parameters:
       - 'false'
   KeyPairName:
     Description: Name of an existing public/private key pair, which allows you to securely connect to your instance
-      after it launches.
-    Type: 'AWS::EC2::KeyPair::KeyName'
+      after it launches. If left empty, AWS Systems Manager Session Manager can still be used to connect to the instance.
+    Type: String
+    Default: ""
   NumBastionHosts:
     AllowedValues:
       - '1'
