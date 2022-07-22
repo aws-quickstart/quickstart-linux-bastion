@@ -339,6 +339,12 @@ Mappings:
       US2004HVM: ami-048a2d001938101dd
       CENTOS7HVM: ami-0d1eb46a368923d43
       SLES15HVM: ami-03790de3a37ba87cc
+    ap-southeast-3:
+      AMZNLINUX2: ami-0483d92a8124da6c9
+      # AMZNLINUX2ARM:
+      US2004HVM: ami-09915141a4f1dafdd
+      CENTOS7HVM: ami-0c654ac429998fb1c
+      SLES15HVM: ami-005899737135b4201
     ca-central-1:
       AMZNLINUX2: ami-04c12937e87474def
       AMZNLINUX2ARM: ami-058c397e06e2c3b81
