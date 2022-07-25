@@ -229,27 +229,17 @@ Parameters:
     Description: CIDR Block for the VPC.
     Type: String
 Conditions:
-  UsingDefaultBucket: !Equals
-    - !Ref QSS3BucketName
-    - 'aws-quickstart'
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, aws-quickstart]
 Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub
         - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template.yaml
-        - S3Bucket: !If
-            - UsingDefaultBucket
-            - !Sub 'aws-quickstart-${AWS::Region}'
-            - !Ref 'QSS3BucketName'
-          S3Region: !If
-            - UsingDefaultBucket
-            - !Ref 'AWS::Region'
-            - !Ref 'QSS3BucketRegion'
+        - S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
+          S3Region: !If [UsingDefaultBucket, !Ref AWS::Region, !Ref QSS3BucketRegion]
       Parameters:
-        AvailabilityZones: !Join
-          - ','
-          - !Ref AvailabilityZones
+        AvailabilityZones: !Join [',', !Ref AvailabilityZones]
         NumberOfAZs: 2
         PrivateSubnet1ACIDR: !Ref PrivateSubnet1CIDR
         PrivateSubnet2ACIDR: !Ref PrivateSubnet2CIDR
@@ -262,14 +252,8 @@ Resources:
     Properties:
       TemplateURL: !Sub
         - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/linux-bastion.template
-        - S3Bucket: !If
-            - UsingDefaultBucket
-            - !Sub 'aws-quickstart-${AWS::Region}'
-            - !Ref 'QSS3BucketName'
-          S3Region: !If
-            - UsingDefaultBucket
-            - !Ref 'AWS::Region'
-            - !Ref 'QSS3BucketRegion'
+        - S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
+          S3Region: !If [UsingDefaultBucket, !Ref AWS::Region, !Ref QSS3BucketRegion]
       Parameters:
         BastionAMIOS: !Ref BastionAMIOS
         BastionHostName: !Ref BastionHostName
@@ -281,19 +265,13 @@ Resources:
         EnableX11Forwarding: !Ref EnableX11Forwarding
         KeyPairName: !Ref KeyPairName
         NumBastionHosts: !Ref NumBastionHosts
-        PublicSubnet1ID: !GetAtt
-          - VPCStack
-          - Outputs.PublicSubnet1ID
-        PublicSubnet2ID: !GetAtt
-          - VPCStack
-          - Outputs.PublicSubnet2ID
+        PublicSubnet1ID: !GetAtt VPCStack.Outputs.PublicSubnet1ID
+        PublicSubnet2ID: !GetAtt VPCStack.Outputs.PublicSubnet2ID
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         RemoteAccessCIDR: !Ref RemoteAccessCIDR
-        VPCID: !GetAtt
-          - VPCStack
-          - Outputs.VPCID
+        VPCID: !GetAtt VPCStack.Outputs.VPCID
 Outputs:
   Postdeployment:
     Description: See the deployment guide for post-deployment steps.

@@ -247,9 +247,7 @@ Rules:
     Assertions:
       - Assert:
           Fn::EachMemberIn:
-            - 'Fn::ValueOfAll':
-                - 'AWS::EC2::Subnet::Id'
-                - VpcId
+            - !ValueOfAll [AWS::EC2::Subnet::Id, VpcId]
             - Fn::RefAll: AWS::EC2::VPC::Id
         AssertDescription: All subnets must exist in the VPC.
   ArmInstance:
@@ -449,54 +447,21 @@ Mappings:
       Code: SLES15HVM
       OS: SLES
 Conditions:
-  RolePathProvided: !Not [!Equals ["", !Ref RolePath]]
-  PermissionsBoundaryProvided: !Not [!Equals ["", !Ref PermissionsBoundaryArn]]
-  2BastionConditionHost: !Or
-    - !Equals
-      - !Ref NumBastionHosts
-      - '2'
-    - !Condition 3BastionCondition
-    - !Condition 4BastionCondition
-  3BastionConditionHost: !Or
-    - !Equals
-      - !Ref NumBastionHosts
-      - '3'
-    - !Condition 4BastionCondition
-  4BastionConditionHost: !Equals
-    - !Ref NumBastionHosts
-    - '4'
-  2BastionCondition: !And
-    - !Condition PopulateRemoteCIDR
-    - !Condition 2BastionConditionHost
-  3BastionCondition: !And
-    - !Condition PopulateRemoteCIDR
-    - !Condition 3BastionConditionHost
-  4BastionCondition: !And
-    - !Condition PopulateRemoteCIDR
-    - !Condition 4BastionConditionHost
-  PopulateRemoteCIDR: !Not
-    - !Equals
-      - !Ref RemoteAccessCIDR
-      - 'disabled-onlyssmaccess'
-  UseAlternativeInitialization: !Not
-    - !Equals
-      - !Ref AlternativeInitializationScript
-      - ''
-  CreateIAMRole: !Equals
-    - !Ref AlternativeIAMRole
-    - ''
-  UseOSImageOverride: !Not
-    - !Equals
-      - !Ref OSImageOverride
-      - ''
-  UsingDefaultBucket: !Equals
-    - !Ref QSS3BucketName
-    - 'aws-quickstart'
-  DefaultBanner: !Equals [!Ref BastionBanner, ""]
-  UseKeyPair: !Not
-    - !Equals
-      - !Ref KeyPairName
-      - ''
+  RolePathProvided: !Not [!Equals ['', !Ref RolePath]]
+  PermissionsBoundaryProvided: !Not [!Equals ['', !Ref PermissionsBoundaryArn]]
+  2BastionConditionHost: !Or [!Equals [!Ref NumBastionHosts, 2], !Condition 3BastionCondition, !Condition 4BastionCondition]
+  3BastionConditionHost: !Or [!Equals [!Ref NumBastionHosts, 3], !Condition 4BastionCondition]
+  4BastionConditionHost: !Equals [!Ref NumBastionHosts, 4]
+  2BastionCondition: !And [!Condition PopulateRemoteCIDR, !Condition 2BastionConditionHost]
+  3BastionCondition: !And [!Condition PopulateRemoteCIDR, !Condition 3BastionConditionHost]
+  4BastionCondition: !And [!Condition PopulateRemoteCIDR, !Condition 4BastionConditionHost]
+  PopulateRemoteCIDR: !Not [!Equals [!Ref RemoteAccessCIDR, disabled-onlyssmaccess]]
+  UseAlternativeInitialization: !Not [!Equals [!Ref AlternativeInitializationScript, '']]
+  CreateIAMRole: !Equals [!Ref AlternativeIAMRole, '']
+  UseOSImageOverride: !Not [!Equals [!Ref OSImageOverride, '']]
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, aws-quickstart]
+  DefaultBanner: !Equals [!Ref BastionBanner, '']
+  UseKeyPair: !Not [!Equals [!Ref KeyPairName, '']]
 Resources:
   BastionMainLogGroup:
     Type: AWS::Logs::LogGroup
@@ -515,11 +480,7 @@ Resources:
     Properties:
       Path: !If [RolePathProvided, !Ref RolePath, !Ref AWS::NoValue]
       PermissionsBoundary:
-        !If [
-          PermissionsBoundaryProvided,
-          !Ref PermissionsBoundaryArn,
-          !Ref AWS::NoValue,
-        ]
+        !If [PermissionsBoundaryProvided, !Ref PermissionsBoundaryArn, !Ref AWS::NoValue]
       AssumeRolePolicyDocument:
         Statement:
           - Action:
@@ -569,22 +530,13 @@ Resources:
               StringEquals:
                 ec2:ResourceTag/aws:cloudformation:stack-id: !Ref AWS::StackId
       Roles:
-        - !If
-          - CreateIAMRole
-          - !Ref BastionHostRole
-          - !Ref AlternativeIAMRole
+        - !If [CreateIAMRole, !Ref BastionHostRole, !Ref AlternativeIAMRole]
   BastionHostProfile:
-    Type: 'AWS::IAM::InstanceProfile'
+    Type: AWS::IAM::InstanceProfile
     Properties:
       Roles:
-        - !If
-          - CreateIAMRole
-          - !Ref BastionHostRole
-          - !Ref AlternativeIAMRole
-      Path: !If
-          - CreateIAMRole
-          - /
-          - /account-managed/
+        - !If [CreateIAMRole, !Ref BastionHostRole, !Ref AlternativeIAMRole]
+      Path: !If [CreateIAMRole, /, /account-managed/]
   EIP1:
     Type: AWS::EC2::EIP
     Condition: PopulateRemoteCIDR
@@ -635,10 +587,7 @@ Resources:
       AWS::CloudFormation::Authentication:
         S3AccessCreds:
           type: S3
-          roleName: !If
-            - CreateIAMRole
-            - !Ref BastionHostRole
-            - !Ref AlternativeIAMRole
+          roleName: !If [CreateIAMRole, !Ref BastionHostRole, !Ref AlternativeIAMRole]
           buckets:
             - !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       AWS::CloudFormation::Init:
@@ -654,14 +603,8 @@ Resources:
             /tmp/auditing_configure.sh:
               source: !Sub
                 - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/auditing_configure.sh
-                - S3Bucket: !If
-                    - UsingDefaultBucket
-                    - !Sub 'aws-quickstart-${AWS::Region}'
-                    - !Ref 'QSS3BucketName'
-                  S3Region: !If
-                    - UsingDefaultBucket
-                    - !Ref 'AWS::Region'
-                    - !Ref 'QSS3BucketRegion'
+                - S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
+                  S3Region: !If [UsingDefaultBucket, !Ref AWS::Region, !Ref QSS3BucketRegion]
               mode: 000550
               owner: root
               group: root
@@ -672,14 +615,8 @@ Resources:
                 - !Ref AlternativeInitializationScript
                 - !Sub
                   - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh
-                  - S3Bucket: !If
-                      - UsingDefaultBucket
-                      - !Sub 'aws-quickstart-${AWS::Region}'
-                      - !Ref 'QSS3BucketName'
-                    S3Region: !If
-                      - UsingDefaultBucket
-                      - !Ref 'AWS::Region'
-                      - !Ref 'QSS3BucketRegion'
+                  - S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
+                    S3Region: !If [UsingDefaultBucket, !Ref AWS::Region, !Ref QSS3BucketRegion]
               mode: 000550
               owner: root
               group: root
@@ -715,13 +652,7 @@ Resources:
       ImageId: !If
         - UseOSImageOverride
         - !Ref OSImageOverride
-        - !FindInMap
-          - AWSAMIRegionMap
-          - !Ref 'AWS::Region'
-          - !FindInMap
-            - LinuxAMINameMap
-            - !Ref BastionAMIOS
-            - Code
+        - !FindInMap [AWSAMIRegionMap, !Ref AWS::Region, !FindInMap [LinuxAMINameMap, !Ref BastionAMIOS, Code]]
       SecurityGroups:
         - !Ref BastionSecurityGroup
       InstanceType: !Ref BastionInstanceType
@@ -768,26 +699,10 @@ Resources:
             CLOUDWATCHGROUP=${BastionMainLogGroup}
             cfn-init -v --stack '${AWS::StackName}' --resource BastionLaunchConfiguration --region ${AWS::Region} || cfn_fail
             [ $(qs_status) == 0 ] && cfn_success || cfn_fail
-          - EIP1:
-              !If
-              - PopulateRemoteCIDR
-              - !Ref EIP1
-              - 'Null'
-            EIP2:
-              !If
-              - 2BastionCondition
-              - !Ref EIP2
-              - 'Null'
-            EIP3:
-              !If
-              - 3BastionCondition
-              - !Ref EIP3
-              - 'Null'
-            EIP4:
-              !If
-              - 4BastionCondition
-              - !Ref EIP4
-              - 'Null'
+          - EIP1: !If [PopulateRemoteCIDR, !Ref EIP1, 'Null']
+            EIP2: !If [2BastionCondition, !Ref EIP2, 'Null']
+            EIP3: !If [3BastionCondition, !Ref EIP3, 'Null']
+            EIP4: !If [4BastionCondition, !Ref EIP4, 'Null']
   BastionSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -848,10 +763,7 @@ Outputs:
       Name: !Sub ${AWS::StackName}-BastionSecurityGroupID
   BastionHostRole:
     Description: Bastion IAM role name.
-    Value: !If
-      - CreateIAMRole
-      - !Ref BastionHostRole
-      - !Ref AlternativeIAMRole
+    Value: !If [CreateIAMRole, !Ref BastionHostRole, !Ref AlternativeIAMRole]
     Export:
       Name: !Sub ${AWS::StackName}-BastionHostRole
   Postdeployment:
