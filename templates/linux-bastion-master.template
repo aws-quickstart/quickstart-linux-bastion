@@ -83,7 +83,6 @@ Metadata:
         default: Allowed bastion external access CIDR
       VPCCIDR:
         default: VPC CIDR
-  cfn-lint: { config: { ignore_checks: [E9007] } }
 Parameters:
   AvailabilityZones:
     Description: List of Availability Zones to use for the subnets in the VPC.
