@@ -85,9 +85,11 @@ Metadata:
         default: VPC CIDR
 Parameters:
   AvailabilityZones:
-    Description: List of Availability Zones to use for the subnets in the VPC.
     Type: List<AWS::EC2::AvailabilityZone::Name>
+    Description: List of Availability Zones to use for the subnets in the VPC.
   BastionAMIOS:
+    Type: String
+    Description: The Linux distribution for the AMI to be used for the bastion instances.
     AllowedValues:
       - Amazon-Linux2-HVM
       - Amazon-Linux2-HVM-ARM
@@ -95,138 +97,142 @@ Parameters:
       - Ubuntu-Server-20.04-LTS-HVM
       - SUSE-SLES-15-HVM
     Default: Amazon-Linux2-HVM
-    Description: The Linux distribution for the AMI to be used for the bastion instances.
-    Type: String
   BastionHostName:
-    Default: LinuxBastion
+    Type: String
     Description: The value used for the name tag of the bastion host.
-    Type: String
+    Default: LinuxBastion
   BastionBanner:
-    Default: ''
+    Type: String
     Description: Banner text to display upon login.
-    Type: String
+    Default: ''
   BastionTenancy:
-    Description: Bastion VPC tenancy (dedicated or default).
     Type: String
-    Default: default
+    Description: Bastion VPC tenancy (dedicated or default).
     AllowedValues:
       - dedicated
       - default
+    Default: default
   BastionInstanceType:
-    Description: Amazon EC2 instance type for the bastion instances.
     Type: String
+    Description: Amazon EC2 instance type for the bastion instances.
     Default: t2.micro
   EnableBanner:
+    Type: String
+    Description: Choose *true* to display a banner when connecting via SSH to the bastion.
     AllowedValues:
       - 'true'
       - 'false'
     Default: 'false'
-    Description: Choose *true* to display a banner when connecting via SSH to the bastion.
-    Type: String
   EnableTCPForwarding:
     Type: String
     Description: To enable TCP forwarding, choose *true*.
-    Default: 'false'
     AllowedValues:
       - 'true'
       - 'false'
+    Default: 'false'
   EnableX11Forwarding:
     Type: String
     Description: To enable X11 forwarding, choose *true*.
-    Default: 'false'
     AllowedValues:
       - 'true'
       - 'false'
+    Default: 'false'
   KeyPairName:
-    Description: Name of an existing public/private key pair, which allows you to securely connect to your instance
-      after it launches. If left empty, AWS Systems Manager Session Manager can still be used to connect to the instance.
     Type: String
+    Description:
+      Name of an existing public/private key pair, which allows you to securely connect to your instance
+      after it launches. If left empty, AWS Systems Manager Session Manager can still be used to connect to the instance.
     Default: ''
   NumBastionHosts:
+    Type: String
+    Description: The number of bastion hosts to create. The maximum number is four.
     AllowedValues:
       - 1
       - 2
       - 3
       - 4
     Default: 1
-    Description: The number of bastion hosts to create. The maximum number is four.
   PrivateSubnet1CIDR:
+    Type: String
+    Description: CIDR block for private subnet 1, located in Availability Zone 1.
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
     Default: 10.0.0.0/19
-    Description: CIDR block for private subnet 1, located in Availability Zone 1.
-    Type: String
   PrivateSubnet2CIDR:
+    Type: String
+    Description: CIDR block for private subnet 2, located in Availability Zone 2.
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
     Default: 10.0.32.0/19
-    Description: CIDR block for private subnet 2, located in Availability Zone 2.
-    Type: String
   PublicSubnet1CIDR:
+    Type: String
+    Description: CIDR block for the public DMZ subnet 1, located in Availability Zone 1.
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
     Default: 10.0.128.0/20
-    Description: CIDR block for the public DMZ subnet 1, located in Availability Zone 1.
-    Type: String
   PublicSubnet2CIDR:
+    Type: String
+    Description: CIDR block for the public DMZ subnet 2, located in Availability Zone 2.
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
     Default: 10.0.144.0/20
-    Description: CIDR block for the public DMZ subnet 2, located in Availability Zone 2.
-    Type: String
   VPCTenancy:
+    Type: String
+    Description: The allowed tenancy of instances launched into the VPC.
     AllowedValues:
       - default
       - dedicated
     Default: default
-    Description: The allowed tenancy of instances launched into the VPC.
-    Type: String
   QSS3BucketName:
-    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
-    ConstraintDescription: The Quick Start bucket name can include numbers, lowercase
-      letters, uppercase letters, and hyphens (-). It cannot start or end with a
-      hyphen (-).
-    Default: aws-quickstart
+    Type: String
     Description: Name of the S3 bucket for your copy of the Quick Start assets.
       Keep the default name unless you are customizing the template.
       Changing the name updates code references to point to a new Quick
       Start location. This name can include numbers, lowercase letters,
       uppercase letters, and hyphens, but do not start or end with a hyphen (-).
       See https://aws-quickstart.github.io/option1.html.
-    Type: String
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription:
+      The Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a
+      hyphen (-).
+    Default: aws-quickstart
   QSS3KeyPrefix:
-    AllowedPattern: ^([0-9a-zA-Z-.]+/)*$
-    ConstraintDescription: The Quick Start S3 key prefix can include numbers, lowercase letters,
-      uppercase letters, hyphens (-), and forward slashes (/).
-    Default: quickstart-linux-bastion/
-    Description: S3 key prefix that is used to simulate a directory for your copy of the
+    Type: String
+    Description:
+      S3 key prefix that is used to simulate a directory for your copy of the
       Quick Start assets. Keep the default prefix unless you are customizing
       the template. Changing this prefix updates code references to point to
       a new Quick Start location. This prefix can include numbers, lowercase
       letters, uppercase letters, hyphens (-), and forward slashes (/). End with a forward slash.
       See https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html
       and https://aws-quickstart.github.io/option1.html.
-    Type: String
+    AllowedPattern: ^([0-9a-zA-Z-.]+/)*$
+    ConstraintDescription:
+      The Quick Start S3 key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), and forward slashes (/).
+    Default: quickstart-linux-bastion/
   QSS3BucketRegion:
-    Default: 'us-east-1'
-    Description: 'AWS Region where the Quick Start S3 bucket (QSS3BucketName) is
-    hosted. Keep the default Region unless you are customizing the template.
-    Changing this Region updates code references to point to a new Quick Start location.
-    When using your own bucket, specify the Region.
-    See https://aws-quickstart.github.io/option1.html.'
     Type: String
+    Description: >-
+      AWS Region where the Quick Start S3 bucket (QSS3BucketName) is
+      hosted. Keep the default Region unless you are customizing the template.
+      Changing this Region updates code references to point to a new Quick Start location.
+      When using your own bucket, specify the Region.
+      See https://aws-quickstart.github.io/option1.html.
+    Default: us-east-1
   RemoteAccessCIDR:
+    Type: String
+    Description: Allowed CIDR block for external SSH access to the bastions.
     AllowedPattern: ^disabled-onlyssmaccess$|^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: CIDR block parameter must be disabled-onlyssmaccess or in the form x.x.x.x/x
-    Description: Allowed CIDR block for external SSH access to the bastions
-    Type: String
     Default: disabled-onlyssmaccess
   VPCCIDR:
+    Type: String
+    Description: CIDR block for the VPC.
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
     Default: 10.0.0.0/16
-    Description: CIDR block for the VPC.
-    Type: String
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, aws-quickstart]
 Resources:

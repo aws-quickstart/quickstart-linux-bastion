@@ -100,6 +100,8 @@ Metadata:
         default: Role path
 Parameters:
   BastionAMIOS:
+    Type: String
+    Description: The Linux distribution for the AMI to be used for the bastion instances.
     AllowedValues:
       - Amazon-Linux2-HVM
       - Amazon-Linux2-HVM-ARM
@@ -107,139 +109,142 @@ Parameters:
       - Ubuntu-Server-20.04-LTS-HVM
       - SUSE-SLES-15-HVM
     Default: Amazon-Linux2-HVM
-    Description: The Linux distribution for the AMI to be used for the bastion instances.
-    Type: String
   BastionHostName:
-    Default: LinuxBastion
+    Type: String
     Description: The value used for the name tag of the bastion host.
-    Type: String
+    Default: LinuxBastion
   BastionBanner:
-    Default: ''
+    Type: String
     Description: Banner text to display upon login.
-    Type: String
+    Default: ''
   BastionTenancy:
-    Description: Bastion VPC tenancy (dedicated or default).
     Type: String
-    Default: default
+    Description: Bastion VPC tenancy (dedicated or default).
     AllowedValues:
       - dedicated
       - default
+    Default: default
   BastionInstanceType:
-    Default: t2.micro
-    Description: Amazon EC2 instance type for the bastion instances.
     Type: String
+    Description: Amazon EC2 instance type for the bastion instances.
+    Default: t2.micro
   EnableBanner:
+    Type: String
+    Description: Choose *true* to display a banner when connecting via SSH to the bastion.
     AllowedValues:
       - 'true'
       - 'false'
     Default: 'false'
-    Description: Choose *true* to display a banner when connecting via SSH to the bastion.
-    Type: String
   EnableTCPForwarding:
     Type: String
     Description: To enable TCP forwarding, choose *true*.
-    Default: 'false'
     AllowedValues:
       - 'true'
       - 'false'
+    Default: 'false'
   EnableX11Forwarding:
     Type: String
     Description: To enable X11 forwarding, choose *true*.
-    Default: 'false'
     AllowedValues:
       - 'true'
       - 'false'
+    Default: 'false'
   KeyPairName:
-    Description: Name of an existing public/private key pair. If you do not have one in this AWS Region,
-      please create it before continuing. If left empty, AWS Systems Manager Session Manager can still be used to connect to the instance.
     Type: String
+    Description:
+      Name of an existing public/private key pair. If you do not have one in this AWS Region,
+      please create it before continuing. If left empty, AWS Systems Manager Session Manager can still be used to connect to the instance.
     Default: ''
   NumBastionHosts:
+    Type: String
+    Description: The number of bastion hosts to create. The maximum number is four.
     AllowedValues:
       - 1
       - 2
       - 3
       - 4
     Default: 1
-    Description: The number of bastion hosts to create. The maximum number is four.
-    Type: String
   PublicSubnet1ID:
+    Type: AWS::EC2::Subnet::Id
     Description: ID of the public subnet 1 that you want to provision the first bastion into (e.g., subnet-a0246dcd).
-    Type: AWS::EC2::Subnet::Id
   PublicSubnet2ID:
-    Description: ID of the public subnet 2 that you want to provision the second bastion into (e.g., subnet-e3246d8e).
     Type: AWS::EC2::Subnet::Id
+    Description: ID of the public subnet 2 that you want to provision the second bastion into (e.g., subnet-e3246d8e).
   QSS3BucketName:
-    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
-    ConstraintDescription: The Quick Start bucket name can include numbers, lowercase
-      letters, uppercase letters, and hyphens (-). It cannot start or end with a
-      hyphen (-).
-    Default: aws-quickstart
+    Type: String
     Description: Name of the S3 bucket for your copy of the Quick Start assets.
       Keep the default name unless you are customizing the template.
       Changing the name updates code references to point to a new Quick
       Start location. This name can include numbers, lowercase letters,
       uppercase letters, and hyphens, but do not start or end with a hyphen (-).
       See https://aws-quickstart.github.io/option1.html.
-    Type: String
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription:
+      The Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a
+      hyphen (-).
+    Default: aws-quickstart
   QSS3BucketRegion:
-    Default: us-east-1
-    Description: The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.
     Type: String
+    Description: The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.
+    Default: us-east-1
   QSS3KeyPrefix:
-    AllowedPattern: ^([0-9a-zA-Z-.]+/)*$
-    ConstraintDescription: The Quick Start S3 key prefix can include numbers, lowercase letters,
-      uppercase letters, hyphens (-), and forward slashes (/).
-    Default: quickstart-linux-bastion/
-    Description: S3 key prefix that is used to simulate a directory for your copy of the
+    Type: String
+    Description:
+      S3 key prefix that is used to simulate a directory for your copy of the
       Quick Start assets. Keep the default prefix unless you are customizing
       the template. Changing this prefix updates code references to point to
       a new Quick Start location. This prefix can include numbers, lowercase
       letters, uppercase letters, hyphens (-), and forward slashes (/). End with a forward slash.
       See https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html
       and https://aws-quickstart.github.io/option1.html.
-    Type: String
+    AllowedPattern: ^([0-9a-zA-Z-.]+/)*$
+    ConstraintDescription:
+      The Quick Start S3 key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), and forward slashes (/).
+    Default: quickstart-linux-bastion/
   RemoteAccessCIDR:
+    Type: String
+    Description: Allowed CIDR block for external SSH access to the bastions.
     AllowedPattern: ^disabled-onlyssmaccess$|^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: CIDR block parameter must be disabled-onlyssmaccess or in the form x.x.x.x/x
-    Description: Allowed CIDR block for external SSH access to the bastions.
-    Type: String
     Default: disabled-onlyssmaccess
   VPCID:
-    Description: ID of the VPC (e.g., vpc-0343606e).
     Type: AWS::EC2::VPC::Id
+    Description: ID of the VPC (e.g., vpc-0343606e).
   AlternativeInitializationScript:
+    Type: String
+    Description: An alternative initialization script to run during setup.
     AllowedPattern: ^https.*|^$
     ConstraintDescription: URL must begin with https.
-    Description: An alternative initialization script to run during setup.
     Default: ''
-    Type: String
   OSImageOverride:
-    Description: The Region-specific image to use for the instance.
     Type: String
+    Description: The Region-specific image to use for the instance.
     Default: ''
   AlternativeIAMRole:
-    Description: An existing IAM role name to attach to the bastion. If left blank,
+    Type: String
+    Description:
+      An existing IAM role name to attach to the bastion. If left blank,
       a new role will be created.
     Default: ''
-    Type: String
   EnvironmentVariables:
+    Type: String
     Description: A comma-separated list of environment variables for use in
       bootstrapping. Variables must be in the format `key=value`. `Value` cannot
       contain commas.
-    Type: String
     Default: ''
   RootVolumeSize:
-    Description: The size in GB for the root EBS volume.
     Type: Number
+    Description: The size in GB for the root EBS volume.
     Default: 10
   PermissionsBoundaryArn:
-    Description: Will be attached to all created IAM roles to satisfy security requirements.
     Type: String
+    Description: Will be attached to all created IAM roles to satisfy security requirements.
     Default: ''
   RolePath:
-    Description: Will be attached to all created IAM roles to satisfy security requirements.
     Type: String
+    Description: Will be attached to all created IAM roles to satisfy security requirements.
     Default: ''
 Rules:
   SubnetsInVPC:

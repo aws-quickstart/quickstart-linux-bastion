@@ -33,12 +33,12 @@ project:
   parameters:
     AvailabilityZones: $[taskcat_getaz_2]
     KeyPairName: $[taskcat_getkeypair]
+    VPCCIDR: 10.0.0.0/16
     PrivateSubnet1CIDR: 10.0.0.0/19
     PrivateSubnet2CIDR: 10.0.32.0/19
     PublicSubnet1CIDR: 10.0.128.0/20
     PublicSubnet2CIDR: 10.0.144.0/20
     QSS3BucketName: $[taskcat_autobucket]
-    VPCCIDR: 10.0.0.0/16
     QSS3BucketRegion: $[taskcat_current_region]
 tests:
   amznlinux2hvm:
