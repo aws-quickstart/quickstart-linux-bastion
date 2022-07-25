@@ -234,11 +234,11 @@ Parameters:
     Type: Number
     Default: 10
   PermissionsBoundaryArn:
-    Description: Will be attached to all created IAM Roles to satisfy security requirements
+    Description: Will be attached to all created IAM roles to satisfy security requirements.
     Type: String
     Default: ''
   RolePath:
-    Description: Will be attached to all created IAM Roles to satisfy security requirements
+    Description: Will be attached to all created IAM roles to satisfy security requirements.
     Type: String
     Default: ''
 Rules:
