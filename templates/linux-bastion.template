@@ -702,11 +702,11 @@ Resources:
               command: !Sub
                 - ./bastion_bootstrap.sh --banner ${BannerUrl} --enable ${EnableBanner} --tcp-forwarding ${EnableTCPForwarding} --x11-forwarding ${EnableX11Forwarding}
                 - BannerUrl: !If
-                  - DefaultBanner
-                  - !Sub
-                    - s3://${S3Bucket}/${QSS3KeyPrefix}scripts/banner_message.txt
-                    - S3Bucket: !If [ UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref 'QSS3BucketName' ]
-                  - !Ref BastionBanner
+                    - DefaultBanner
+                    - !Sub
+                      - s3://${S3Bucket}/${QSS3KeyPrefix}scripts/banner_message.txt
+                      - S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
+                    - !Ref BastionBanner
     Properties:
       AssociatePublicIpAddress: true
       PlacementTenancy: !Ref BastionTenancy
