@@ -464,6 +464,8 @@ Conditions:
 Resources:
   BastionMainLogGroup:
     Type: AWS::Logs::LogGroup
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Delete
   SSHMetricFilter:
     Type: AWS::Logs::MetricFilter
     Properties:
