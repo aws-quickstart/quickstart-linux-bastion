@@ -126,29 +126,6 @@ Parameters:
       - dedicated
       - default
   BastionInstanceType:
-    AllowedValues:
-      - t2.nano
-      - t2.micro
-      - t2.small
-      - t2.medium
-      - t2.large
-      - t3.micro
-      - t3.small
-      - t3.medium
-      - t3.large
-      - t3.xlarge
-      - t3.2xlarge
-      - t4g.nano
-      - t4g.micro
-      - t4g.small
-      - t4g.medium
-      - t4g.large
-      - t4g.xlarge
-      - t4g.2xlarge
-      - m4.large
-      - m4.xlarge
-      - m4.2xlarge
-      - m4.4xlarge
     Default: t2.micro
     Description: Amazon EC2 instance type for the bastion instances.
     Type: String
@@ -224,10 +201,11 @@ Parameters:
       and https://aws-quickstart.github.io/option1.html.
     Type: String
   RemoteAccessCIDR:
-    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x
+    AllowedPattern: ^disabled-onlyssmaccess$|^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    ConstraintDescription: CIDR block parameter must be disabled-onlyssmaccess or in the form x.x.x.x/x
     Description: Allowed CIDR block for external SSH access to the bastions.
     Type: String
+    Default: disabled-onlyssmaccess
   VPCID:
     Description: ID of the VPC (e.g., vpc-0343606e).
     Type: 'AWS::EC2::VPC::Id'
@@ -284,6 +262,10 @@ Rules:
             - t4g.small
             - t4g.2xlarge
             - t4g.xlarge
+            - m6g.medium
+            - m6g.large
+            - m6g.xlarge
+            - m6g.2xlarge
           - !Ref 'BastionInstanceType'
         AssertDescription: This instance type must use BastionAMIOS type of Amazon-Linux2-HVM-ARM.
     RuleCondition: !Equals
@@ -469,20 +451,33 @@ Mappings:
 Conditions:
   RolePathProvided: !Not [!Equals ["", !Ref RolePath]]
   PermissionsBoundaryProvided: !Not [!Equals ["", !Ref PermissionsBoundaryArn]]
-  2BastionCondition: !Or
+  2BastionConditionHost: !Or
     - !Equals
       - !Ref NumBastionHosts
       - '2'
     - !Condition 3BastionCondition
     - !Condition 4BastionCondition
-  3BastionCondition: !Or
+  3BastionConditionHost: !Or
     - !Equals
       - !Ref NumBastionHosts
       - '3'
     - !Condition 4BastionCondition
-  4BastionCondition: !Equals
+  4BastionConditionHost: !Equals
     - !Ref NumBastionHosts
     - '4'
+  2BastionCondition: !And
+    - !Condition PopulateRemoteCIDR
+    - !Condition 2BastionConditionHost
+  3BastionCondition: !And
+    - !Condition PopulateRemoteCIDR
+    - !Condition 3BastionConditionHost
+  4BastionCondition: !And
+    - !Condition PopulateRemoteCIDR
+    - !Condition 4BastionConditionHost
+  PopulateRemoteCIDR: !Not
+    - !Equals
+      - !Ref RemoteAccessCIDR
+      - 'disabled-onlyssmaccess'
   UseAlternativeInitialization: !Not
     - !Equals
       - !Ref AlternativeInitializationScript
@@ -592,6 +587,7 @@ Resources:
           - /account-managed/
   EIP1:
     Type: 'AWS::EC2::EIP'
+    Condition: PopulateRemoteCIDR
     Properties:
       Domain: vpc
   EIP2:
@@ -772,7 +768,12 @@ Resources:
             CLOUDWATCHGROUP=${BastionMainLogGroup}
             cfn-init -v --stack '${AWS::StackName}' --resource BastionLaunchConfiguration --region ${AWS::Region} || cfn_fail
             [ $(qs_status) == 0 ] && cfn_success || cfn_fail
-          - EIP2:
+          - EIP1:
+              !If
+              - PopulateRemoteCIDR
+              - !Ref EIP1
+              - 'Null'
+            EIP2:
               !If
               - 2BastionCondition
               - !Ref EIP2
@@ -793,14 +794,18 @@ Resources:
       GroupDescription: Enables SSH Access to Bastion Hosts
       VpcId: !Ref VPCID
       SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: !Ref RemoteAccessCIDR
-        - IpProtocol: icmp
-          FromPort: -1
-          ToPort: -1
-          CidrIp: !Ref RemoteAccessCIDR
+        !If
+          - PopulateRemoteCIDR
+          -
+            - IpProtocol: tcp
+              FromPort: 22
+              ToPort: 22
+              CidrIp: !Ref RemoteAccessCIDR
+            - IpProtocol: icmp
+              FromPort: -1
+              ToPort: -1
+              CidrIp: !Ref RemoteAccessCIDR
+          - !Ref "AWS::NoValue"
 Outputs:
   BastionAutoScalingGroup:
     Description: Auto Scaling group reference ID.
@@ -808,6 +813,7 @@ Outputs:
     Export:
       Name: !Sub '${AWS::StackName}-BastionAutoScalingGroup'
   EIP1:
+    Condition: PopulateRemoteCIDR
     Description: Elastic IP 1 for bastion.
     Value: !Ref EIP1
     Export:

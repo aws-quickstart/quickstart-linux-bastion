@@ -39,7 +39,6 @@ project:
     PublicSubnet1CIDR: 10.0.128.0/20
     PublicSubnet2CIDR: 10.0.144.0/20
     QSS3BucketName: $[taskcat_autobucket]
-    RemoteAccessCIDR: 10.0.0.0/16
     VPCCIDR: 10.0.0.0/16
     QSS3BucketRegion: $[taskcat_current_region]
 tests:
@@ -47,6 +46,7 @@ tests:
     parameters:
       BastionAMIOS: Amazon-Linux2-HVM
       BastionInstanceType: t3.medium
+      RemoteAccessCIDR: 10.0.0.0/16
     regions:
       - ap-northeast-1
       - ap-northeast-2
@@ -73,6 +73,7 @@ tests:
     parameters:
       BastionAMIOS: CentOS-7-HVM
       BastionInstanceType: t3.medium
+      RemoteAccessCIDR: 10.0.0.0/16
     regions:
       - ap-south-1
       - ca-central-1
@@ -84,6 +85,7 @@ tests:
     parameters:
       BastionAMIOS: SUSE-SLES-15-HVM
       BastionInstanceType: t3.medium
+      RemoteAccessCIDR: 10.0.0.0/16
     regions:
       - ap-south-1
       - ca-central-1
@@ -95,6 +97,7 @@ tests:
     parameters:
       BastionAMIOS: Ubuntu-Server-20.04-LTS-HVM
       BastionInstanceType: t3.medium
+      RemoteAccessCIDR: 10.0.0.0/16
     regions:
       - ap-south-1
       - ca-central-1
@@ -106,6 +109,7 @@ tests:
     parameters:
       BastionAMIOS: Amazon-Linux2-HVM-ARM
       BastionInstanceType: t4g.nano
+      RemoteAccessCIDR: 10.0.0.0/16
     regions:
       - ap-south-1
       - ca-central-1
@@ -113,3 +117,25 @@ tests:
       - eu-north-1
       - eu-west-1
       - us-east-1
+  onlyssmaccess:
+    parameters:
+      BastionAMIOS: Amazon-Linux2-HVM-ARM
+      BastionInstanceType: t4g.nano
+      RemoteAccessCIDR: 'disabled-onlyssmaccess'
+      NumBastionHosts: 2
+    regions:
+      - ap-south-1
+      - ca-central-1
+      - eu-central-1
+      - eu-north-1
+      - eu-west-1
+      - us-east-1
+      - us-east-2
+  multiplehosts:
+    parameters:
+      BastionAMIOS: Amazon-Linux2-HVM-ARM
+      BastionInstanceType: t4g.nano
+      RemoteAccessCIDR: 10.0.0.0/16
+      NumBastionHosts: 2
+    regions:
+      - eu-west-1
