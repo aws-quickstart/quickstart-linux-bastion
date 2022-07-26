@@ -32,7 +32,6 @@ project:
   template: templates/linux-bastion-master.template
   parameters:
     AvailabilityZones: $[taskcat_getaz_2]
-    #BastionInstanceType: t3.medium
     KeyPairName: $[taskcat_getkeypair]
     PrivateSubnet1CIDR: 10.0.0.0/19
     PrivateSubnet2CIDR: 10.0.32.0/19
