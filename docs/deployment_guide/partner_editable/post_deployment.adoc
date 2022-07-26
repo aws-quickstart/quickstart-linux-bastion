@@ -1,3 +1,73 @@
 // Include any postdeployment steps here, such as steps necessary to test that the deployment was successful. If there are no postdeployment steps, leave this file empty.
 
 == Postdeployment steps
+
+Log in to the bastion host.
+Use one of the following user names, depending on your choice of Linux distribution:
+
+* Amazon Linux / SUSE Linux Enterprise Server (SLES): *ec2-user*
+* CentOS: *centos*
+* Ubuntu: *ubuntu*
+
+The Linux distribution is specified in the *Bastion AMI operating system* parameter when you deploy the templates.
+
+=== Enabling and customizing the Linux bastion host banner
+:xrefstyle: short
+This Quick Start provides the default banner illustrated in <<banner>> for the Linux bastion hosts.
+The banner is disabled by default.
+To enable it, set the *Bastion banner* parameter to *true* during deployment.
+
+[#banner]
+.Customizing the Linux bastion host banner
+image::../docs/deployment_guide/images/banner.png[banner]
+
+To customize the banner, create an ASCII text file with your own banner content.
+Then upload it to an S3 bucket or other publicly accessible location, and verify that it is accessible from the host.
+
+=== Bastion logging
+The bastion hosts deployed by this Quick Start provide a command logger in the
+`/var/log/audit/audit.log` file.
+This log file contains the date, SSH client connection IP address, user name, working directory, and the commands issued.
+
+For added security, the contents of the `/var/log/audit/audit.log` file is also stored in a CloudWatch Logs log group in the AWS Cloud, and remains available in case the bastion hosts fail.
+
+The log includes a history of the commands that are run when you log in. <<logging>> shows an example.
+
+:xrefstyle: short
+[#logging]
+.Bastion logging
+image::../docs/deployment_guide/images/logging.png[Logging,width=100%,height=100%]
+
+To notify your users that all their commands will be monitored and logged, we recommend that you enable the bastion host banner.
+For more information, see link:#_enabling_and_customizing_the_linux_bastion_host_banner[Enabling and Customizing the Linux bastion host banner].
+The default banner text includes the alert shown in <<banner>>, which you can customize.
+
+The `bastion.log` file is an immutable file that cannot be easily deleted or tampered with.
+However, in case this happens, there is a shadow file with a copy of `bastion.log` located in `/var/log/audit/audit.log`.
+And, the Quick Start also stores the contents of `bastion.log` remotely using the CloudWatch Logs service.
+Log files can be found under CloudWatch Logs using the instance ID as the log stream name.
+
+=== Remote access
+
+This Quick Start provisions one Linux bastion host in each Availability Zone with a single security group as a virtual firewall.
+This security group is required for remote access from the Internet if a remote access CIDR block was configured for the deployment.
+The security group is configured as follows:
+
+==== Inbound
+
+|===
+|Source|Protocol|Ports
+
+|Remote access CIDR|TCP|22
+|Remote access CIDR|ICMP|N/A
+|===
+
+==== Outbound
+
+|===
+|Destination|Protocol|Ports
+
+|0.0.0.0/0 |All|All
+|===
+
+For more information, see https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Security.html[Internetwork traffic privacy in Amazon VPC^].
