@@ -1,14 +1,14 @@
-:quickstart-project-name: quickstart-repo-name
+:quickstart-project-name: quickstart-linux-bastion
 :quickstart-github-org: aws-quickstart
-:partner-product-name: Full Product Name
-:partner-product-short-name: Product Name
-:partner-company-name: Example Company Name, Ltd.
-:doc-month: January
+:partner-product-name: Linux Bastion Hosts
+:partner-product-short-name: Linux bastion hosts
+// :partner-company-name: Example Company Name, Ltd.
+:doc-month: July
 :doc-year: 2022
-:partner-contributors: John Smith, {partner-company-name}
+// :partner-contributors: John Smith, {partner-company-name}
 // :other-contributors: Akua Mansa, Trek10
-:aws-contributors: Janine Singh, AWS IoT Partner team
-:aws-ia-contributors: Toni Jones, AWS Integration & Automation team
-:deployment_time: 15 minutes
+:aws-contributors: Santiago Cardenas, AWS Serverless Partners
+:aws-ia-contributors: Tony Vattathil, Ian Hill, and Troy Lindsay, AWS Integration & Automation team
+:deployment_time: 5 minutes
 :default_deployment_region: us-east-1
 // :private_repo:
