@@ -993,7 +993,7 @@ This gateway is used by the bastion hosts to send and receive traffic.*</p>
 <div class="ulist">
 <ul>
 <li>
-<p>As of <a href="https://github.com/aws-quickstart/quickstart-linux-bastion/pull/142">July 25th, 2022</a>, the Linux bastion host will not have a public IP address assigned for remote access and should be accessed via AWS Systems Manager or alternate means.</p>
+<p>As of <a href="https://github.com/aws-quickstart/quickstart-linux-bastion/pull/142">July 25th, 2022</a>, the Linux bastion host will not have a public IP address assigned for remote access by default, and should be accessed via <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/session-manager.html">AWS Systems Manager</a> or alternate means.</p>
 </li>
 <li>
 <p>If a remote access CIDR block is configured for the deployment, an Elastic IP address is assigned and inbound Secure Shell (SSH) access is permitted.</p>
