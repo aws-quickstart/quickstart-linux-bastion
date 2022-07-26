@@ -10,5 +10,5 @@
 :aws-contributors: Santiago Cardenas, AWS Serverless Partners
 :aws-ia-contributors: Tony Vattathil, Ian Hill, and Troy Lindsay, AWS Integration & Automation team
 :deployment_time: 5 minutes
-:default_deployment_region: us-east-1
+:default_deployment_region: us-west-2
 // :private_repo:
