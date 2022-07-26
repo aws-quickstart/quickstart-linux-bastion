@@ -98,7 +98,6 @@ Metadata:
         default: Permissions boundary ARN
       RolePath:
         default: Role path
-  cfn-lint: { config: { ignore_checks: [E9007] } }
 Parameters:
   BastionAMIOS:
     AllowedValues:
