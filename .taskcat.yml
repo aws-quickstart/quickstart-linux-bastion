@@ -32,14 +32,13 @@ project:
   template: templates/linux-bastion-master.template
   parameters:
     AvailabilityZones: $[taskcat_getaz_2]
-    #BastionInstanceType: t3.medium
     KeyPairName: $[taskcat_getkeypair]
+    VPCCIDR: 10.0.0.0/16
     PrivateSubnet1CIDR: 10.0.0.0/19
     PrivateSubnet2CIDR: 10.0.32.0/19
     PublicSubnet1CIDR: 10.0.128.0/20
     PublicSubnet2CIDR: 10.0.144.0/20
     QSS3BucketName: $[taskcat_autobucket]
-    VPCCIDR: 10.0.0.0/16
     QSS3BucketRegion: $[taskcat_current_region]
 tests:
   amznlinux2hvm:
@@ -63,7 +62,7 @@ tests:
       - sa-east-1
       - us-east-1
       - us-east-2
-        #- us-west-1
+      #- us-west-1
       - us-west-2
       #- cn-north-1
       #- cn-northwest-1
@@ -121,7 +120,7 @@ tests:
     parameters:
       BastionAMIOS: Amazon-Linux2-HVM-ARM
       BastionInstanceType: t4g.nano
-      RemoteAccessCIDR: 'disabled-onlyssmaccess'
+      RemoteAccessCIDR: disabled-onlyssmaccess
       NumBastionHosts: 2
     regions:
       - ap-south-1
