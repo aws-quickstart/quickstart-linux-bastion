@@ -5,7 +5,7 @@ Metadata:
     EntrypointName: Launch into an existing VPC
     Order: 2
   LICENSE: Apache License, Version 2.0
-  'AWS::CloudFormation::Interface':
+  AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
           default: Network configuration
@@ -111,11 +111,11 @@ Parameters:
     Description: The Linux distribution for the AMI to be used for the bastion instances.
     Type: String
   BastionHostName:
-    Default: 'LinuxBastion'
+    Default: LinuxBastion
     Description: The value used for the name tag of the bastion host.
     Type: String
   BastionBanner:
-    Default: ""
+    Default: ''
     Description: Banner text to display upon login.
     Type: String
   BastionTenancy:
@@ -154,22 +154,22 @@ Parameters:
     Description: Name of an existing public/private key pair. If you do not have one in this AWS Region,
       please create it before continuing. If left empty, AWS Systems Manager Session Manager can still be used to connect to the instance.
     Type: String
-    Default: ""
+    Default: ''
   NumBastionHosts:
     AllowedValues:
-      - '1'
-      - '2'
-      - '3'
-      - '4'
-    Default: '1'
+      - 1
+      - 2
+      - 3
+      - 4
+    Default: 1
     Description: The number of bastion hosts to create. The maximum number is four.
     Type: String
   PublicSubnet1ID:
     Description: ID of the public subnet 1 that you want to provision the first bastion into (e.g., subnet-a0246dcd).
-    Type: 'AWS::EC2::Subnet::Id'
+    Type: AWS::EC2::Subnet::Id
   PublicSubnet2ID:
     Description: ID of the public subnet 2 that you want to provision the second bastion into (e.g., subnet-e3246d8e).
-    Type: 'AWS::EC2::Subnet::Id'
+    Type: AWS::EC2::Subnet::Id
   QSS3BucketName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     ConstraintDescription: The Quick Start bucket name can include numbers, lowercase
@@ -184,7 +184,7 @@ Parameters:
       See https://aws-quickstart.github.io/option1.html.
     Type: String
   QSS3BucketRegion:
-    Default: 'us-east-1'
+    Default: us-east-1
     Description: The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.
     Type: String
   QSS3KeyPrefix:
@@ -208,7 +208,7 @@ Parameters:
     Default: disabled-onlyssmaccess
   VPCID:
     Description: ID of the VPC (e.g., vpc-0343606e).
-    Type: 'AWS::EC2::VPC::Id'
+    Type: AWS::EC2::VPC::Id
   AlternativeInitializationScript:
     AllowedPattern: ^https.*|^$
     ConstraintDescription: URL must begin with https.
@@ -233,7 +233,7 @@ Parameters:
   RootVolumeSize:
     Description: The size in GB for the root EBS volume.
     Type: Number
-    Default: '10'
+    Default: 10
   PermissionsBoundaryArn:
     Description: Will be attached to all created IAM Roles to satisfy security requirements
     Type: String
@@ -246,11 +246,11 @@ Rules:
   SubnetsInVPC:
     Assertions:
       - Assert:
-          'Fn::EachMemberIn':
+          Fn::EachMemberIn:
             - 'Fn::ValueOfAll':
                 - 'AWS::EC2::Subnet::Id'
                 - VpcId
-            - 'Fn::RefAll': 'AWS::EC2::VPC::Id'
+            - Fn::RefAll: AWS::EC2::VPC::Id
         AssertDescription: All subnets must exist in the VPC.
   ArmInstance:
     Assertions:
@@ -266,7 +266,7 @@ Rules:
             - m6g.large
             - m6g.xlarge
             - m6g.2xlarge
-          - !Ref 'BastionInstanceType'
+          - !Ref BastionInstanceType
         AssertDescription: This instance type must use BastionAMIOS type of Amazon-Linux2-HVM-ARM.
     RuleCondition: !Equals
       - !Ref BastionAMIOS
@@ -499,19 +499,19 @@ Conditions:
       - ''
 Resources:
   BastionMainLogGroup:
-    Type: 'AWS::Logs::LogGroup'
+    Type: AWS::Logs::LogGroup
   SSHMetricFilter:
-    Type: 'AWS::Logs::MetricFilter'
+    Type: AWS::Logs::MetricFilter
     Properties:
       LogGroupName: !Ref BastionMainLogGroup
       FilterPattern: ON FROM USER PWD
       MetricTransformations:
         - MetricName: SSHCommandCount
-          MetricValue: '1'
-          MetricNamespace: !Sub "AWSQuickStart/${AWS::StackName}"
+          MetricValue: 1
+          MetricNamespace: !Sub AWSQuickStart/${AWS::StackName}
   BastionHostRole:
     Condition: CreateIAMRole
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       Path: !If [RolePathProvided, !Ref RolePath, !Ref AWS::NoValue]
       PermissionsBoundary:
@@ -523,17 +523,17 @@ Resources:
       AssumeRolePolicyDocument:
         Statement:
           - Action:
-              - 'sts:AssumeRole'
+              - sts:AssumeRole
             Principal:
               Service:
-                - !Sub 'ec2.${AWS::URLSuffix}'
+                - !Sub ec2.${AWS::URLSuffix}
             Effect: Allow
         Version: 2012-10-17
       ManagedPolicyArns:
-        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore'
-        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy'
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy
   BastionHostPolicy:
-    Type: 'AWS::IAM::Policy'
+    Type: AWS::IAM::Policy
     Condition: CreateIAMRole
     Properties:
       PolicyName: BastionPolicy
@@ -541,29 +541,29 @@ Resources:
         Version: 2012-10-17
         Statement:
           - Action:
-              - 's3:GetObject'
+              - s3:GetObject
             Resource: !Sub
               - arn:${AWS::Partition}:s3:::${S3Bucket}/${QSS3KeyPrefix}*
               - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
             Effect: Allow
           - Action:
-              - 'logs:CreateLogStream'
-              - 'logs:GetLogEvents'
-              - 'logs:PutLogEvents'
-              - 'logs:DescribeLogGroups'
-              - 'logs:DescribeLogStreams'
-              - 'logs:PutRetentionPolicy'
-              - 'logs:PutMetricFilter'
-              - 'logs:CreateLogGroup'
-            Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*"
+              - logs:CreateLogStream
+              - logs:GetLogEvents
+              - logs:PutLogEvents
+              - logs:DescribeLogGroups
+              - logs:DescribeLogStreams
+              - logs:PutRetentionPolicy
+              - logs:PutMetricFilter
+              - logs:CreateLogGroup
+            Resource: !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*
             Effect: Allow
           - Action:
-              - 'ec2:DescribeAddresses'
+              - ec2:DescribeAddresses
             Resource: '*'
             Effect: Allow
           - Effect: Allow
             Action:
-              - 'ec2:AssociateAddress'
+              - ec2:AssociateAddress
             Resource: '*'
             Condition:
               StringEquals:
@@ -574,7 +574,7 @@ Resources:
           - !Ref BastionHostRole
           - !Ref AlternativeIAMRole
   BastionHostProfile:
-    Type: 'AWS::IAM::InstanceProfile'
+    Type: AWS::IAM::InstanceProfile
     Properties:
       Roles:
         - !If
@@ -586,27 +586,27 @@ Resources:
           - /
           - /account-managed/
   EIP1:
-    Type: 'AWS::EC2::EIP'
+    Type: AWS::EC2::EIP
     Condition: PopulateRemoteCIDR
     Properties:
       Domain: vpc
   EIP2:
-    Type: 'AWS::EC2::EIP'
+    Type: AWS::EC2::EIP
     Condition: 2BastionCondition
     Properties:
       Domain: vpc
   EIP3:
-    Type: 'AWS::EC2::EIP'
+    Type: AWS::EC2::EIP
     Condition: 3BastionCondition
     Properties:
       Domain: vpc
   EIP4:
-    Type: 'AWS::EC2::EIP'
+    Type: AWS::EC2::EIP
     Condition: 4BastionCondition
     Properties:
       Domain: vpc
   BastionAutoScalingGroup:
-    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       LaunchConfigurationName: !Ref BastionLaunchConfiguration
       VPCZoneIdentifier:
@@ -614,7 +614,7 @@ Resources:
         - !Ref PublicSubnet2ID
       MinSize: !Ref NumBastionHosts
       MaxSize: !Ref NumBastionHosts
-      Cooldown: '900'
+      Cooldown: 900
       DesiredCapacity: !Ref NumBastionHosts
       Tags:
         - Key: Name
@@ -630,9 +630,9 @@ Resources:
       AutoScalingReplacingUpdate:
         WillReplace: true
   BastionLaunchConfiguration:
-    Type: 'AWS::AutoScaling::LaunchConfiguration'
+    Type: AWS::AutoScaling::LaunchConfiguration
     Metadata:
-      'AWS::CloudFormation::Authentication':
+      AWS::CloudFormation::Authentication:
         S3AccessCreds:
           type: S3
           roleName: !If
@@ -641,11 +641,11 @@ Resources:
             - !Ref AlternativeIAMRole
           buckets:
             - !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-      'AWS::CloudFormation::Init':
+      AWS::CloudFormation::Init:
         config:
           files:
             /tmp/auditd.rules:
-              mode: '000550'
+              mode: 000550
               owner: root
               group: root
               content: |
@@ -662,7 +662,7 @@ Resources:
                     - UsingDefaultBucket
                     - !Ref 'AWS::Region'
                     - !Ref 'QSS3BucketRegion'
-              mode: '000550'
+              mode: 000550
               owner: root
               group: root
               authentication: S3AccessCreds
@@ -680,27 +680,27 @@ Resources:
                       - UsingDefaultBucket
                       - !Ref 'AWS::Region'
                       - !Ref 'QSS3BucketRegion'
-              mode: '000550'
+              mode: 000550
               owner: root
               group: root
               authentication: S3AccessCreds
           commands:
             a-add_auditd_rules:
-              cwd: '/tmp/'
+              cwd: /tmp/
               env:
                 BASTION_OS: !FindInMap [LinuxAMINameMap, !Ref BastionAMIOS, OS]
-              command: "./auditing_configure.sh"
+              command: ./auditing_configure.sh
               # command:
               #   - !If [ ]
               #   - "cat /tmp/auditd.rules >> /etc/audit/rules.d/audit.rules && service auditd restart"
             b-bootstrap:
-              cwd: '/tmp/'
+              cwd: /tmp/
               env:
                 REGION: !Sub ${AWS::Region}
                 URL_SUFFIX: !Sub ${AWS::URLSuffix}
-                BANNER_REGION: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref 'QSS3BucketRegion' ]
+                BANNER_REGION: !If [UsingDefaultBucket, !Ref AWS::Region, !Ref QSS3BucketRegion]
               command: !Sub
-                - "./bastion_bootstrap.sh --banner ${BannerUrl} --enable ${EnableBanner} --tcp-forwarding ${EnableTCPForwarding} --x11-forwarding ${EnableX11Forwarding}"
+                - ./bastion_bootstrap.sh --banner ${BannerUrl} --enable ${EnableBanner} --tcp-forwarding ${EnableTCPForwarding} --x11-forwarding ${EnableX11Forwarding}
                 - BannerUrl: !If
                   - DefaultBanner
                   - !Sub
@@ -789,7 +789,7 @@ Resources:
               - !Ref EIP4
               - 'Null'
   BastionSecurityGroup:
-    Type: 'AWS::EC2::SecurityGroup'
+    Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Enables SSH Access to Bastion Hosts
       VpcId: !Ref VPCID
@@ -811,41 +811,41 @@ Outputs:
     Description: Auto Scaling group reference ID.
     Value: !Ref BastionAutoScalingGroup
     Export:
-      Name: !Sub '${AWS::StackName}-BastionAutoScalingGroup'
+      Name: !Sub ${AWS::StackName}-BastionAutoScalingGroup
   EIP1:
     Condition: PopulateRemoteCIDR
     Description: Elastic IP 1 for bastion.
     Value: !Ref EIP1
     Export:
-      Name: !Sub '${AWS::StackName}-EIP1'
+      Name: !Sub ${AWS::StackName}-EIP1
   EIP2:
     Condition: 2BastionCondition
     Description: Elastic IP 2 for bastion.
     Value: !Ref EIP2
     Export:
-      Name: !Sub '${AWS::StackName}-EIP2'
+      Name: !Sub ${AWS::StackName}-EIP2
   EIP3:
     Condition: 3BastionCondition
     Description: Elastic IP 3 for bastion.
     Value: !Ref EIP3
     Export:
-      Name: !Sub '${AWS::StackName}-EIP3'
+      Name: !Sub ${AWS::StackName}-EIP3
   EIP4:
     Condition: 4BastionCondition
     Description: Elastic IP 4 for bastion.
     Value: !Ref EIP4
     Export:
-      Name: !Sub '${AWS::StackName}-EIP4'
+      Name: !Sub ${AWS::StackName}-EIP4
   CloudWatchLogs:
     Description: CloudWatch Logs GroupName. Your SSH logs will be stored here.
     Value: !Ref BastionMainLogGroup
     Export:
-      Name: !Sub '${AWS::StackName}-CloudWatchLogs'
+      Name: !Sub ${AWS::StackName}-CloudWatchLogs
   BastionSecurityGroupID:
     Description: Bastion security group ID.
     Value: !Ref BastionSecurityGroup
     Export:
-      Name: !Sub '${AWS::StackName}-BastionSecurityGroupID'
+      Name: !Sub ${AWS::StackName}-BastionSecurityGroupID
   BastionHostRole:
     Description: Bastion IAM role name.
     Value: !If
@@ -853,7 +853,7 @@ Outputs:
       - !Ref BastionHostRole
       - !Ref AlternativeIAMRole
     Export:
-      Name: !Sub '${AWS::StackName}-BastionHostRole'
+      Name: !Sub ${AWS::StackName}-BastionHostRole
   Postdeployment:
     Description: See the deployment guide for post-deployment steps.
     Value: https://aws.amazon.com/quickstart/?quickstart-all.sort-by=item.additionalFields.sortDate&quickstart-all.sort-order=desc&awsm.page-quickstart-all=5

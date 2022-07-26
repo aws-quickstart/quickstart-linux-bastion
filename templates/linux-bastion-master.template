@@ -2,10 +2,10 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: LinuxBastion+VPC Jul,30,2020 (qs-1qup6ra9p) (Please do not remove)
 Metadata:
   QuickStartDocumentation:
-    EntrypointName: "Launch into a new VPC"
+    EntrypointName: Launch into a new VPC
     Order: 1
   LICENSE: Apache License, Version 2.0
-  'AWS::CloudFormation::Interface':
+  AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
           default: Network configuration
@@ -87,7 +87,7 @@ Metadata:
 Parameters:
   AvailabilityZones:
     Description: List of Availability Zones to use for the subnets in the VPC.
-    Type: 'List<AWS::EC2::AvailabilityZone::Name>'
+    Type: List<AWS::EC2::AvailabilityZone::Name>
   BastionAMIOS:
     AllowedValues:
       - Amazon-Linux2-HVM
@@ -99,11 +99,11 @@ Parameters:
     Description: The Linux distribution for the AMI to be used for the bastion instances.
     Type: String
   BastionHostName:
-    Default: 'LinuxBastion'
+    Default: LinuxBastion
     Description: The value used for the name tag of the bastion host.
     Type: String
   BastionBanner:
-    Default: ""
+    Default: ''
     Description: Banner text to display upon login.
     Type: String
   BastionTenancy:
@@ -142,14 +142,14 @@ Parameters:
     Description: Name of an existing public/private key pair, which allows you to securely connect to your instance
       after it launches. If left empty, AWS Systems Manager Session Manager can still be used to connect to the instance.
     Type: String
-    Default: ""
+    Default: ''
   NumBastionHosts:
     AllowedValues:
-      - '1'
-      - '2'
-      - '3'
-      - '4'
-    Default: '1'
+      - 1
+      - 2
+      - 3
+      - 4
+    Default: 1
     Description: The number of bastion hosts to create. The maximum number is four.
     Type: String
   PrivateSubnet1CIDR:
@@ -235,7 +235,7 @@ Conditions:
     - 'aws-quickstart'
 Resources:
   VPCStack:
-    Type: 'AWS::CloudFormation::Stack'
+    Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub
         - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template.yaml
@@ -251,7 +251,7 @@ Resources:
         AvailabilityZones: !Join
           - ','
           - !Ref AvailabilityZones
-        NumberOfAZs: '2'
+        NumberOfAZs: 2
         PrivateSubnet1ACIDR: !Ref PrivateSubnet1CIDR
         PrivateSubnet2ACIDR: !Ref PrivateSubnet2CIDR
         PublicSubnet1CIDR: !Ref PublicSubnet1CIDR
@@ -259,7 +259,7 @@ Resources:
         VPCCIDR: !Ref VPCCIDR
         VPCTenancy: !Ref VPCTenancy
   BastionStack:
-    Type: 'AWS::CloudFormation::Stack'
+    Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub
         - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/linux-bastion.template
