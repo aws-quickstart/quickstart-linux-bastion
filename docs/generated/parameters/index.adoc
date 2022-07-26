@@ -1,6 +1,0 @@
-
-=== Launch into a new VPC
-include::linux-bastion-master.adoc[]
-
-=== Launch into an existing VPC
-include::linux-bastion.adoc[]
