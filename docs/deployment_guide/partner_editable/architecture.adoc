@@ -2,11 +2,11 @@
 
 Deploying this Quick Start with default parameters builds the following {partner-product-short-name} environment in the AWS Cloud.
 
-// Replace this example diagram with your own. Follow our wiki guidelines: https://w.amazon.com/bin/view/AWS_Quick_Starts/Process_for_PSAs/#HPrepareyourarchitecturediagram. Upload your source PowerPoint file to the GitHub {deployment name}/docs/images/ directory in its repository.
+NOTE: The bastion host https://github.com/aws-quickstart/quickstart-linux-bastion/pull/142[no longer has a public IP address assigned for remote access by default^]. You can https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/session-manager.html[connect to your Linux instance using Session Manager^], a capability of AWS Systems Manager. If a remote-access CIDR block is configured for the deployment, an Elastic IP address is assigned, and inbound SSH (Secure Shell) access is permitted.
 
 [#architecture1]
 .Quick Start architecture for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/architecture_diagram.png[Architecture]
+image::../docs/deployment_guide/images/linux-bastion-architecture_diagram.png[Architecture]
 
 As shown in <<architecture1>>, this Quick Start sets up the following:
 
@@ -17,9 +17,7 @@ As shown in <<architecture1>>, this Quick Start sets up the following:
 * In the public subnets:
 ** Managed network address translation (NAT) gateways to allow outbound internet access for resources in the private subnets.*
 ** A Linux bastion host in an Auto Scaling group for connecting to Amazon Elastic Compute Cloud (Amazon EC2) instances in public and private subnets.
-*** As of https://github.com/aws-quickstart/quickstart-linux-bastion/pull/142[July 25th, 2022], the Linux bastion host will not have a public IP address assigned for remote access by default, and should be accessed via https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/session-manager.html[AWS Systems Manager] or alternate means.
-*** If a remote access CIDR block is configured for the deployment, an Elastic IP address is assigned and inbound Secure Shell (SSH) access is permitted.
 * An Amazon CloudWatch log group to hold the Linux bastion host shell history logs.
-// Add bullet points for any additional components that are included in the deployment. Ensure that the additional components are shown in the architecture diagram. End each bullet with a period.
+* AWS Systems Manager for access to the bastion host.
 
 [.small]#* The template that deploys this Quick Start into an existing VPC skips the components marked by asterisks and prompts you for your existing VPC configuration.#
