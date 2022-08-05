@@ -11,7 +11,7 @@ image::../docs/deployment_guide/images/linux-bastion-architecture_diagram.png[Ar
 As shown in <<architecture1>>, this Quick Start sets up the following:
 
 * A highly available architecture that spans two Availability Zones.*
-* A VPC configured with public and private subnets, according to AWS best practices, to provide you with your own virtual network on AWS.*
+* A virtual private cloud (VPC) configured with public and private subnets, according to AWS best practices, to provide you with your own virtual network on AWS.*
 * An internet gateway to allow access to the internet.
   This gateway is used by the bastion hosts to send and receive traffic.*
 * In the public subnets:
