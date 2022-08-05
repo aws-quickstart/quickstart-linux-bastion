@@ -12,7 +12,7 @@ The Linux distribution is specified in the *Bastion AMI operating system* parame
 
 === Enable and customize the Linux bastion host banner
 :xrefstyle: short
-This Quick Start provides a banner for the Linux bastion hosts, as illustrated in <<banner>>. The banner is disabled by default. Enable it, and customize it if you like, to notify users that all their actions will be monitored and recorded.
+This Quick Start provides a banner for the Linux bastion hosts, as illustrated in <<banner>>. The banner is disabled by default. We recommend that you enable it to notify users that all their actions will be monitored and recorded. Customize it if you like.
 
 [#banner]
 .The Linux bastion host banner
