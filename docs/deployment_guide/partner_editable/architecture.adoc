@@ -6,14 +6,12 @@ NOTE: The bastion host https://github.com/aws-quickstart/quickstart-linux-bastio
 
 [#architecture1]
 .Quick Start architecture for {partner-product-short-name} on AWS
-image::../docs/deployment_guide/images/linux-bastion-architecture_diagram.png[Architecture]
+image::../docs/deployment_guide/images/linux-bastion-architecture.png[Architecture, 85%]
 
 As shown in <<architecture1>>, this Quick Start sets up the following:
 
 * A highly available architecture that spans two Availability Zones.*
 * A virtual private cloud (VPC) configured with public and private subnets, according to AWS best practices, to provide you with your own virtual network on AWS.*
-* An internet gateway to allow access to the internet.
-  This gateway is used by the bastion hosts to send and receive traffic.*
 * In the public subnets:
 ** Managed network address translation (NAT) gateways to allow outbound internet access for resources in the private subnets.*
 ** A Linux bastion host in an Auto Scaling group for connecting to Amazon Elastic Compute Cloud (Amazon EC2) instances in public and private subnets.
