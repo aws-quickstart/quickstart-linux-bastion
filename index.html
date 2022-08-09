@@ -860,21 +860,27 @@ p.footer-text a{color:#d7d8d8}
 <li><a href="#_deployment_options">Deployment options</a></li>
 <li><a href="#_predeployment_steps">Predeployment steps</a>
 <ul class="sectlevel2">
-<li><a href="#_choose_a_region">Choose a Region</a></li>
 <li><a href="#_optional_create_a_key_pair">(Optional) Create a key pair</a></li>
+<li><a href="#_optional_customize_the_linux_bastion_host_banner">(Optional) Customize the Linux bastion host banner</a></li>
 </ul>
 </li>
 <li><a href="#_deployment_steps">Deployment steps</a></li>
 <li><a href="#_postdeployment_steps">Postdeployment steps</a>
 <ul class="sectlevel2">
-<li><a href="#_enabling_and_customizing_the_linux_bastion_host_banner">Enabling and customizing the Linux bastion host banner</a></li>
+<li><a href="#_confirm_that_you_can_log_in_to_the_bastion_host">Confirm that you can log in to the bastion host</a></li>
+</ul>
+</li>
+<li><a href="#_additional_information">Additional information</a>
+<ul class="sectlevel2">
 <li><a href="#_bastion_logging">Bastion logging</a></li>
 <li><a href="#_remote_access">Remote access</a></li>
 </ul>
 </li>
 <li><a href="#_troubleshooting">Troubleshooting</a>
 <ul class="sectlevel2">
-<li><a href="#_faq">FAQ</a></li>
+<li><a href="#_i_encountered_a_create_failed_error_when_i_launched_the_quick_start">I encountered a <strong>CREATE_FAILED</strong> error when I launched the Quick Start</a></li>
+<li><a href="#_i_encountered_a_size_limitation_error_when_i_deployed_the_aws_cloudformation_templates">I encountered a size-limitation error when I deployed the AWS CloudFormation templates</a></li>
+<li><a href="#_i_changed_the_instance_type_parameter_after_deployment_and_updated_the_stack_but_the_instance_types_did_not_change_or_the_elastic_ip_addresses_were_not_reassociated_after_the_stack_update">I changed the instance type parameter after deployment and updated the stack, but the instance types did not change or the Elastic IP addresses were not reassociated after the stack update</a></li>
 </ul>
 </li>
 <li><a href="#_resources">Resources</a></li>
@@ -894,7 +900,7 @@ p.footer-text a{color:#d7d8d8}
 </div>
 </div>
 <div class="paragraph text-center">
-<p><strong>July 2022</strong><br>
+<p><strong>August 2022</strong><br>
 <em>Santiago Cardenas, AWS Serverless Partners</em><br>
 <em>Tony Vattathil, Ian Hill, and Troy Lindsay, AWS Integration &amp; Automation team</em><br></p>
 </div>
@@ -924,25 +930,7 @@ Refer to the <a href="https://github.com/aws-quickstart/quickstart-linux-bastion
 <h2 id="_overview">Overview</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This Quick Start deploys Linux Bastion Hosts on the AWS Cloud. This guide covers the steps necessary to deploy this Quick Start.</p>
-</div>
-<div class="paragraph">
-<p>This Quick Start provides Linux bastion host functionality for AWS Cloud infrastructures.
-It deploys a virtual private cloud (VPC) using the <a href="https://fwd.aws/9VdxN">Amazon VPC Quick Start reference deployment</a>.
-Then, it sets up private and public subnets and deploys Linux bastion instances into the VPC.
-You can also choose to deploy Linux bastion hosts into your existing VPC.</p>
-</div>
-<div class="paragraph">
-<p>The bastion hosts provide secure access to Linux instances located in the private and public subnets.
-The Quick Start architecture deploys Linux bastion host instances into every public subnet to provide readily available administrative access to the environment.
-The Quick Start sets up a Multi-AZ environment consisting of two Availability Zones.
-If highly available bastion access is not necessary, you can stop the instance in the second Availability Zone and start it up when needed.</p>
-</div>
-<div class="paragraph">
-<p>You can use this Quick Start as a building block for your own Linux-based deployments.
-You can add other infrastructure components and software layers to complete your Linux environment in the AWS Cloud.
-To build an AWS Cloud infrastructure for accessing Microsoft Windows-based instances, see the <a href="https://fwd.aws/5VrKP">Quick Start for Remote Desktop (RD)
-Gateway</a>.</p>
+<p>This Quick Start deploys Linux bastion hosts on the AWS Cloud. This guide covers the steps necessary to deploy this Quick Start.</p>
 </div>
 </div>
 </div>
@@ -958,13 +946,25 @@ Gateway</a>.</p>
 <h2 id="_architecture">Architecture</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Deploying this Quick Start with default parameters builds the following Linux bastion hosts environment in the AWS Cloud.</p>
+<p>Deploying this Quick Start with default parameters builds the following Linux Bastion Hosts environment in the AWS Cloud.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The bastion host <a href="https://github.com/aws-quickstart/quickstart-linux-bastion/pull/142" target="_blank" rel="noopener">no longer has a public IP address assigned for remote access by default</a>. You can <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/session-manager.html" target="_blank" rel="noopener">connect to your Linux instance using Session Manager</a>, a capability of AWS Systems Manager. If a remote-access CIDR block is configured for the deployment, an Elastic IP address is assigned, and inbound SSH (Secure Shell) access is permitted.
+</td>
+</tr>
+</table>
 </div>
 <div id="architecture1" class="imageblock">
 <div class="content">
-<img src="docs/deployment_guide/images/architecture_diagram.png" alt="Architecture">
+<img src="docs/deployment_guide/images/linux-bastion-architecture_diagram.png" alt="Architecture">
 </div>
-<div class="title">Figure 1. Quick Start architecture for Linux bastion hosts on AWS</div>
+<div class="title">Figure 1. Quick Start architecture for Linux Bastion Hosts on AWS</div>
 </div>
 <div class="paragraph">
 <p>As shown in <a href="#architecture1">Figure 1</a>, this Quick Start sets up the following:</p>
@@ -975,7 +975,7 @@ Gateway</a>.</p>
 <p>A highly available architecture that spans two Availability Zones.*</p>
 </li>
 <li>
-<p>A VPC configured with public and private subnets, according to AWS best practices, to provide you with your own virtual network on AWS.*</p>
+<p>A virtual private cloud (VPC) configured with public and private subnets, according to AWS best practices, to provide you with your own virtual network on AWS.*</p>
 </li>
 <li>
 <p>An internet gateway to allow access to the internet.
@@ -990,22 +990,15 @@ This gateway is used by the bastion hosts to send and receive traffic.*</p>
 </li>
 <li>
 <p>A Linux bastion host in an Auto Scaling group for connecting to Amazon Elastic Compute Cloud (Amazon EC2) instances in public and private subnets.</p>
-<div class="ulist">
-<ul>
-<li>
-<p>As of <a href="https://github.com/aws-quickstart/quickstart-linux-bastion/pull/142">July 25th, 2022</a>, the Linux bastion host will not have a public IP address assigned for remote access by default, and should be accessed via <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/session-manager.html">AWS Systems Manager</a> or alternate means.</p>
-</li>
-<li>
-<p>If a remote access CIDR block is configured for the deployment, an Elastic IP address is assigned and inbound Secure Shell (SSH) access is permitted.</p>
-</li>
-</ul>
-</div>
 </li>
 </ul>
 </div>
 </li>
 <li>
 <p>An Amazon CloudWatch log group to hold the Linux bastion host shell history logs.</p>
+</li>
+<li>
+<p>AWS Systems Manager for access to the bastion host.</p>
 </li>
 </ul>
 </div>
@@ -1023,15 +1016,15 @@ This gateway is used by the bastion hosts to send and receive traffic.*</p>
 <div class="ulist">
 <ul>
 <li>
-<p><a href="https://fwd.aws/rQWep" target="_blank" rel="noopener">Deploy Linux bastion hosts into a new VPC</a>. This option builds a new AWS environment that consists of the VPC, subnets, NAT gateways, security groups, bastion hosts, and other infrastructure components. It then deploys Linux bastion hosts into this new VPC.</p>
+<p><a href="https://fwd.aws/rQWep" target="_blank" rel="noopener">Deploy Linux Bastion Hosts into a new VPC</a>. This option builds a new AWS environment that consists of a VPC, private and public subnets, NAT gateways, Linux bastion hosts, and other infrastructure components.</p>
 </li>
 <li>
-<p><a href="https://fwd.aws/Jwzqv" target="_blank" rel="noopener">Deploy Linux bastion hosts into an existing VPC</a>. This option provisions Linux bastion hosts in your existing AWS infrastructure.</p>
+<p><a href="https://fwd.aws/Jwzqv" target="_blank" rel="noopener">Deploy Linux Bastion Hosts into an existing VPC</a>. This option provisions Linux Bastion Hosts in your existing AWS infrastructure.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>This Quick Start provides separate templates for these options. It also lets you configure Classless Inter-Domain Routing (CIDR) blocks, instance types, and Linux bastion hosts settings.</p>
+<p>This Quick Start provides separate templates for these options. It also lets you configure Classless Inter-Domain Routing (CIDR) blocks, instance types, and Linux Bastion Hosts settings.</p>
 </div>
 </div>
 </div>
@@ -1039,68 +1032,27 @@ This gateway is used by the bastion hosts to send and receive traffic.*</p>
 <h2 id="_predeployment_steps">Predeployment steps</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_choose_a_region">Choose a Region</h3>
-<div class="ulist">
-<ul>
-<li>
-<p>Before deploying the stack, in the AWS Management Console, choose an AWS Region from the top toolbar.</p>
-<div id="region" class="imageblock">
-<div class="content">
-<img src="docs/deployment_guide/images/region.png" alt="AWS Region list">
-</div>
-<div class="title">Figure 2. Selecting an AWS Region</div>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-Consider choosing a Region closest to your data center or corporate network to reduce network latency between systems running on AWS and the systems and users on your corporate network.
-</td>
-</tr>
-</table>
-</div>
-</li>
-</ul>
+<h3 id="_optional_create_a_key_pair">(Optional) Create a key pair</h3>
+<div class="paragraph">
+<p>If you want to access your Linux bastion host using SSH as well as AWS Systems Manager, you must create a key pair. For details, refer to <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html" target="_blank" rel="noopener">Amazon EC2 key pairs and Linux instances</a> and <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html#having-ec2-create-your-key-pair" target="_blank" rel="noopener">Create a key pair using Amazon EC2</a>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_optional_create_a_key_pair">(Optional) Create a key pair</h3>
+<h3 id="_optional_customize_the_linux_bastion_host_banner">(Optional) Customize the Linux bastion host banner</h3>
 <div class="paragraph">
-<p>If you want to access for your Linux bastion host via SSH as well as AWS Systems Manager, you must create a key pair.
-To create a <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html">key pair</a> in your preferred Region, do the following:</p>
+<p>This Quick Start provides a banner for the Linux bastion hosts, as illustrated in <a href="#banner">Figure 2</a>.</p>
 </div>
-<div class="olist arabic">
-<ol class="arabic" start="1">
-<li>
-<p>In your AWS Management Console, choose an AWS Region.</p>
-</li>
-<li>
-<p>On the <strong>Services</strong> menu, choose <strong>EC2</strong>.</p>
-</li>
-<li>
-<p>Under <strong>Network and Security</strong>, choose <strong>Key Pairs</strong>.</p>
-</li>
-<li>
-<p>Choose <strong>Create Key Pair</strong>.</p>
-</li>
-<li>
-<p>Enter a name and choose <strong>Create</strong>.</p>
-<div id="keypair" class="imageblock">
+<div id="banner" class="imageblock">
 <div class="content">
-<img src="docs/deployment_guide/images/keypair.png" alt="keypair" width="100%" height="100%">
+<img src="docs/deployment_guide/images/banner.png" alt="banner">
 </div>
-<div class="title">Figure 3. Creating a key pair</div>
+<div class="title">Figure 2. The Linux bastion host banner</div>
 </div>
 <div class="paragraph">
-<p>Amazon EC2 uses public-key cryptography to encrypt and decrypt login information.
-To be able to log in to your instances, you must create a key pair.
-On Linux, the key pair is used to authenticate SSH login.</p>
+<p>To enable the banner, you set the <strong>Bastion banner</strong> parameter to <strong>true</strong> during deployment. The banner is disabled by default. We recommend that you enable it during deployment to notify users that all their actions will be monitored and recorded.</p>
 </div>
-</li>
-</ol>
+<div class="paragraph">
+<p>To customize the banner, create an ASCII text file with your own banner content. Then upload the file to an S3 bucket or other publicly accessible location, and verify that it is accessible from the host.</p>
 </div>
 </div>
 </div>
@@ -1156,6 +1108,8 @@ Unless you are customizing the Quick Start templates for your own projects, don&
 <div class="sect1">
 <h2 id="_postdeployment_steps">Postdeployment steps</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_confirm_that_you_can_log_in_to_the_bastion_host">Confirm that you can log in to the bastion host</h3>
 <div class="paragraph">
 <p>Log in to the bastion host.
 Use one of the following user names, depending on your choice of Linux distribution:</p>
@@ -1176,24 +1130,12 @@ Use one of the following user names, depending on your choice of Linux distribut
 <div class="paragraph">
 <p>The Linux distribution is specified in the <strong>Bastion AMI operating system</strong> parameter when you deploy the templates.</p>
 </div>
-<div class="sect2">
-<h3 id="_enabling_and_customizing_the_linux_bastion_host_banner">Enabling and customizing the Linux bastion host banner</h3>
-<div class="paragraph">
-<p>This Quick Start provides the default banner illustrated in <a href="#banner">Figure 4</a> for the Linux bastion hosts.
-The banner is disabled by default.
-To enable it, set the <strong>Bastion banner</strong> parameter to <strong>true</strong> during deployment.</p>
-</div>
-<div id="banner" class="imageblock">
-<div class="content">
-<img src="docs/deployment_guide/images/banner.png" alt="banner">
-</div>
-<div class="title">Figure 4. Customizing the Linux bastion host banner</div>
-</div>
-<div class="paragraph">
-<p>To customize the banner, create an ASCII text file with your own banner content.
-Then upload it to an S3 bucket or other publicly accessible location, and verify that it is accessible from the host.</p>
 </div>
 </div>
+</div>
+<div class="sect1">
+<h2 id="_additional_information">Additional information</h2>
+<div class="sectionbody">
 <div class="sect2">
 <h3 id="_bastion_logging">Bastion logging</h3>
 <div class="paragraph">
@@ -1202,26 +1144,21 @@ Then upload it to an S3 bucket or other publicly accessible location, and verify
 This log file contains the date, SSH client connection IP address, user name, working directory, and the commands issued.</p>
 </div>
 <div class="paragraph">
-<p>For added security, the contents of the <code>/var/log/audit/audit.log</code> file is also stored in a CloudWatch Logs log group in the AWS Cloud, and remains available in case the bastion hosts fail.</p>
+<p>For added security, the contents of the <code>/var/log/audit/audit.log</code> file is also stored in a CloudWatch Logs log group in the AWS Cloud and remains available in case the bastion hosts fail.</p>
 </div>
 <div class="paragraph">
-<p>The log includes a history of the commands that are run when you log in. <a href="#logging">Figure 5</a> shows an example.</p>
+<p>The log includes a history of the commands that are run when you log in. <a href="#logging">Figure 3</a> shows an example.</p>
 </div>
 <div id="logging" class="imageblock">
 <div class="content">
-<img src="docs/deployment_guide/images/logging.png" alt="Logging" width="100%" height="100%">
+<img src="docs/deployment_guide/images/logging.png" alt="Logging">
 </div>
-<div class="title">Figure 5. Bastion logging</div>
-</div>
-<div class="paragraph">
-<p>To notify your users that all their commands will be monitored and logged, we recommend that you enable the bastion host banner.
-For more information, see <a href="#_enabling_and_customizing_the_linux_bastion_host_banner">Enabling and Customizing the Linux bastion host banner</a>.
-The default banner text includes the alert shown in <a href="#banner">Figure 4</a>, which you can customize.</p>
+<div class="title">Figure 3. Bastion logging</div>
 </div>
 <div class="paragraph">
 <p>The <code>bastion.log</code> file is an immutable file that cannot be easily deleted or tampered with.
 However, in case this happens, there is a shadow file with a copy of <code>bastion.log</code> located in <code>/var/log/audit/audit.log</code>.
-And, the Quick Start also stores the contents of <code>bastion.log</code> remotely using the CloudWatch Logs service.
+The Quick Start also stores the contents of <code>bastion.log</code> remotely using the CloudWatch Logs service.
 Log files can be found under CloudWatch Logs using the instance ID as the log stream name.</p>
 </div>
 </div>
@@ -1285,7 +1222,7 @@ The security group is configured as follows:</p>
 </tbody>
 </table>
 <div class="paragraph">
-<p>For more information, see <a href="https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Security.html" target="_blank" rel="noopener">Internetwork traffic privacy in Amazon VPC</a>.</p>
+<p>For more information, refer to <a href="https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Security.html" target="_blank" rel="noopener">Internetwork traffic privacy in Amazon VPC</a>.</p>
 </div>
 </div>
 </div>
@@ -1298,12 +1235,9 @@ The security group is configured as follows:</p>
 <p>For troubleshooting common Quick Start issues, refer to the <a href="https://fwd.aws/rA69w?" target="_blank" rel="noopener">AWS Quick Start General Information Guide</a> and <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html" target="_blank" rel="noopener">Troubleshooting CloudFormation</a>.</p>
 </div>
 <div class="sect2">
-<h3 id="_faq">FAQ</h3>
+<h3 id="_i_encountered_a_create_failed_error_when_i_launched_the_quick_start">I encountered a <strong>CREATE_FAILED</strong> error when I launched the Quick Start</h3>
 <div class="paragraph">
-<p><strong>Q.</strong> I encountered a <strong>CREATE_FAILED</strong> error when I launched the Quick Start.</p>
-</div>
-<div class="paragraph">
-<p><strong>A.</strong> If AWS CloudFormation fails to create the stack, relaunch the template with <strong>Rollback on failure</strong> set to <strong>Disabled</strong>. This setting is under <strong>Advanced</strong> in the AWS CloudFormation console on the <strong>Configure stack options</strong> page. With this setting, the stack&#8217;s state is retained, and you can troubleshoot the issue.</p>
+<p>If AWS CloudFormation fails to create the stack, relaunch the template with <strong>Rollback on failure</strong> set to <strong>Disabled</strong>. This setting is under <strong>Advanced</strong> in the AWS CloudFormation console on the <strong>Configure stack options</strong> page. With this setting, the stack&#8217;s state is retained, and you can troubleshoot the issue.</p>
 </div>
 <div class="admonitionblock warning">
 <table>
@@ -1318,19 +1252,19 @@ When you set <strong>Rollback on failure</strong> to <strong>Disabled</strong>, 
 </table>
 </div>
 <div class="paragraph">
-<p>For more information, see <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html" target="_blank" rel="noopener">Troubleshooting AWS CloudFormation</a>.</p>
+<p>For more information, refer to <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html" target="_blank" rel="noopener">Troubleshooting CloudFormation</a>.</p>
 </div>
-<div class="paragraph">
-<p><strong>Q.</strong> I encountered a size-limitation error when I deployed the AWS CloudFormation templates.</p>
 </div>
+<div class="sect2">
+<h3 id="_i_encountered_a_size_limitation_error_when_i_deployed_the_aws_cloudformation_templates">I encountered a size-limitation error when I deployed the AWS CloudFormation templates</h3>
 <div class="paragraph">
-<p><strong>A.</strong> Launch the Quick Start templates from the links in this guide or from another S3 bucket. If you deploy the templates from a local copy on your computer or from a location other than an S3 bucket, you might encounter template-size limitations. For more information, see <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html" target="_blank" rel="noopener">AWS CloudFormation quotas</a>.</p>
+<p>Launch the Quick Start templates from the links in this guide or from another S3 bucket. If you deploy the templates from a local copy on your computer or from a location other than an S3 bucket, you might encounter template-size limitations. For more information, refer to <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html" target="_blank" rel="noopener">AWS CloudFormation quotas</a>.</p>
 </div>
-<div class="paragraph">
-<p><strong>Q.</strong> I changed the instance type parameter after deployment and updated the stack, but the instance types did not change or the Elastic IP addresses were not reassociated after the stack update.</p>
 </div>
+<div class="sect2">
+<h3 id="_i_changed_the_instance_type_parameter_after_deployment_and_updated_the_stack_but_the_instance_types_did_not_change_or_the_elastic_ip_addresses_were_not_reassociated_after_the_stack_update">I changed the instance type parameter after deployment and updated the stack, but the instance types did not change or the Elastic IP addresses were not reassociated after the stack update</h3>
 <div class="paragraph">
-<p><strong>A.</strong> Terminate your bastion host instances. They will be replaced by Auto Scaling. A bootstrap action is performed on the new instances to configure security settings and CloudWatch logs and associate Elastic IP addresses.</p>
+<p>Terminate your bastion host instances. They will be replaced by Auto Scaling. A bootstrap action is performed on the new instances to configure security settings and CloudWatch logs and associate Elastic IP addresses.</p>
 </div>
 </div>
 </div>
@@ -1344,7 +1278,7 @@ When you set <strong>Rollback on failure</strong> to <strong>Disabled</strong>, 
 <p><a href="https://aws.amazon.com/documentation/cloudformation/" target="_blank" rel="noopener">AWS CloudFormation Documentation</a></p>
 </li>
 <li>
-<p>Amazon EC2</p>
+<p>Amazon EC2:</p>
 <div class="ulist">
 <ul>
 <li>
@@ -1361,7 +1295,7 @@ When you set <strong>Rollback on failure</strong> to <strong>Disabled</strong>, 
 <div class="ulist">
 <ul>
 <li>
-<p><a href="https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_SecurityGroups.html" target="_blank" rel="noopener">Security groups for your VPC</a></p>
+<p><a href="https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_SecurityGroups.html" target="_blank" rel="noopener">Control traffic to resources using security groups</a></p>
 </li>
 <li>
 <p><a href="https://blogs.aws.amazon.com/security/post/Tx3N8GFK85UN1G6/Securely-connect-to-Linux-instances-running-in-a-private-Amazon-VPC" target="_blank" rel="noopener">Securely Connect to Linux Instances Running a Private Amazon VPC</a></p>
@@ -1421,7 +1355,7 @@ When you set <strong>Rollback on failure</strong> to <strong>Disabled</strong>, 
 </html>
 <!--
 repo commit:
-64887982784025677580008f0f78fc130c31be7d
+ce3af310264cd67844bdc03dd68230dde84ff03f
 
 submodule config:
  bea809baa0fecbf792aacc93bbe8ecd4d017de5e docs/boilerplate (heads/main)
