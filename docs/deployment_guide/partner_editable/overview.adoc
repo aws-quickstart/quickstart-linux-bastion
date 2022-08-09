@@ -1,7 +1,1 @@
 This Quick Start deploys Linux bastion hosts on the AWS Cloud. This guide covers the steps necessary to deploy this Quick Start.
-
-//TODO Troy, We no longer give a detailed overview of the Quick Start in the deployment guides. We publish description only on the landing page. See the “‘Overview’ content” section of our Docs 2.1 wiki page: https://w.amazon.com/bin/view/AWS_IA/documentation/docs2_1/#H22Overview22content. So please consider the following paragraphs (which I've commented out) along with the overview on the current landing page, and let us know what content you'd like to see on the updated landing page.
-
-//The bastion hosts provide secure access to Linux instances located in the private and public subnets. The Quick Start architecture deploys Linux bastion host instances into every public subnet to provide readily available administrative access to the environment. The Quick Start sets up a Multi-AZ environment consisting of two Availability Zones. If highly available bastion access is not necessary, you can stop the instance in the second Availability Zone and start it up when needed.
-
-//You can use this Quick Start as a building block for your own Linux-based deployments. You can add other infrastructure components and software layers to complete your Linux environment in the AWS Cloud. To build an AWS Cloud infrastructure for accessing Microsoft Windows-based instances, see the https://fwd.aws/5VrKP[Quick Start for Remote Desktop (RD) Gateway^].
