@@ -1,7 +1,15 @@
-//TODO Troy, I've removed the content that was here under "Choose a Region" because we've moved our description of AWS Regions to the QS General Information Guide, and Step 2 under "Deployment steps" tells people when to choose their Region.
-
 == (Optional) Create a key pair
 
 If you want to access your Linux bastion host using SSH as well as AWS Systems Manager, you must create a key pair. For details, refer to http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html[Amazon EC2 key pairs and Linux instances^] and https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html#having-ec2-create-your-key-pair[Create a key pair using Amazon EC2^].
 
-//TODO Troy, I've removed the detailed procedure here and pointed to the existing documentation. Do we need to note anything particular to this Quick Start here?
+=== (Optional) Customize the Linux bastion host banner
+
+This Quick Start provides a banner for the Linux bastion hosts, as illustrated in <<banner>>.
+
+[#banner]
+.The Linux bastion host banner
+image::../docs/deployment_guide/images/banner.png[banner]
+
+To customize the banner, create an ASCII text file with your own banner content. Then upload the file to an S3 bucket or other publicly accessible location, and verify that it is accessible from the host.
+
+To enable the banner, you set the *Bastion banner* parameter to *true* during deployment. The banner is disabled by default. We recommend that you enable it during deployment to notify users that all their actions will be monitored and recorded.
