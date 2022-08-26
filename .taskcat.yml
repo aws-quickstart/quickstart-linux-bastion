@@ -1,8 +1,6 @@
 project:
   name: quickstart-linux-bastion
   owner: quickstart-eng@amazon.com
-  lambda_source_path: functions/source
-  lambda_zip_path: packages
   s3_regional_buckets: true
   regions:
     - af-south-1
