@@ -32,7 +32,7 @@ project:
   template: templates/linux-bastion-entrypoint-new-vpc.template.yaml
   parameters:
     AvailabilityZones: $[taskcat_getaz_2]
-    KeyPairName: $[taskcat_getkeypair]
+    KeyPairName: --override--
     QSS3BucketName: $[taskcat_autobucket]
     QSS3BucketRegion: $[taskcat_current_region]
 tests:
