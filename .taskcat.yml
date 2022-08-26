@@ -29,7 +29,7 @@ project:
     - us-gov-west-1
     - cn-north-1
     - cn-northwest-1
-  template: templates/linux-bastion-master.template
+  template: templates/linux-bastion-entrypoint-new-vpc.template.yaml
   parameters:
     AvailabilityZones: $[taskcat_getaz_2]
     KeyPairName: $[taskcat_getkeypair]

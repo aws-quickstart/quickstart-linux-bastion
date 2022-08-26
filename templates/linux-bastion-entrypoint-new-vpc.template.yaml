@@ -1,9 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  **DEPRECATED: This template has been deprecated in favor of
-  'linux-bastion-entrypoint-new-vpc.template.yaml', and is no longer being
-  maintained.**
-  LinuxBastion+VPC Jul,30,2020 (qs-1qup6ra9p) (Please do not remove)
+  AWS CloudFormation template for deploying Linux bastion hosts in an
+  auto-scaling group in a new VPC. (qs-1qup6ra9p)
 Metadata:
   QuickStartDocumentation:
     EntrypointName: Launch into a new VPC
@@ -260,7 +258,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub
-        - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/linux-bastion.template
+        - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/linux-bastion-entrypoint-existing-vpc.template.yaml
         - S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
           S3Region: !If [UsingDefaultBucket, !Ref AWS::Region, !Ref QSS3BucketRegion]
       Parameters:
