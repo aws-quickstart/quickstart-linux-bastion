@@ -9,47 +9,46 @@ PROGRAM='Linux Bastion'
 IMDS_BASE_URL='http://169.254.169.254/latest'
 ##################################### Functions Definitions
 function checkos () {
-    platform='unknown'
-    unamestr=`uname`
-    if [[ "${unamestr}" == 'Linux' ]]; then
-        platform='linux'
-    else
-        echo "[WARNING] This script is not supported on MacOS or FreeBSD"
-        exit 1
-    fi
-    echo "${FUNCNAME[0]} Ended"
+  platform='unknown'
+  unamestr=`uname`
+  if [[ "${unamestr}" == 'Linux' ]]; then
+    platform='linux'
+  else
+    echo "[WARNING] This script is not supported on MacOS or FreeBSD"
+    exit 1
+  fi
+  echo "${FUNCNAME[0]} Ended"
 }
 
 function imdsv2_token() {
-    curl -X PUT "${IMDS_BASE_URL}/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 600"
+  curl -X PUT "${IMDS_BASE_URL}/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 600"
 }
 
 function imds_request() {
-    REQUEST_PATH=$1
-    if [[ -z $TOKEN ]]; then
-        TOKEN=$(imdsv2_token)
-    fi
-    curl -sH "X-aws-ec2-metadata-token: $TOKEN" "${IMDS_BASE_URL}/${REQUEST_PATH}"
+  REQUEST_PATH=$1
+  if [[ -z $TOKEN ]]; then
+    TOKEN=$(imdsv2_token)
+  fi
+  curl -sH "X-aws-ec2-metadata-token: $TOKEN" "${IMDS_BASE_URL}/${REQUEST_PATH}"
 }
 
 function setup_environment_variables() {
-    REGION=$(imds_request meta-data/placement/availability-zone/)
-      #ex: us-east-1a => us-east-1
-    REGION=${REGION: :-1}
+  REGION=$(imds_request meta-data/placement/availability-zone/)
+    #ex: us-east-1a => us-east-1
+  REGION=${REGION: :-1}
 
-    ETH0_MAC=$(/sbin/ip link show dev eth0 | /bin/egrep -o -i 'link/ether\ ([0-9a-z]{2}:){5}[0-9a-z]{2}' | /bin/sed -e 's,link/ether\ ,,g')
+  ETH0_MAC=$(/sbin/ip link show dev eth0 | /bin/egrep -o -i 'link/ether\ ([0-9a-z]{2}:){5}[0-9a-z]{2}' | /bin/sed -e 's,link/ether\ ,,g')
 
-    _userdata_file="/var/lib/cloud/instance/user-data.txt"
+  _userdata_file="/var/lib/cloud/instance/user-data.txt"
 
-    INSTANCE_ID=$(imds_request meta-data/instance-id)
-    EIP_LIST=$(grep EIP_LIST ${_userdata_file} | sed -e 's/EIP_LIST=//g' -e 's/\"//g')
+  INSTANCE_ID=$(imds_request meta-data/instance-id)
+  EIP_LIST=$(grep EIP_LIST ${_userdata_file} | sed -e 's/EIP_LIST=//g' -e 's/\"//g')
 
-    LOCAL_IP_ADDRESS=$(imds_request meta-data/network/interfaces/macs/${ETH0_MAC}/local-ipv4s/)
+  LOCAL_IP_ADDRESS=$(imds_request meta-data/network/interfaces/macs/${ETH0_MAC}/local-ipv4s/)
 
-    CWG=$(grep CLOUDWATCHGROUP ${_userdata_file} | sed -e 's/CLOUDWATCHGROUP=//g' -e 's/\"//g')
+  CWG=$(grep CLOUDWATCHGROUP ${_userdata_file} | sed -e 's/CLOUDWATCHGROUP=//g' -e 's/\"//g')
 
-
-    export REGION ETH0_MAC EIP_LIST CWG LOCAL_IP_ADDRESS INSTANCE_ID
+  export REGION ETH0_MAC EIP_LIST CWG LOCAL_IP_ADDRESS INSTANCE_ID
 }
 
 function verify_dependencies(){
@@ -65,178 +64,174 @@ function verify_dependencies(){
 }
 
 function usage() {
-    echo "$0 <usage>"
-    echo " "
-    echo "options:"
-    echo -e "--help \t Show options for this script"
-    echo -e "--banner \t Enable or Disable Bastion Message"
-    echo -e "--enable \t SSH Banner"
-    echo -e "--tcp-forwarding \t Enable or Disable TCP Forwarding"
-    echo -e "--x11-forwarding \t Enable or Disable X11 Forwarding"
+  echo "$0 <usage>"
+  echo " "
+  echo "options:"
+  echo -e "--help \t Show options for this script"
+  echo -e "--banner \t Enable or Disable Bastion Message"
+  echo -e "--enable \t SSH Banner"
+  echo -e "--tcp-forwarding \t Enable or Disable TCP Forwarding"
+  echo -e "--x11-forwarding \t Enable or Disable X11 Forwarding"
 }
 
 function chkstatus () {
-    if [[ $? -eq 0 ]]
-    then
-        echo "Script [PASS]"
-    else
-        echo "Script [FAILED]" >&2
-        exit 1
-    fi
+  if [[ $? -eq 0 ]]
+  then
+    echo "Script [PASS]"
+  else
+    echo "Script [FAILED]" >&2
+    exit 1
+  fi
 }
 
 function osrelease () {
-    OS=`cat /etc/os-release | grep '^NAME=' |  tr -d \" | sed 's/\n//g' | sed 's/NAME=//g'`
-    if [[ "${OS}" == "Ubuntu" ]]; then
-        echo "Ubuntu"
-    elif [[ "${OS}" == "Amazon Linux AMI" ]] || [[ "${OS}" == "Amazon Linux" ]]; then
-        echo "AMZN"
-    elif [[ "${OS}" == "CentOS Linux" ]]; then
-        echo "CentOS"
-    elif [[ "${OS}" == "SLES" ]]; then
-        echo "SLES"
-    else
-        echo "Operating System Not Found"
-    fi
-    echo "${FUNCNAME[0]} Ended" >> /var/log/cfn-init.log
+  OS=`cat /etc/os-release | grep '^NAME=' |  tr -d \" | sed 's/\n//g' | sed 's/NAME=//g'`
+  if [[ "${OS}" == "Ubuntu" ]]; then
+    echo "Ubuntu"
+  elif [[ "${OS}" == "Amazon Linux AMI" ]] || [[ "${OS}" == "Amazon Linux" ]]; then
+    echo "AMZN"
+  elif [[ "${OS}" == "CentOS Linux" ]]; then
+    echo "CentOS"
+  elif [[ "${OS}" == "SLES" ]]; then
+    echo "SLES"
+  else
+    echo "Operating System Not Found"
+  fi
+  echo "${FUNCNAME[0]} Ended" >> /var/log/cfn-init.log
 }
 
 function setup_logs () {
+  echo "${FUNCNAME[0]} Started"
+  URL_SUFFIX="${URL_SUFFIX:-amazonaws.com}"
+  HARDWARE=`uname -m`
+  if [[ "${release}" == "SLES" ]]; then
+    curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/suse/amd64/latest/amazon-cloudwatch-agent.rpm" -O
+    zypper install --allow-unsigned-rpm -y ./amazon-cloudwatch-agent.rpm
+    rm ./amazon-cloudwatch-agent.rpm
+  elif [[ "${release}" == "CentOS" ]]; then
+    curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/centos/amd64/latest/amazon-cloudwatch-agent.rpm" -O
+    rpm -U ./amazon-cloudwatch-agent.rpm
+    rm ./amazon-cloudwatch-agent.rpm
+  elif [[ "${release}" == "Ubuntu" ]]; then
+    export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+    curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb" -O
+    dpkg -i -E ./amazon-cloudwatch-agent.deb
+    rm ./amazon-cloudwatch-agent.deb
+  elif [[ "${release}" == "AMZN" ]] && [[ "${HARDWARE}" == "x86_64" ]]; then
+    curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm" -O
+    rpm -U ./amazon-cloudwatch-agent.rpm
+    rm ./amazon-cloudwatch-agent.rpm
+  elif [[ "${release}" == "AMZN" ]] && [[ "${HARDWARE}" == "aarch64" ]]; then
+    curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/amazon_linux/arm64/latest/amazon-cloudwatch-agent.rpm" -O
+    rpm -U ./amazon-cloudwatch-agent.rpm
+    rm ./amazon-cloudwatch-agent.rpm
+  fi
 
-    echo "${FUNCNAME[0]} Started"
-    URL_SUFFIX="${URL_SUFFIX:-amazonaws.com}"
-    HARDWARE=`uname -m`
-    if [[ "${release}" == "SLES" ]]; then
-        curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/suse/amd64/latest/amazon-cloudwatch-agent.rpm" -O
-        zypper install --allow-unsigned-rpm -y ./amazon-cloudwatch-agent.rpm
-        rm ./amazon-cloudwatch-agent.rpm
-    elif [[ "${release}" == "CentOS" ]]; then
-        curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/centos/amd64/latest/amazon-cloudwatch-agent.rpm" -O
-        rpm -U ./amazon-cloudwatch-agent.rpm
-        rm ./amazon-cloudwatch-agent.rpm
-    elif [[ "${release}" == "Ubuntu" ]]; then
-        export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
-        curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb" -O
-        dpkg -i -E ./amazon-cloudwatch-agent.deb
-        rm ./amazon-cloudwatch-agent.deb
-    elif [[ "${release}" == "AMZN" ]] && [[ "${HARDWARE}" == "x86_64" ]]; then
-        curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm" -O
-        rpm -U ./amazon-cloudwatch-agent.rpm
-        rm ./amazon-cloudwatch-agent.rpm
-    elif [[ "${release}" == "AMZN" ]] && [[ "${HARDWARE}" == "aarch64" ]]; then
-        curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/amazon_linux/arm64/latest/amazon-cloudwatch-agent.rpm" -O
-        rpm -U ./amazon-cloudwatch-agent.rpm
-        rm ./amazon-cloudwatch-agent.rpm
-    fi
-
-    cat <<EOF >> /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+  cat <<EOF >> /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 {
-    "logs": {
-        "force_flush_interval": 5,
-        "logs_collected": {
-            "files": {
-                "collect_list": [
-                    {
-                        "file_path": "/var/log/audit/audit.log",
-                        "log_group_name": "${CWG}",
-                        "log_stream_name": "{instance_id}",
-                        "timestamp_format": "%Y-%m-%d %H:%M:%S",
-                        "timezone": "UTC"
-                    }
-                ]
-            }
-        }
+  "logs": {
+    "force_flush_interval": 5,
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/var/log/audit/audit.log",
+            "log_group_name": "${CWG}",
+            "log_stream_name": "{instance_id}",
+            "timestamp_format": "%Y-%m-%d %H:%M:%S",
+            "timezone": "UTC"
+          }
+        ]
+      }
     }
+  }
 }
 EOF
 
-    if [ -x /bin/systemctl ] || [ -x /usr/bin/systemctl ]; then
-        systemctl enable amazon-cloudwatch-agent.service
-        systemctl restart amazon-cloudwatch-agent.service
-    else
-        start amazon-cloudwatch-agent
-    fi
+  if [ -x /bin/systemctl ] || [ -x /usr/bin/systemctl ]; then
+    systemctl enable amazon-cloudwatch-agent.service
+    systemctl restart amazon-cloudwatch-agent.service
+  else
+    start amazon-cloudwatch-agent
+  fi
 }
 
 function setup_os () {
+  echo "${FUNCNAME[0]} Started"
 
-    echo "${FUNCNAME[0]} Started"
+  echo "Defaults env_keep += \"SSH_CLIENT\"" >> /etc/sudoers
 
-    echo "Defaults env_keep += \"SSH_CLIENT\"" >> /etc/sudoers
+  if [[ "${release}" == "Ubuntu" ]]; then
+    user_group="ubuntu"
+  elif [[ "${release}" == "CentOS" ]]; then
+    user_group="centos"
+  elif [[ "${release}" == "SLES" ]]; then
+    user_group="users"
+  else
+    user_group="ec2-user"
+  fi
 
-    if [[ "${release}" == "Ubuntu" ]]; then
-        user_group="ubuntu"
-    elif [[ "${release}" == "CentOS" ]]; then
-        user_group="centos"
-    elif [[ "${release}" == "SLES" ]]; then
-        user_group="users"
-    else
-        user_group="ec2-user"
-    fi
+  if [[ "${release}" == "CentOS" ]]; then
+    /sbin/restorecon -v /etc/ssh/sshd_config
+  fi
 
-    if [[ "${release}" == "CentOS" ]]; then
-        /sbin/restorecon -v /etc/ssh/sshd_config
-    fi
+  if [[ "${release}" == "SLES" ]]; then
+    echo "0 0 * * * zypper patch --non-interactive" > ~/mycron
+  elif [[ "${release}" == "Ubuntu" ]]; then
+    apt-get install -y unattended-upgrades
+    echo "0 0 * * * unattended-upgrades -d" > ~/mycron
+  else
+    echo "0 0 * * * yum -y update --security" > ~/mycron
+  fi
 
-    if [[ "${release}" == "SLES" ]]; then
-        echo "0 0 * * * zypper patch --non-interactive" > ~/mycron
-    elif [[ "${release}" == "Ubuntu" ]]; then
-        apt-get install -y unattended-upgrades
-        echo "0 0 * * * unattended-upgrades -d" > ~/mycron
-    else
-        echo "0 0 * * * yum -y update --security" > ~/mycron
-    fi
-
-    crontab ~/mycron
-    rm ~/mycron
-    systemctl restart sshd
-    echo "${FUNCNAME[0]} Ended"
+  crontab ~/mycron
+  rm ~/mycron
+  systemctl restart sshd
+  echo "${FUNCNAME[0]} Ended"
 }
 
 function request_eip() {
+  # Is the already-assigned Public IP an elastic IP?
+  _query_assigned_public_ip
 
-    # Is the already-assigned Public IP an elastic IP?
-    _query_assigned_public_ip
+  set +e
+  _determine_eip_assc_status ${PUBLIC_IP_ADDRESS}
+  set -e
 
-    set +e
-    _determine_eip_assc_status ${PUBLIC_IP_ADDRESS}
-    set -e
+  if [[ ${_eip_associated} -eq 0 ]]; then
+    echo "The Public IP address associated with eth0 (${PUBLIC_IP_ADDRESS}) is already an Elastic IP. Not proceeding further."
+    exit 1
+  fi
 
-    if [[ ${_eip_associated} -eq 0 ]]; then
-      echo "The Public IP address associated with eth0 (${PUBLIC_IP_ADDRESS}) is already an Elastic IP. Not proceeding further."
-      exit 1
+  EIP_ARRAY=(${EIP_LIST//,/ })
+  _eip_assigned_count=0
+
+  for eip in "${EIP_ARRAY[@]}"; do
+    if [[ "${eip}" == "Null" ]]; then
+      echo "Detected a NULL Value, moving on."
+      continue
     fi
 
-    EIP_ARRAY=(${EIP_LIST//,/ })
-    _eip_assigned_count=0
+    # Determine if the EIP has already been assigned.
+    set +e
+    _determine_eip_assc_status ${eip}
+    set -e
+    _determine_eip_allocation ${eip}
 
-    for eip in "${EIP_ARRAY[@]}"; do
+    # Attempt to assign EIP to the ENI.
+    set +e
+    aws ec2 associate-address --instance-id ${INSTANCE_ID} --allocation-id  ${eip_allocation} --region ${REGION}
 
-      if [[ "${eip}" == "Null" ]]; then
-        echo "Detected a NULL Value, moving on."
-        continue
-      fi
+    rc=$?
+    set -e
 
-      # Determine if the EIP has already been assigned.
-      set +e
-      _determine_eip_assc_status ${eip}
-      set -e
-      _determine_eip_allocation ${eip}
+    if [[ ${rc} -ne 0 ]]; then
+      echo "Unable to associate EIP ${eip}. Failure. Exiting"
+      exit 1
+    fi
+  done
 
-      # Attempt to assign EIP to the ENI.
-      set +e
-      aws ec2 associate-address --instance-id ${INSTANCE_ID} --allocation-id  ${eip_allocation} --region ${REGION}
-
-      rc=$?
-      set -e
-
-      if [[ ${rc} -ne 0 ]]; then
-        echo "Unable to associate EIP ${eip}. Failure. Exiting"
-        exit 1
-      fi
-    done
-
-    echo "${FUNCNAME[0]} Ended"
+  echo "${FUNCNAME[0]} Ended"
 }
 
 function _query_assigned_public_ip() {
@@ -261,25 +256,24 @@ function _determine_eip_assc_status(){
   else
     _eip_associated=0
   fi
-
 }
 
 function _determine_eip_allocation(){
   echo "Determining EIP Allocation for [${1}]"
   resource_id_length=$(aws ec2 describe-addresses --public-ips ${1} --output text --region ${REGION} | head -n 1 | awk {'print $2'} | sed 's/.*eipalloc-//')
   if [[ "${#resource_id_length}" -eq 17 ]]; then
-      eip_allocation=$(aws ec2 describe-addresses --public-ips ${1} --output text --region ${REGION}| egrep 'eipalloc-([a-z0-9]{17})' -o)
+    eip_allocation=$(aws ec2 describe-addresses --public-ips ${1} --output text --region ${REGION}| egrep 'eipalloc-([a-z0-9]{17})' -o)
   else
-      eip_allocation=$(aws ec2 describe-addresses --public-ips ${1} --output text --region ${REGION}| egrep 'eipalloc-([a-z0-9]{8})' -o)
+    eip_allocation=$(aws ec2 describe-addresses --public-ips ${1} --output text --region ${REGION}| egrep 'eipalloc-([a-z0-9]{8})' -o)
   fi
 }
 
 function prevent_process_snooping() {
-    # Prevent bastion host users from viewing processes owned by other users.
-    mount -o remount,rw,hidepid=2 /proc
-    awk '!/proc/' /etc/fstab > temp && mv temp /etc/fstab
-    echo "proc /proc proc defaults,hidepid=2 0 0" >> /etc/fstab
-    echo "${FUNCNAME[0]} Ended"
+  # Prevent bastion host users from viewing processes owned by other users.
+  mount -o remount,rw,hidepid=2 /proc
+  awk '!/proc/' /etc/fstab > temp && mv temp /etc/fstab
+  echo "proc /proc proc defaults,hidepid=2 0 0" >> /etc/fstab
+  echo "${FUNCNAME[0]} Ended"
 }
 
 ##################################### End Function Definitions
@@ -299,59 +293,62 @@ TEMP=`getopt -o h --longoptions help,banner:,enable:,tcp-forwarding:,x11-forward
 eval set -- "${TEMP}"
 
 
-if [[ $# == 1 ]] ; then echo "No input provided! type ($0 --help) to see usage help" >&2 ; exit 1 ; fi
+if [[ $# == 1 ]]; then
+  echo "No input provided! type ($0 --help) to see usage help" >&2
+  exit 1
+fi
 
 # extract options and their arguments into variables.
 while true; do
-    case "$1" in
-        -h | --help)
-            usage
-            exit 1
-            ;;
-        --banner)
-            BANNER_PATH="$2";
-            shift 2
-            ;;
-        --enable)
-            ENABLE="$2";
-            shift 2
-            ;;
-        --tcp-forwarding)
-            TCP_FORWARDING="$2";
-            shift 2
-            ;;
-        --x11-forwarding)
-            X11_FORWARDING="$2";
-            shift 2
-            ;;
-        --)
-            break
-            ;;
-        *)
-            break
-            ;;
-    esac
+  case "$1" in
+    -h | --help)
+      usage
+      exit 1
+      ;;
+    --banner)
+      BANNER_PATH="$2";
+      shift 2
+      ;;
+    --enable)
+      ENABLE="$2";
+      shift 2
+      ;;
+    --tcp-forwarding)
+      TCP_FORWARDING="$2";
+      shift 2
+      ;;
+    --x11-forwarding)
+      X11_FORWARDING="$2";
+      shift 2
+      ;;
+    --)
+      break
+      ;;
+    *)
+      break
+      ;;
+  esac
 done
 
 # BANNER CONFIGURATION
 BANNER_FILE="/etc/ssh_banner"
 if [[ ${ENABLE} == "true" ]];then
-    if [[ -z ${BANNER_PATH} ]];then
-        echo "BANNER_PATH is null skipping ..."
+  if [[ -z ${BANNER_PATH} ]];then
+    echo "BANNER_PATH is null skipping..."
+  else
+    echo "BANNER_PATH = ${BANNER_PATH}"
+    echo "Creating Banner in ${BANNER_FILE}"
+    aws s3 cp "${BANNER_PATH}" "${BANNER_FILE}"  --region ${BANNER_REGION}
+    if [[ -e ${BANNER_FILE} ]] ;then
+      echo "[INFO] Installing banner..."
+      echo -e "\n Banner ${BANNER_FILE}" >>/etc/ssh/sshd_config
     else
-        echo "BANNER_PATH = ${BANNER_PATH}"
-        echo "Creating Banner in ${BANNER_FILE}"
-        aws s3 cp "${BANNER_PATH}" "${BANNER_FILE}"  --region ${BANNER_REGION}
-        if [[ -e ${BANNER_FILE} ]] ;then
-            echo "[INFO] Installing banner ... "
-            echo -e "\n Banner ${BANNER_FILE}" >>/etc/ssh/sshd_config
-        else
-            echo "[INFO] banner file is not accessible skipping ..."
-            exit 1;
-        fi
+      echo "[INFO] banner file is not accessible skipping..."
+      exit 1;
     fi
+  fi
 else
-    echo "Banner message is not enabled!"
+  echo "Banner message is not enabled!"
 fi
 
 #Enable/Disable TCP forwarding
@@ -363,22 +360,22 @@ X11_FORWARDING=`echo "${X11_FORWARDING}" | sed 's/\\n//g'`
 echo "Value of TCP_FORWARDING - ${TCP_FORWARDING}"
 echo "Value of X11_FORWARDING - ${X11_FORWARDING}"
 if [[ ${TCP_FORWARDING} == "false" ]];then
-    awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-    echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
+  awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+  echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
 fi
 
 if [[ ${X11_FORWARDING} == "false" ]];then
-    awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-    echo "X11Forwarding no" >> /etc/ssh/sshd_config
+  awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
+  echo "X11Forwarding no" >> /etc/ssh/sshd_config
 fi
 
 release=$(osrelease)
 if [[ "${release}" == "Operating System Not Found" ]]; then
-    echo "[ERROR] Unsupported Linux Bastion OS"
-    exit 1
+  echo "[ERROR] Unsupported Linux Bastion OS"
+  exit 1
 else
-    setup_os
-    setup_logs
+  setup_os
+  setup_logs
 fi
 
 prevent_process_snooping
