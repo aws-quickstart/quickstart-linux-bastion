@@ -17,7 +17,7 @@ checkos() {
     echo "[WARNING] This script is not supported on MacOS or FreeBSD"
     exit 1
   fi
-  echo "${FUNCNAME[0]} Ended"
+  echo "${FUNCNAME[0]} ended"
 }
 
 imdsv2_token() {
@@ -60,7 +60,7 @@ verify_dependencies() {
     ./aws/install
     popd
   fi
-  echo "${FUNCNAME[0]} Ended"
+  echo "${FUNCNAME[0]} ended"
 }
 
 usage() {
@@ -68,10 +68,10 @@ usage() {
   echo " "
   echo "options:"
   echo -e "--help \t Show options for this script"
-  echo -e "--banner \t Enable or Disable Bastion Message"
-  echo -e "--enable \t SSH Banner"
-  echo -e "--tcp-forwarding \t Enable or Disable TCP Forwarding"
-  echo -e "--x11-forwarding \t Enable or Disable X11 Forwarding"
+  echo -e "--banner \t Enable or disable bastion message"
+  echo -e "--enable \t SSH banner"
+  echo -e "--tcp-forwarding \t Enable or disable TCP forwarding"
+  echo -e "--x11-forwarding \t Enable or disable X11 forwarding"
 }
 
 chkstatus() {
@@ -95,13 +95,13 @@ osrelease() {
   elif [[ "${OS}" == "SLES" ]]; then
     echo "SLES"
   else
-    echo "Operating System Not Found"
+    echo "Operating system not found"
   fi
-  echo "${FUNCNAME[0]} Ended" >> /var/log/cfn-init.log
+  echo "${FUNCNAME[0]} ended" >> /var/log/cfn-init.log
 }
 
 setup_logs() {
-  echo "${FUNCNAME[0]} Started"
+  echo "${FUNCNAME[0]} started"
   URL_SUFFIX="${URL_SUFFIX:-amazonaws.com}"
   HARDWARE=`uname -m`
   if [[ "${release}" == "SLES" ]]; then
@@ -157,7 +157,7 @@ EOF
 }
 
 setup_os() {
-  echo "${FUNCNAME[0]} Started"
+  echo "${FUNCNAME[0]} started"
 
   echo "Defaults env_keep += \"SSH_CLIENT\"" >> /etc/sudoers
 
@@ -187,7 +187,7 @@ setup_os() {
   crontab ~/mycron
   rm ~/mycron
   systemctl restart sshd
-  echo "${FUNCNAME[0]} Ended"
+  echo "${FUNCNAME[0]} ended"
 }
 
 request_eip() {
@@ -231,7 +231,7 @@ request_eip() {
     fi
   done
 
-  echo "${FUNCNAME[0]} Ended"
+  echo "${FUNCNAME[0]} ended"
 }
 
 _query_assigned_public_ip() {
@@ -273,7 +273,7 @@ prevent_process_snooping() {
   mount -o remount,rw,hidepid=2 /proc
   awk '!/proc/' /etc/fstab > temp && mv temp /etc/fstab
   echo "proc /proc proc defaults,hidepid=2 0 0" >> /etc/fstab
-  echo "${FUNCNAME[0]} Ended"
+  echo "${FUNCNAME[0]} ended"
 }
 
 ##################################### End Function Definitions
