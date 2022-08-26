@@ -53,10 +53,15 @@ function setup_environment_variables() {
 }
 
 function verify_dependencies(){
-    if [[ "a$(which aws)" == "a" ]]; then
-      pip install awscli==1.19.79
-    fi
-    echo "${FUNCNAME[0]} Ended"
+  if [[ "a$(which aws)" == "a" ]]; then
+    uname=$(uname -m)
+    pushd /tmp
+    wget -O "./awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-$uname.zip"
+    unzip ./awscliv2.zip
+    ./aws/install
+    popd
+  fi
+  echo "${FUNCNAME[0]} Ended"
 }
 
 function usage() {
