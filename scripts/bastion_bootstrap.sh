@@ -8,7 +8,7 @@
 PROGRAM='Linux Bastion'
 IMDS_BASE_URL='http://169.254.169.254/latest'
 ##################################### Functions Definitions
-function checkos () {
+checkos() {
   platform='unknown'
   unamestr=`uname`
   if [[ "${unamestr}" == 'Linux' ]]; then
@@ -20,11 +20,11 @@ function checkos () {
   echo "${FUNCNAME[0]} Ended"
 }
 
-function imdsv2_token() {
+imdsv2_token() {
   curl -X PUT "${IMDS_BASE_URL}/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 600"
 }
 
-function imds_request() {
+imds_request() {
   REQUEST_PATH=$1
   if [[ -z $TOKEN ]]; then
     TOKEN=$(imdsv2_token)
@@ -32,7 +32,7 @@ function imds_request() {
   curl -sH "X-aws-ec2-metadata-token: $TOKEN" "${IMDS_BASE_URL}/${REQUEST_PATH}"
 }
 
-function setup_environment_variables() {
+setup_environment_variables() {
   REGION=$(imds_request meta-data/placement/availability-zone/)
     #ex: us-east-1a => us-east-1
   REGION=${REGION: :-1}
@@ -51,7 +51,7 @@ function setup_environment_variables() {
   export REGION ETH0_MAC EIP_LIST CWG LOCAL_IP_ADDRESS INSTANCE_ID
 }
 
-function verify_dependencies(){
+verify_dependencies() {
   if [[ "a$(which aws)" == "a" ]]; then
     uname=$(uname -m)
     pushd /tmp
@@ -63,7 +63,7 @@ function verify_dependencies(){
   echo "${FUNCNAME[0]} Ended"
 }
 
-function usage() {
+usage() {
   echo "$0 <usage>"
   echo " "
   echo "options:"
@@ -74,7 +74,7 @@ function usage() {
   echo -e "--x11-forwarding \t Enable or Disable X11 Forwarding"
 }
 
-function chkstatus () {
+chkstatus() {
   if [[ $? -eq 0 ]]
   then
     echo "Script [PASS]"
@@ -84,7 +84,7 @@ function chkstatus () {
   fi
 }
 
-function osrelease () {
+osrelease() {
   OS=`cat /etc/os-release | grep '^NAME=' |  tr -d \" | sed 's/\n//g' | sed 's/NAME=//g'`
   if [[ "${OS}" == "Ubuntu" ]]; then
     echo "Ubuntu"
@@ -100,7 +100,7 @@ function osrelease () {
   echo "${FUNCNAME[0]} Ended" >> /var/log/cfn-init.log
 }
 
-function setup_logs () {
+setup_logs() {
   echo "${FUNCNAME[0]} Started"
   URL_SUFFIX="${URL_SUFFIX:-amazonaws.com}"
   HARDWARE=`uname -m`
@@ -156,7 +156,7 @@ EOF
   fi
 }
 
-function setup_os () {
+setup_os() {
   echo "${FUNCNAME[0]} Started"
 
   echo "Defaults env_keep += \"SSH_CLIENT\"" >> /etc/sudoers
@@ -190,7 +190,7 @@ function setup_os () {
   echo "${FUNCNAME[0]} Ended"
 }
 
-function request_eip() {
+request_eip() {
   # Is the already-assigned Public IP an elastic IP?
   _query_assigned_public_ip
 
@@ -234,14 +234,14 @@ function request_eip() {
   echo "${FUNCNAME[0]} Ended"
 }
 
-function _query_assigned_public_ip() {
+_query_assigned_public_ip() {
   # Note: ETH0 Only.
   # - Does not distinguish between EIP and Standard IP. Need to cross-ref later.
   echo "Querying the assigned public IP"
   PUBLIC_IP_ADDRESS=$(imds_request meta-data/public-ipv4/${ETH0_MAC}/public-ipv4s/)
 }
 
-function _determine_eip_assc_status(){
+_determine_eip_assc_status() {
   # Is the provided EIP associated?
   # Also determines if an IP is an EIP.
   # 0 => true
@@ -258,7 +258,7 @@ function _determine_eip_assc_status(){
   fi
 }
 
-function _determine_eip_allocation(){
+_determine_eip_allocation() {
   echo "Determining EIP Allocation for [${1}]"
   resource_id_length=$(aws ec2 describe-addresses --public-ips ${1} --output text --region ${REGION} | head -n 1 | awk {'print $2'} | sed 's/.*eipalloc-//')
   if [[ "${#resource_id_length}" -eq 17 ]]; then
@@ -268,7 +268,7 @@ function _determine_eip_allocation(){
   fi
 }
 
-function prevent_process_snooping() {
+prevent_process_snooping() {
   # Prevent bastion host users from viewing processes owned by other users.
   mount -o remount,rw,hidepid=2 /proc
   awk '!/proc/' /etc/fstab > temp && mv temp /etc/fstab
