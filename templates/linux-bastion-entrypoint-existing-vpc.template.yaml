@@ -709,14 +709,12 @@ Resources:
             #cfn signaling functions
             yum install git -y || apt-get install -y git || zypper -n install git
 
-            function cfn_fail
-            {
+            cfn_fail() {
               cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource BastionAutoScalingGroup
               exit 1
             }
 
-            function cfn_success
-            {
+            cfn_success() {
               cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource BastionAutoScalingGroup
               exit 0
             }
