@@ -97,6 +97,7 @@ Parameters:
       - Amazon-Linux2-HVM-ARM
       - CentOS-7-HVM
       - Ubuntu-Server-20.04-LTS-HVM
+      - Ubuntu-Server-22.04-LTS-HVM
       - SUSE-SLES-15-HVM
     Default: Amazon-Linux2-HVM
   BastionHostName:
