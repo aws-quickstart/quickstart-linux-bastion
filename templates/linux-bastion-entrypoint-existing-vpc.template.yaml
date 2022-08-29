@@ -753,7 +753,7 @@ Resources:
               FromPort: -1
               ToPort: -1
               CidrIp: !Ref RemoteAccessCIDR
-          - !Ref "AWS::NoValue"
+          - !Ref AWS::NoValue
 Outputs:
   BastionAutoScalingGroup:
     Description: Auto Scaling group reference ID.
