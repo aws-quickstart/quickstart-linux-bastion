@@ -660,9 +660,6 @@ Resources:
               env:
                 BASTION_OS: !FindInMap [LinuxAMINameMap, !Ref BastionAMIOS, OS]
               command: ./auditing_configure.sh
-              # command:
-              #   - !If [ ]
-              #   - "cat /tmp/auditd.rules >> /etc/audit/rules.d/audit.rules && service auditd restart"
             b-bootstrap:
               cwd: /tmp/
               env:
