@@ -128,14 +128,14 @@ Parameters:
     Default: 'false'
   EnableTCPForwarding:
     Type: String
-    Description: To enable TCP forwarding, choose "true".
+    Description: Choose "true" to enable TCP forwarding.
     AllowedValues:
       - 'true'
       - 'false'
     Default: 'false'
   EnableX11Forwarding:
     Type: String
-    Description: To enable X11 forwarding, choose "true".
+    Description: Choose "true" to enable X11 forwarding.
     AllowedValues:
       - 'true'
       - 'false'
