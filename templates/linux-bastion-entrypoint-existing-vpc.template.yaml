@@ -704,7 +704,7 @@ Resources:
             done
             export PATH=$PATH:/usr/local/bin
             #cfn signaling functions
-            yum install git -y || apt-get install -y git || zypper -n install git
+            yum install git -y || apt-get install -y git unzip || zypper -n install git
 
             cfn_fail() {
               cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource BastionAutoScalingGroup
@@ -716,9 +716,25 @@ Resources:
               exit 0
             }
 
-            until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git ; do echo "Retrying"; done
-            cd /quickstart-linux-utilities;
-            source quickstart-cfn-tools.source;
+            pushd /tmp
+
+            if [[ "a$(which aws)" == "a" ]]
+            then
+              echo "Installing AWS CLI..."
+              uname=$(uname -m)
+              wget -O "./awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-$uname.zip"
+              unzip ./awscliv2.zip
+              ./aws/install
+            fi
+
+            until aws s3 cp --no-progress "s3://${S3Bucket}/${QSS3KeyPrefix}scripts/cfn-tools.sh" .
+            do
+              echo "Retrying..."
+            done
+            source ./cfn-tools.sh
+
+            popd /tmp
+
             qs_update-os || qs_err;
             qs_bootstrap_pip || qs_err " pip bootstrap failed ";
             qs_aws-cfn-bootstrap || qs_err " cfn bootstrap failed ";
@@ -731,6 +747,7 @@ Resources:
             EIP2: !If [2BastionCondition, !Ref EIP2, 'Null']
             EIP3: !If [3BastionCondition, !Ref EIP3, 'Null']
             EIP4: !If [4BastionCondition, !Ref EIP4, 'Null']
+            S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
   BastionSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:

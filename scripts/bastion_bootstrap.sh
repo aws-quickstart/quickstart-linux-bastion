@@ -51,18 +51,6 @@ setup_environment_variables() {
   export REGION ETH0_MAC EIP_LIST CWG LOCAL_IP_ADDRESS INSTANCE_ID
 }
 
-verify_dependencies() {
-  if [[ "a$(which aws)" == "a" ]]; then
-    uname=$(uname -m)
-    pushd /tmp
-    wget -O "./awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-$uname.zip"
-    unzip ./awscliv2.zip
-    ./aws/install
-    popd
-  fi
-  echo "${FUNCNAME[0]} ended"
-}
-
 usage() {
   echo "$0 <usage>"
   echo " "
@@ -280,8 +268,7 @@ prevent_process_snooping() {
 
 # Call checkos to ensure platform is Linux
 checkos
-# Verify dependencies are installed.
-verify_dependencies
+
 # Assuming it is, setup environment variables.
 setup_environment_variables
 
