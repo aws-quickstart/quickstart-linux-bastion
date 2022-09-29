@@ -106,7 +106,7 @@ tests:
       BastionAMIOS: Amazon-Linux2-HVM-ARM
       BastionInstanceType: t4g.nano
       RemoteAccessCIDR: disabled-onlyssmaccess
-      NumBastionHosts: 2
+      NumBastionHosts: 1
     regions:
       - ap-south-1
       - ca-central-1
