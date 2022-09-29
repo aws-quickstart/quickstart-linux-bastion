@@ -7,7 +7,6 @@
 #
 # -Amazon Linux 2
 # -CentOS 7
-# -Red Hat Enterprise Linux 7
 # -SUSE Linux Enterprise Server 15
 # -Ubuntu 20.04 & 22.04
 #
@@ -268,22 +267,13 @@ qs_aws-cfn-bootstrap() {
     export PATH=$PATH:/opt/aws/bin
     yum install -y python3-pip
     alternatives --set python /usr/bin/python3
-  elif [ "$INSTANCE_OSTYPE" == "amzn" ]; then
-    echo "Warning: Support for this OS Version is deprecated - Consider upgrading to Amazon Linux 2"
-    cp scripts/opt-aws.sh /etc/profile.d/
-    ln -s /opt/aws/bin/cfn-* /usr/bin/
-    export PATH=$PATH:/opt/aws/bin
-    yum install -y python3-pip
-    alternatives --set python /usr/bin/python3
+
   elif [ "$INSTANCE_OSTYPE" == "ubuntu" ]; then
     apt-get -y update
     apt-get -y install python2.7
     curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output /tmp/get-pip2.7.py
     python2.7 /tmp/get-pip2.7.py
     pip2 install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-  elif [ "$INSTANCE_OSTYPE" == "rhel" ]; then
-    yum update -y
-    pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
   elif [ "$INSTANCE_OSTYPE" == "centos" ]; then
     yum update -y
     qs_bootstrap_pip
