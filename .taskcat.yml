@@ -39,7 +39,6 @@ tests:
   amznlinux2hvm:
     parameters:
       BastionAMIOS: Amazon-Linux2-HVM
-      BastionInstanceType: t3.medium
       RemoteAccessCIDR: 10.0.0.0/16
   centos7hvm:
     parameters:
@@ -47,11 +46,6 @@ tests:
       BastionInstanceType: t3.medium
       RemoteAccessCIDR: 10.0.0.0/16
     regions:
-      - ap-south-1
-      - ca-central-1
-      - eu-central-1
-      - eu-north-1
-      - eu-west-1
       - us-east-1
   sles15hvm:
     parameters:
@@ -59,36 +53,21 @@ tests:
       BastionInstanceType: t3.medium
       RemoteAccessCIDR: 10.0.0.0/16
     regions:
-      - ap-south-1
-      - ca-central-1
       - eu-central-1
-      - eu-north-1
-      - eu-west-1
-      - us-east-1
   us2004hvm:
     parameters:
       BastionAMIOS: Ubuntu-Server-20.04-LTS-HVM
-      BastionInstanceType: t3.medium
+      BastionInstanceType: t3.small
       RemoteAccessCIDR: 10.0.0.0/16
     regions:
-      - ap-south-1
-      - ca-central-1
-      - eu-central-1
-      - eu-north-1
-      - eu-west-1
-      - us-east-1
+      - eu-west-3
   us2204hvm:
     parameters:
       BastionAMIOS: Ubuntu-Server-22.04-LTS-HVM
-      BastionInstanceType: t3.medium
+      BastionInstanceType: t3.small
       RemoteAccessCIDR: 10.0.0.0/16
     regions:
-      - ap-south-1
-      - ca-central-1
-      - eu-central-1
       - eu-north-1
-      - eu-west-1
-      - us-east-1
   arminst:
     parameters:
       BastionAMIOS: Amazon-Linux2-HVM-ARM
@@ -96,11 +75,6 @@ tests:
       RemoteAccessCIDR: 10.0.0.0/16
     regions:
       - ap-south-1
-      - ca-central-1
-      - eu-central-1
-      - eu-north-1
-      - eu-west-1
-      - us-east-1
   onlyssmaccess:
     parameters:
       BastionAMIOS: Amazon-Linux2-HVM-ARM
@@ -108,12 +82,6 @@ tests:
       RemoteAccessCIDR: disabled-onlyssmaccess
       NumBastionHosts: 1
     regions:
-      - ap-south-1
-      - ca-central-1
-      - eu-central-1
-      - eu-north-1
-      - eu-west-1
-      - us-east-1
       - us-east-2
   multiplehosts:
     parameters:
