@@ -130,7 +130,7 @@ Parameters:
   BastionInstanceType:
     Type: String
     Description: Amazon EC2 instance type for the bastion instances.
-    Default: t2.micro
+    Default: t3.micro
   EnableBanner:
     Type: String
     Description: Choose "true" to display a banner when connecting to the bastion using SSH.
