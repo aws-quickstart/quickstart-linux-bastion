@@ -33,7 +33,7 @@ PROGRAM='AWS Reference Linux Common Tools'
 # Detects operating system type and return value
 # If no variable is passed in function will print to std-out
 #
-function qs_int_set_svc_executable(){
+qs_int_set_svc_executable() {
   if [[ $(which systemctl) ]]; then
     export qs_svc_executable="systemd"
   else
@@ -41,7 +41,7 @@ function qs_int_set_svc_executable(){
   fi
 }
 
-function qs_int_is_svc_active(){
+qs_int_is_svc_active() {
   case ${qs_svc_executable} in
     systemd)
       systemctl is-active --quiet ${1}.service
@@ -52,7 +52,7 @@ function qs_int_is_svc_active(){
   esac
 }
 
-function qs_int_service_restart() {
+qs_int_service_restart() {
   case ${qs_svc_executable} in
     systemd)
       systemctl restart ${1}.service
@@ -63,7 +63,7 @@ function qs_int_service_restart() {
   esac
 }
 
-function qs_get-ostype() {
+qs_get-ostype() {
   local __return=$1
   DETECTION_STRING="/etc/*-release"
   if [[ $(ls ${DETECTION_STRING}) ]]; then
@@ -97,7 +97,7 @@ function qs_get-ostype() {
 # Returns operating system version or return 1
 # If no variable is passed in function will print to std-out
 #
-function qs_get-osversion () {
+qs_get-osversion () {
   local __return=$1
   DETECTION_STRING="/etc/*-release"
   if [[ $(ls ${DETECTION_STRING})  ]]; then
@@ -129,7 +129,7 @@ function qs_get-osversion () {
 # If python is install returns default python path
 # If no variable is passed in function will print to std-out
 #
-function qs_get-python-path() {
+qs_get-python-path() {
   local __return=$1
   # Set PYTHON_EXECUTEABLE to default python version
   if command -v python > /dev/null 2>&1; then
@@ -153,7 +153,7 @@ function qs_get-python-path() {
 
 # Relax require tty
 #
-function qs_notty() {
+qs_notty() {
   qs_get-ostype INSTANCE_OSTYPE
   qs_get-osversion INSTANCE_OSVERSION
   echo "[INFO] Relax tty requirement"
@@ -166,7 +166,7 @@ function qs_notty() {
 
 # Installs pip from bootstrap.pypa
 #
-function qs_bootstrap_pip() {
+qs_bootstrap_pip() {
   qs_notty
   echo "[INFO] Check for python/pip"
   qs_get-python-path PYTHON_EXECUTEABLE
@@ -187,13 +187,13 @@ function qs_bootstrap_pip() {
 # Installs and configures cloudwatch
 # Then adds /var/log/syslog to log collection
 #
-function qs_cloudwatch_tracklog() {
+qs_cloudwatch_tracklog() {
   local -r __log="$@"
   cat cloudwatch_logs.stub | sed s,__LOG__,$__log,g >> /var/awslogs/etc/awslogs.conf
   qs_int_service_restart awslogs
 }
 
-function qs_cloudwatch_install() {
+qs_cloudwatch_install() {
   echo "[INFO] Install AWS CloudWatch Agent"
   REGION=`curl http://169.254.169.254/latest/dynamic/instance-identity/document|grep region|awk -F\" '{print $4}'`
   echo $'[general]\nstate_file = /var/awslogs/state/agent-state' > awslogs.conf
@@ -213,7 +213,7 @@ function qs_cloudwatch_install() {
 
 # Added EPEL enabler
 #
-function qs_enable_epel() {
+qs_enable_epel() {
   qs_get-ostype INSTANCE_OSTYPE
   qs_get-osversion INSTANCE_OSVERSION
   echo "[INFO] Enable epel-release-latest-7"
@@ -232,7 +232,7 @@ function qs_enable_epel() {
 #
 # If no variable is passed in function will print to std-out
 #
-function qs_update-os() {
+qs_update-os() {
   # Assigns values to INSTANCE_OSTYPE
   qs_get-ostype INSTANCE_OSTYPE
   qs_get-osversion INSTANCE_OSVERSION
@@ -256,7 +256,7 @@ function qs_update-os() {
 
 # Install aws-cfn-bootstrap tools
 #
-function qs_aws-cfn-bootstrap() {
+qs_aws-cfn-bootstrap() {
   # Assigns values to INSTANCE_OSTYPE
   qs_get-ostype INSTANCE_OSTYPE
   qs_get-osversion INSTANCE_OSVERSION
@@ -303,13 +303,13 @@ function qs_aws-cfn-bootstrap() {
   fi
 }
 
-function qs_err() {
+qs_err() {
   touch /var/tmp/stack_failed
   echo "[FAILED] @ $1" >>/var/tmp/stack_failed
   echo "[FAILED] @ $1"
 }
 
-function qs_status() {
+qs_status() {
   if [ -f /var/tmp/stack_failed ]; then
     printf 1;
     return 1
@@ -319,7 +319,7 @@ function qs_status() {
   fi
 }
 
-function qs_status.clean() {
+qs_status.clean() {
   if [ -f /var/tmp/stack_failed ]; then
     echo "clean failed state"
     rm /var/tmp/stack_failed
@@ -328,7 +328,7 @@ function qs_status.clean() {
   fi
 }
 
-function available_functions() {
+available_functions() {
   echo "--------------------------------"
   echo "Available quickstart_functions:
     #qs_err
@@ -350,7 +350,7 @@ function available_functions() {
 # Install dependencies
 # Assigns values to INSTANCE_
 #
-function install_dependancies() {
+install_dependancies() {
   qs_get-ostype INSTANCE_OSTYPE
   qs_get-osversion INSTANCE_OSVERSION
 
@@ -388,7 +388,7 @@ function install_dependancies() {
 # qs_retry_command 10 some_command.sh
 # Command will retry with linear back-off
 #
-function qs_retry_command() {
+qs_retry_command() {
   local -r __tries="$1"; shift
   local -r __run="$@"
   local -i __backoff_delay=2
