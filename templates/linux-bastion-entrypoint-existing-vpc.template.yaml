@@ -390,6 +390,13 @@ Mappings:
       US2204HVM: ami-0bc607f9bc3cbe5cd
       CENTOS7HVM: ami-0eb3117f2ccc34ba6
       SLES15SP4HVM: ami-05c58114a34dbae09
+    me-central-1:
+      AMZNLINUX2: ami-0b2373ec0e87325e0
+      AMZNLINUX2ARM: ami-079cbefad75e3224d
+      US2004HVM: ami-0ddd99e1ef60bf7dd
+      US2204HVM: ami-039fa3619add37c03
+      CENTOS7HVM: ami-0f3bfe072614fef65
+      SLES15SP4HVM: ami-0e58a0202165f87c2
     me-south-1:
       AMZNLINUX2: ami-09a2e6e8686165092
       AMZNLINUX2ARM: ami-0b25be82c969e4f01
