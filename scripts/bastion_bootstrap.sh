@@ -178,6 +178,26 @@ setup_os() {
   echo "${FUNCNAME[0]} ended"
 }
 
+# Setup AWS Systems Manager (SSM) agent
+setup_ssm() {
+  echo "${FUNCNAME[0]} started"
+  URL_SUFFIX="${URL_SUFFIX:-amazonaws.com}"
+  HARDWARE=`uname -m`
+  if [[ "${release}" == "CentOS" ]]; then
+    yum install -y "https://amazon-ssm-${REGION}.s3.${REGION}.${URL_SUFFIX}/latest/linux_arm64/amazon-ssm-agent.rpm"
+  fi
+
+  if [[ "${release}" == "Ubuntu" ]]; then
+    systemctl enable snap.amazon-ssm-agent.amazon-ssm-agent.service
+    systemctl restart snap.amazon-ssm-agent.amazon-ssm-agent.service
+  elif [ -x /bin/systemctl ] || [ -x /usr/bin/systemctl ]; then
+    systemctl enable amazon-ssm-agent.service
+    systemctl restart amazon-ssm-agent.service
+  else
+    start amazon-ssm-agent
+  fi
+}
+
 request_eip() {
   # Is the already-assigned Public IP an elastic IP?
   _query_assigned_public_ip
@@ -363,6 +383,7 @@ if [[ "${release}" == "Operating System Not Found" ]]; then
 else
   setup_os
   setup_logs
+  install_ssm
 fi
 
 prevent_process_snooping
