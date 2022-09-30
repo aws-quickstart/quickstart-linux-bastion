@@ -40,6 +40,11 @@ tests:
     parameters:
       BastionAMIOS: Amazon-Linux2-HVM
       RemoteAccessCIDR: 10.0.0.0/16
+    regions:
+      - me-south-1
+      - us-west-2
+      - us-gov-east-1
+      - cn-north-1
   centos7hvm:
     parameters:
       BastionAMIOS: CentOS-7-HVM
@@ -74,7 +79,10 @@ tests:
       BastionInstanceType: t4g.nano
       RemoteAccessCIDR: 10.0.0.0/16
     regions:
+      - us-west-1
       - ap-south-1
+      - us-gov-west-1
+      - cn-northwest-1
   onlyssmaccess:
     parameters:
       BastionAMIOS: Amazon-Linux2-HVM-ARM
