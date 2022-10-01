@@ -1,4 +1,4 @@
-#!/usr/bin/bash -e
+#!/usr/bin/env bash
 # AWS Reference Common Linux Tools
 # authors: tonynv@amazon.com, andglenn@amazon.com
 #
