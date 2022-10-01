@@ -339,14 +339,14 @@ done
 
 # BANNER CONFIGURATION
 BANNER_FILE="/etc/ssh_banner"
-if [[ ${ENABLE} == "true" ]];then
-  if [[ -z ${BANNER_PATH} ]];then
+if [[ ${ENABLE} == "true" ]]; then
+  if [[ -z ${BANNER_PATH} ]]; then
     echo "BANNER_PATH is null skipping..."
   else
     echo "BANNER_PATH = ${BANNER_PATH}"
     echo "Creating Banner in ${BANNER_FILE}"
     aws s3 cp "${BANNER_PATH}" "${BANNER_FILE}"  --region ${BANNER_REGION}
-    if [[ -e ${BANNER_FILE} ]] ;then
+    if [[ -e ${BANNER_FILE} ]]; then
       echo "[INFO] Installing banner..."
       echo -e "\n Banner ${BANNER_FILE}" >>/etc/ssh/sshd_config
     else
@@ -366,12 +366,12 @@ X11_FORWARDING=`echo "${X11_FORWARDING}" | sed 's/\\n//g'`
 
 echo "Value of TCP_FORWARDING - ${TCP_FORWARDING}"
 echo "Value of X11_FORWARDING - ${X11_FORWARDING}"
-if [[ ${TCP_FORWARDING} == "false" ]];then
+if [[ ${TCP_FORWARDING} == "false" ]]; then
   awk '!/AllowTcpForwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
   echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
 fi
 
-if [[ ${X11_FORWARDING} == "false" ]];then
+if [[ ${X11_FORWARDING} == "false" ]]; then
   awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
   echo "X11Forwarding no" >> /etc/ssh/sshd_config
 fi
