@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+set -xe
+
 install_stuff_ubuntu() {
   apt-get -y install auditd
 }
