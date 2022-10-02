@@ -711,7 +711,7 @@ Resources:
             done
             export PATH=$PATH:/usr/local/bin
             #cfn signaling functions
-            yum install git unzip wget -y || apt-get install -y git unzip wget || zypper -n install git unzip wget
+            yum install -y git unzip wget curl || apt-get install -y git unzip wget curl || zypper -n install git unzip wget curl
 
             cfn_fail() {
               cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource BastionAutoScalingGroup
