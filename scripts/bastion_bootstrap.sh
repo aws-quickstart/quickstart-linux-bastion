@@ -89,6 +89,18 @@ osrelease() {
   echo "${FUNCNAME[0]} ended" >> /var/log/cfn-init.log
 }
 
+# Setup Amazon EC2 Instance Connect agent
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-connect-set-up.html#ec2-instance-connect-install
+setup_ec2_instance_connect() {
+  echo "${FUNCNAME[0]} started"
+
+  if [[ "${release}" == "AMZN" ]]; then
+    yum install -y ec2-instance-connect
+  elif [[ "${release}" == "Ubuntu" ]]; then
+    apt-get install -y ec2-instance-connect
+  fi
+}
+
 setup_logs() {
   echo "${FUNCNAME[0]} started"
   URL_SUFFIX="${URL_SUFFIX:-amazonaws.com}"
@@ -377,6 +389,7 @@ else
   setup_os
   setup_logs
   setup_ssm
+  setup_ec2_instance_connect
 fi
 
 prevent_process_snooping
