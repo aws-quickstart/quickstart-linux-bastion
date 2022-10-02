@@ -320,24 +320,29 @@ install_dependancies() {
 
   check_cmd() {
     if hash $1 &>/dev/null; then
-      echo "[INFO] Dependencies Met!"
+      echo "[INFO] Dependencies met!"
       return 0
     else
-      echo "[INFO] Installing Dependencies"
+      echo "[INFO] Installing dependencies"
       return 1
     fi
   }
 
   if [ "$INSTANCE_OSTYPE" == "amzn" ]; then
-    check_cmd curl 'yum clean all && yum install curl -y'
+    check_cmd curl
+    [[ $? -eq 1 ]] && yum clean all && yum install -y curl || return 0
+
   elif [ "$INSTANCE_OSTYPE" == "ubuntu" ]; then
-    check_cmd curl;[[ $? -eq 1 ]] && apt update && apt install curl -y || return 0
+    check_cmd curl
+    [[ $? -eq 1 ]] && apt update && apt install -y curl || return 0
 
   elif [ "$INSTANCE_OSTYPE" == "centos" ]; then
-    check_cmd curl;[[ $? -eq 1 ]] && yum clean && yum install curl -y || return 0
+    check_cmd curl
+    [[ $? -eq 1 ]] && yum clean && yum install -y curl || return 0
 
   elif [ "$INSTANCE_OSTYPE" == "sles" ]; then
-    check_cmd curl;[[ $? -eq 1 ]] && zypper -n refresh && zypper -n install curl || return 0
+    check_cmd curl
+    [[ $? -eq 1 ]] && zypper -n refresh && zypper -n install curl || return 0
   else
     echo "[FAIL] : Dependencies not satisfied!"
     exit 1
