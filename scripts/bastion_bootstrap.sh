@@ -384,7 +384,7 @@ if [[ "${release}" == "Operating System Not Found" ]]; then
 else
   setup_os
   setup_logs
-  install_ssm
+  setup_ssm
 fi
 
 prevent_process_snooping
