@@ -190,24 +190,6 @@ qs_cloudwatch_tracklog() {
   qs_int_service_restart awslogs
 }
 
-qs_cloudwatch_install() {
-  echo "[INFO] Install AWS CloudWatch Agent"
-  REGION=`curl http://169.254.169.254/latest/dynamic/instance-identity/document|grep region|awk -F\" '{print $4}'`
-  echo $'[general]\nstate_file = /var/awslogs/state/agent-state' > awslogs.conf
-  cat cloudwatch_logs.stub | sed s,__LOG__,/var/log/syslog,g >> awslogs.conf
-  qs_get-python-path PYTHON_EXECUTEABLE
-  if [ $? -eq 0 ]; then
-  curl --silent \
-    --show-error \
-    --retry 5 \
-    https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
-  $PYTHON_EXECUTEABLE ./awslogs-agent-setup.py --region $REGION -c awslogs.conf -n
-  else
-    qs_int_is_svc_active awslogs && echo "[INFO] Cloudwatch Service is running"
-    exit 1
-  fi
-}
-
 # Added EPEL enabler
 #
 qs_enable_epel() {
@@ -330,7 +312,6 @@ available_functions() {
     #qs_notty
     #qs_aws-cfn-bootstrap
     #qs_cloudwatch_tracklog
-    #qs_cloudwatch_install
     #qs_retry_command"
   echo "--------------------------------"
 }
