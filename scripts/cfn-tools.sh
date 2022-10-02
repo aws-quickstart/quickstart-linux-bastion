@@ -156,9 +156,7 @@ qs_notty() {
   qs_get-ostype INSTANCE_OSTYPE
   qs_get-osversion INSTANCE_OSVERSION
   echo "[INFO] Relax tty requirement"
-  if [ "$INSTANCE_OSTYPE" == "rhel" ]; then
-    sed -i -e "s/Defaults    requiretty/Defaults    \!requiretty/" /etc/sudoers
-  elif [ "$INSTANCE_OSTYPE" == "centos" ]; then
+  if [ "$INSTANCE_OSTYPE" == "centos" ]; then
     sed -i -e "s/Defaults    requiretty/Defaults    \!requiretty/" /etc/sudoers
   fi
 }
@@ -196,9 +194,7 @@ qs_enable_epel() {
   qs_get-ostype INSTANCE_OSTYPE
   qs_get-osversion INSTANCE_OSVERSION
   echo "[INFO] Enable epel-release-latest-7"
-  if [ "$INSTANCE_OSTYPE" == "rhel" ]; then
-    yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-  elif [ "$INSTANCE_OSTYPE" == "centos" ]; then
+  if [ "$INSTANCE_OSTYPE" == "centos" ]; then
     yum install -y epel-release
   else
     exit 1
@@ -221,8 +217,6 @@ qs_update-os() {
     yum update -y
   elif [ "$INSTANCE_OSTYPE" == "ubuntu" ]; then
     apt-get update -y
-  elif [ "$INSTANCE_OSTYPE" == "rhel" ]; then
-    yum update -y
   elif [ "$INSTANCE_OSTYPE" == "centos" ]; then
     yum update -y
   elif [ "$INSTANCE_OSTYPE" == "sles" ]; then
@@ -338,9 +332,6 @@ install_dependancies() {
     check_cmd curl 'yum clean all && yum install curl -y'
   elif [ "$INSTANCE_OSTYPE" == "ubuntu" ]; then
     check_cmd curl;[[ $? -eq 1 ]] && apt update && apt install curl -y || return 0
-
-  elif [ "$INSTANCE_OSTYPE" == "rhel" ]; then
-    check_cmd curl;[[ $? -eq 1 ]] && yum clean && yum install curl -y || return 0
 
   elif [ "$INSTANCE_OSTYPE" == "centos" ]; then
     check_cmd curl;[[ $? -eq 1 ]] && yum clean && yum install curl -y || return 0
