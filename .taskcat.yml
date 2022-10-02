@@ -79,8 +79,8 @@ tests:
       BastionInstanceType: t4g.nano
       RemoteAccessCIDR: 10.0.0.0/16
     regions:
-      - us-west-1
       - ap-south-1
+      - us-west-1
       - us-gov-west-1
       - cn-northwest-1
   onlyssmaccess:
