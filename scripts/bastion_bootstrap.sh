@@ -184,8 +184,8 @@ setup_ssm() {
   echo "${FUNCNAME[0]} started"
   URL_SUFFIX="${URL_SUFFIX:-amazonaws.com}"
   HARDWARE=`uname -m`
-  if [[ "${release}" == "CentOS" ]]; then
-    yum install -y "https://amazon-ssm-${REGION}.s3.${REGION}.${URL_SUFFIX}/latest/linux_arm64/amazon-ssm-agent.rpm"
+  if [[ "${release}" == "CentOS" ]] && [[ "${HARDWARE}" == "x86_64" ]]; then
+    yum install -y "https://amazon-ssm-${REGION}.s3.${REGION}.${URL_SUFFIX}/latest/linux_amd64/amazon-ssm-agent.rpm"
   fi
 
   if [[ "${release}" == "Ubuntu" ]]; then
