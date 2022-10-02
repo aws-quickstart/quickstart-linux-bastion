@@ -22,7 +22,7 @@ checkos() {
 }
 
 imdsv2_token() {
-  curl -X PUT "${IMDS_BASE_URL}/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 600"
+  curl -sSX PUT "${IMDS_BASE_URL}/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 600"
 }
 
 imds_request() {
@@ -30,7 +30,7 @@ imds_request() {
   if [[ -z $TOKEN ]]; then
     TOKEN=$(imdsv2_token)
   fi
-  curl -sH "X-aws-ec2-metadata-token: $TOKEN" "${IMDS_BASE_URL}/${REQUEST_PATH}"
+  curl -sSH "X-aws-ec2-metadata-token: $TOKEN" "${IMDS_BASE_URL}/${REQUEST_PATH}"
 }
 
 setup_environment_variables() {

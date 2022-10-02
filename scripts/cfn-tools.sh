@@ -172,10 +172,8 @@ qs_bootstrap_pip() {
   if [ $? -eq 0 ] ;then
     command -v pip > /dev/null 2&>1
     if [ $? -eq 1 ]; then
-      curl --silent \
-        --show-error \
-        --retry 5 \
-        https://bootstrap.pypa.io/pip/2.7/get-pip.py | $PYTHON_EXECUTEABLE
+      curl -sS --retry 5 https://bootstrap.pypa.io/pip/2.7/get-pip.py |
+        $PYTHON_EXECUTEABLE
     fi
   else
     echo $PYTHON_EXECUTEABLE
@@ -271,7 +269,7 @@ qs_aws-cfn-bootstrap() {
   elif [ "$INSTANCE_OSTYPE" == "ubuntu" ]; then
     apt-get -y update
     apt-get -y install python2.7
-    curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output /tmp/get-pip2.7.py
+    curl -sS https://bootstrap.pypa.io/pip/2.7/get-pip.py --output /tmp/get-pip2.7.py
     python2.7 /tmp/get-pip2.7.py
     pip2 install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
   elif [ "$INSTANCE_OSTYPE" == "centos" ]; then
