@@ -211,6 +211,21 @@ setup_ssm() {
   else
     start amazon-ssm-agent
   fi
+
+  # As of 2022-10-03, the AWS Systems Manager plugin for the AWS CLI is only
+  # officially hosted from the `session-manager-downloads` bucket in us-east-1
+  # (ie: regional buckets are not yet supported).
+  # https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
+  echo 'Installing the AWS Systems Manager (SSM) plugin for the AWS CLI...'
+  if [[ "${release}" == 'AMZN' ]] || [[ "${release}" == 'CentOS' ]]; then
+    yum install -y "https://session-manager-downloads.s3.us-east-1.amazonaws.com/plugin/latest/linux_${ARCHITECTURE2}/session-manager-plugin.rpm"
+  elif [[ "${release}" == 'SLES' ]]; then
+    zypper install --allow-unsigned-rpm -y "https://session-manager-downloads.s3.us-east-1.amazonaws.com/plugin/latest/linux_${ARCHITECTURE2}/session-manager-plugin.rpm"
+  elif [[ "${release}" == 'Ubuntu' ]]; then
+    wget "https://session-manager-downloads.s3.us-east-1.amazonaws.com/plugin/latest/ubuntu_${ARCHITECTURE2}/session-manager-plugin.deb"
+    dpkg -i -E ./session-manager-plugin.deb
+    rm ./session-manager-plugin.deb
+  fi
 }
 
 request_eip() {
