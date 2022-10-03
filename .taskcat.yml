@@ -73,7 +73,7 @@ tests:
       RemoteAccessCIDR: 10.0.0.0/16
     regions:
       - eu-north-1
-  arminst:
+  amznlinux2hvmarm:
     parameters:
       BastionAMIOS: Amazon-Linux2-HVM-ARM
       BastionInstanceType: t4g.nano
@@ -83,6 +83,13 @@ tests:
       - us-west-1
       - us-gov-west-1
       - cn-northwest-1
+  us2204hvmarm:
+    parameters:
+      BastionAMIOS: Ubuntu-Server-22.04-LTS-HVM-ARM
+      BastionInstanceType: t4g.nano
+      RemoteAccessCIDR: 10.0.0.0/16
+    regions:
+      - af-south-1
   onlyssmaccess:
     parameters:
       BastionAMIOS: Amazon-Linux2-HVM-ARM

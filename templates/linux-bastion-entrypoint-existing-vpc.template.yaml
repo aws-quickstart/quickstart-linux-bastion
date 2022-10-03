@@ -110,6 +110,7 @@ Parameters:
       - CentOS-7-HVM
       - Ubuntu-Server-20.04-LTS-HVM
       - Ubuntu-Server-22.04-LTS-HVM
+      - Ubuntu-Server-22.04-LTS-HVM-ARM
       - SUSE-SLES-15-HVM
     Default: Amazon-Linux2-HVM
   BastionHostName:
@@ -258,24 +259,53 @@ Rules:
             - Fn::RefAll: AWS::EC2::VPC::Id
         AssertDescription: All subnets must exist in the VPC.
   ArmInstance:
+    RuleCondition: !Contains
+      - - Amazon-Linux2-HVM-ARM
+        - Ubuntu-Server-22.04-LTS-HVM-ARM
+      - !Ref BastionAMIOS
     Assertions:
       - Assert: !Contains
+        - - t4g.nano
+          - t4g.micro
+          - t4g.small
+          - t4g.medium
+          - t4g.large
+          - t4g.xlarge
+          - t4g.2xlarge
+          - m6g.medium
+          - m6g.large
+          - m6g.xlarge
+          - m6g.2xlarge
+        - !Ref BastionInstanceType
+        AssertDescription: >-
+          You selected an ARM AMI operating system, so you must also enter an
+          ARM instance type, such as t4g.micro. For additional details, see
+          https://aws.amazon.com/ec2/instance-types/.
+  X86_64Instance:
+    RuleCondition: !Not
+      - !Contains
+        - - Amazon-Linux2-HVM-ARM
+          - Ubuntu-Server-22.04-LTS-HVM-ARM
+        - !Ref BastionAMIOS
+    Assertions:
+      - Assert: !Not
+        - !Contains
           - - t4g.nano
-            - t4g.medium
-            - t4g.large
             - t4g.micro
             - t4g.small
-            - t4g.2xlarge
+            - t4g.medium
+            - t4g.large
             - t4g.xlarge
+            - t4g.2xlarge
             - m6g.medium
             - m6g.large
             - m6g.xlarge
             - m6g.2xlarge
           - !Ref BastionInstanceType
-        AssertDescription: This instance type must use BastionAMIOS type of Amazon-Linux2-HVM-ARM.
-    RuleCondition: !Equals
-      - !Ref BastionAMIOS
-      - Amazon-Linux2-HVM-ARM
+        AssertDescription: >-
+          You selected a x86_64 AMI operating system, so you must also enter a
+          x86_64 instance type, such as t3.micro. For additional details, see
+          https://aws.amazon.com/ec2/instance-types/.
 Mappings:
   AWSAMIRegionMap:
     af-south-1:
@@ -283,6 +313,7 @@ Mappings:
       AMZNLINUX2ARM: ami-0525721922594fb11
       US2004HVM: ami-082e4bb19296548b2
       US2204HVM: ami-080bc3824e96f9b8d
+      US2204HVMARM: ami-04f0408f494c0c285
       CENTOS7HVM: ami-0e7ff6dec8807b69f
       SLES15SP4HVM: ami-0b182a175a9344329
     ap-east-1:
@@ -290,6 +321,7 @@ Mappings:
       AMZNLINUX2ARM: ami-0e531faeed6c81263
       US2004HVM: ami-0758a5d4fc79f3ef5
       US2204HVM: ami-079156dd95513514f
+      US2204HVMARM: ami-0c5b035581d9859b0
       CENTOS7HVM: ami-09f998aa76774295f
       SLES15SP4HVM: ami-06130ce0e5645edc4
     ap-northeast-1:
@@ -297,6 +329,7 @@ Mappings:
       AMZNLINUX2ARM: ami-03361228a16aabbea
       US2004HVM: ami-0adcb4f170c975f15
       US2204HVM: ami-0d204984f5cde7a51
+      US2204HVMARM: ami-055bb115702a738f5
       CENTOS7HVM: ami-0fd48c6031f8700df
       SLES15SP4HVM: ami-08d5afff14b78a281
     ap-northeast-2:
@@ -304,6 +337,7 @@ Mappings:
       AMZNLINUX2ARM: ami-0df7659587273dd64
       US2004HVM: ami-044bb09d2020f8760
       US2204HVM: ami-05f82245cbdf5daa7
+      US2204HVMARM: ami-0e9baedd18568cdb9
       CENTOS7HVM: ami-09e2a570cb404b37e
       SLES15SP4HVM: ami-0b8951725398f7575
     ap-northeast-3:
@@ -311,6 +345,7 @@ Mappings:
       AMZNLINUX2ARM: ami-0382375f125289052
       US2004HVM: ami-06340f1a4465ca9e5
       US2204HVM: ami-0d6dbe860474011f3
+      US2204HVMARM: ami-021dd71bd5cffbc80
       CENTOS7HVM: ami-02483871b467662e6
       SLES15SP4HVM: ami-044bb1b8d85d630a7
     ap-south-1:
@@ -318,6 +353,7 @@ Mappings:
       AMZNLINUX2ARM: ami-0494f7473bf694265
       US2004HVM: ami-02240fe5e8581a077
       US2204HVM: ami-068257025f72f470d
+      US2204HVMARM: ami-03b7965a117bed272
       CENTOS7HVM: ami-0763cf792771fe1bd
       SLES15SP4HVM: ami-03aa8cb259123c505
     ap-southeast-1:
@@ -325,6 +361,7 @@ Mappings:
       AMZNLINUX2ARM: ami-0d8566954ee6c6bb1
       US2004HVM: ami-081fdf6456213aa4a
       US2204HVM: ami-02fbe9c35165f2a52
+      US2204HVMARM: ami-0746974430e590fc4
       CENTOS7HVM: ami-00d785f1c099d5a0e
       SLES15SP4HVM: ami-01ae98b95555d6f5d
     ap-southeast-2:
@@ -332,6 +369,7 @@ Mappings:
       AMZNLINUX2ARM: ami-02dc2e45afd1dc0db
       US2004HVM: ami-053054c980a4d9796
       US2204HVM: ami-0031085f7b66fa348
+      US2204HVMARM: ami-0192b4451f941f39c
       CENTOS7HVM: ami-0cf5f53cea16d8cbf
       SLES15SP4HVM: ami-03790de3a37ba87cc
     ap-southeast-3:
@@ -339,6 +377,7 @@ Mappings:
       AMZNLINUX2ARM: ami-05ea409b18f746e20
       US2004HVM: ami-00c650496cccf36f8
       US2204HVM: ami-0246cfac406c84c84
+      US2204HVMARM: ami-080c8096bf5726733
       CENTOS7HVM: ami-0dc1b02193df64768
       SLES15SP4HVM: ami-01075fd3a01c91824
     ca-central-1:
@@ -346,6 +385,7 @@ Mappings:
       AMZNLINUX2ARM: ami-0a8093f353773f464
       US2004HVM: ami-04673916e7c7aa985
       US2204HVM: ami-062b886c79ad2cb1c
+      US2204HVMARM: ami-0b6937ac543fe96d7
       CENTOS7HVM: ami-0ca3e32c623d61bdf
       SLES15SP4HVM: ami-04d0ed5d3fd5e05a8
     eu-central-1:
@@ -353,6 +393,7 @@ Mappings:
       AMZNLINUX2ARM: ami-064718721588ff974
       US2004HVM: ami-05f7491af5eef733a
       US2204HVM: ami-05db0e60504db9e1b
+      US2204HVMARM: ami-01367ed74c2608aef
       CENTOS7HVM: ami-0b4c74d41ee4bed78
       SLES15SP4HVM: ami-001a77181c22a52ba
     eu-north-1:
@@ -360,6 +401,7 @@ Mappings:
       AMZNLINUX2ARM: ami-0fb5db3dec6eaa5d4
       US2004HVM: ami-0bc337ab82f7c00b4
       US2204HVM: ami-0a2b8744b4fe77f92
+      US2204HVMARM: ami-0440e5026412ff23f
       CENTOS7HVM: ami-08998a9a61da37c77
       SLES15SP4HVM: ami-0c61d9bf4e84dd26a
     eu-south-1:
@@ -367,6 +409,7 @@ Mappings:
       AMZNLINUX2ARM: ami-013e8fb0657cfcce0
       US2004HVM: ami-0f882950b69c3d52e
       US2204HVM: ami-0be8a0321a0db3412
+      US2204HVMARM: ami-05189c936dfb5ccda
       CENTOS7HVM: ami-0ce6f8b3dbadf3b41
       SLES15SP4HVM: ami-0324f5c2cb963f12b
     eu-west-1:
@@ -374,6 +417,7 @@ Mappings:
       AMZNLINUX2ARM: ami-0de648cb0cb33b332
       US2004HVM: ami-01aa664a17515f5bb
       US2204HVM: ami-07bd2fc45c8a8dd48
+      US2204HVMARM: ami-096800910c1b781ba
       CENTOS7HVM: ami-0c1f3a8058fde8814
       SLES15SP4HVM: ami-0be8fad2a3296a74f
     eu-west-2:
@@ -381,6 +425,7 @@ Mappings:
       AMZNLINUX2ARM: ami-0e236a81ef27ac534
       US2004HVM: ami-05c94e542948a2807
       US2204HVM: ami-0fb391cce7a602d1f
+      US2204HVMARM: ami-0510e632102e49c91
       CENTOS7HVM: ami-036e229aa5fa198ba
       SLES15SP4HVM: ami-0ae5ba775e2b57305
     eu-west-3:
@@ -388,6 +433,7 @@ Mappings:
       AMZNLINUX2ARM: ami-001d2d5e8b474de99
       US2004HVM: ami-0953b38f670ad3e1e
       US2204HVM: ami-00e43f192e8c59874
+      US2204HVMARM: ami-0042da0ea9ad6dd83
       CENTOS7HVM: ami-0eb3117f2ccc34ba6
       SLES15SP4HVM: ami-05c58114a34dbae09
     me-central-1:
@@ -395,6 +441,7 @@ Mappings:
       AMZNLINUX2ARM: ami-079cbefad75e3224d
       US2004HVM: ami-0e5c17e27dc12c8bf
       US2204HVM: ami-00235e997214d0d66
+      US2204HVMARM: ami-054435f0a698ed0b8
       CENTOS7HVM: ami-0f3bfe072614fef65
       SLES15SP4HVM: ami-0e58a0202165f87c2
     me-south-1:
@@ -402,6 +449,7 @@ Mappings:
       AMZNLINUX2ARM: ami-0b25be82c969e4f01
       US2004HVM: ami-03cc0b5db8321f2e5
       US2204HVM: ami-0402240419adac512
+      US2204HVMARM: ami-0dad959e850d35f4a
       CENTOS7HVM: ami-03a968cc818f19908
       SLES15SP4HVM: ami-0cb731bd07edfbcc4
     sa-east-1:
@@ -409,6 +457,7 @@ Mappings:
       AMZNLINUX2ARM: ami-0d08f99f2f13b0426
       US2004HVM: ami-07de2a52834192a7b
       US2204HVM: ami-0f88887f0197fb12e
+      US2204HVMARM: ami-061694d1c1058c12f
       CENTOS7HVM: ami-04384c010169ed8d3
       SLES15SP4HVM: ami-0a8e14c344b199257
     us-east-1:
@@ -416,6 +465,7 @@ Mappings:
       AMZNLINUX2ARM: '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-arm64-gp2}}'
       US2004HVM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}'
       US2204HVM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}'
+      US2204HVMARM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/22.04/stable/current/arm64/hvm/ebs-gp2/ami-id}}'
       CENTOS7HVM: ami-002070d43b0a4f171
       SLES15SP4HVM: ami-08e167817c87ed7fd
     us-east-2:
@@ -423,6 +473,7 @@ Mappings:
       AMZNLINUX2ARM: '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-arm64-gp2}}'
       US2004HVM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}'
       US2204HVM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}'
+      US2204HVMARM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/22.04/stable/current/arm64/hvm/ebs-gp2/ami-id}}'
       CENTOS7HVM: ami-05a36e1502605b4aa
       SLES15SP4HVM: ami-0535d9b70179f9734
     us-west-1:
@@ -430,6 +481,7 @@ Mappings:
       AMZNLINUX2ARM: ami-05eac8da5664290c1
       US2004HVM: ami-009c002b1cd1b34da
       US2204HVM: ami-0a1069756c2859f0b
+      US2204HVMARM: ami-0dc5e9ff792ec08e3
       CENTOS7HVM: ami-0dee0f906cf114191
       SLES15SP4HVM: ami-0d36c27f11154fad6
     us-west-2:
@@ -437,6 +489,7 @@ Mappings:
       AMZNLINUX2ARM: '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-arm64-gp2}}'
       US2004HVM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}'
       US2204HVM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}'
+      US2204HVMARM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/22.04/stable/current/arm64/hvm/ebs-gp2/ami-id}}'
       CENTOS7HVM: ami-08c191625cfb7ee61
       SLES15SP4HVM: ami-0bfb58754b8025d15
     us-gov-east-1:
@@ -444,6 +497,7 @@ Mappings:
       AMZNLINUX2ARM: ami-08261b2bb73791aea
       US2004HVM: ami-0314a15f14d2f8552
       US2204HVM: ami-05c7b901193ad0be2
+      US2204HVMARM: ami-02715d3e836877098
       CENTOS7HVM: ami-00c6b007ba906a530
       # SLES15SP4HVM:
     us-gov-west-1:
@@ -451,6 +505,7 @@ Mappings:
       AMZNLINUX2ARM: ami-03c35861cd8693f9b
       US2004HVM: ami-84556de5
       US2204HVM: ami-09e0cb78220c19409
+      US2204HVMARM: ami-005ba2efd47a41344
       CENTOS7HVM: ami-08b470dba6016d395
       # SLES15SP4HVM:
     cn-north-1:
@@ -458,6 +513,7 @@ Mappings:
       AMZNLINUX2ARM: ami-003a4ad3c32f09b30
       US2004HVM: ami-0220ae5c1b972044b
       US2204HVM: ami-0736f3b1ba33afdc6
+      US2204HVMARM: ami-06ef60fb6cceb0b24
       CENTOS7HVM: ami-0860d3f26ee044bb9
       # SLES15SP4HVM:
     cn-northwest-1:
@@ -465,6 +521,7 @@ Mappings:
       AMZNLINUX2ARM: ami-0145d1130bc11582c
       US2004HVM: ami-086ca35e0926354ce
       US2204HVM: ami-09fcf3b4295bfce3a
+      US2204HVMARM: ami-06ab1278066d238c2
       CENTOS7HVM: ami-01cac994948aca880
       # SLES15SP4HVM:
   LinuxAMINameMap:
@@ -482,6 +539,9 @@ Mappings:
       OS: Ubuntu
     Ubuntu-Server-22.04-LTS-HVM:
       Code: US2204HVM
+      OS: Ubuntu
+    Ubuntu-Server-22.04-LTS-HVM-ARM:
+      Code: US2204HVMARM
       OS: Ubuntu
     SUSE-SLES-15-HVM:
       Code: SLES15SP4HVM
