@@ -8,6 +8,18 @@ set -xe
 # Configuration
 PROGRAM='Linux Bastion'
 IMDS_BASE_URL='http://169.254.169.254/latest'
+HARDWARE=$(uname -m)
+if [[ "${HARDWARE}" == 'x86_64' ]]; then
+  ARCHITECTURE='amd64'
+  ARCHITECTURE2='64bit'
+elif [[ "${HARDWARE}" == 'aarch64' ]]; then
+  ARCHITECTURE='arm64'
+  ARCHITECTURE2='arm64'
+else
+  echo "[FAILED] Unsupported architecture: '${HARDWARE}'."
+  exit 1
+fi
+
 ##################################### Functions Definitions
 checkos() {
   platform='unknown'
@@ -104,20 +116,17 @@ setup_ec2_instance_connect() {
 setup_logs() {
   echo "${FUNCNAME[0]} started"
   URL_SUFFIX="${URL_SUFFIX:-amazonaws.com}"
-  HARDWARE=`uname -m`
-  if [[ "${release}" == "SLES" ]]; then
-    zypper install --allow-unsigned-rpm -y "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/suse/amd64/latest/amazon-cloudwatch-agent.rpm"
-  elif [[ "${release}" == "CentOS" ]]; then
-    yum install -y "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/centos/amd64/latest/amazon-cloudwatch-agent.rpm"
-  elif [[ "${release}" == "Ubuntu" ]]; then
+  if [[ "${release}" == 'SLES' ]]; then
+    zypper install --allow-unsigned-rpm -y "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/suse/${ARCHITECTURE}/latest/amazon-cloudwatch-agent.rpm"
+  elif [[ "${release}" == 'CentOS' ]]; then
+    yum install -y "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/centos/${ARCHITECTURE}/latest/amazon-cloudwatch-agent.rpm"
+  elif [[ "${release}" == 'Ubuntu' ]]; then
     export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
-    curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb" -O
+    curl "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/ubuntu/${ARCHITECTURE}/latest/amazon-cloudwatch-agent.deb" -O
     dpkg -i -E ./amazon-cloudwatch-agent.deb
     rm ./amazon-cloudwatch-agent.deb
-  elif [[ "${release}" == "AMZN" ]] && [[ "${HARDWARE}" == "x86_64" ]]; then
-    yum install -y "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm"
-  elif [[ "${release}" == "AMZN" ]] && [[ "${HARDWARE}" == "aarch64" ]]; then
-    yum install -y "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/amazon_linux/arm64/latest/amazon-cloudwatch-agent.rpm"
+  elif [[ "${release}" == 'AMZN' ]]; then
+    yum install -y "https://amazoncloudwatch-agent-${REGION}.s3.${REGION}.${URL_SUFFIX}/amazon_linux/${ARCHITECTURE}/latest/amazon-cloudwatch-agent.rpm"
   fi
 
   cat <<EOF >> /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
@@ -187,9 +196,10 @@ setup_os() {
 setup_ssm() {
   echo "${FUNCNAME[0]} started"
   URL_SUFFIX="${URL_SUFFIX:-amazonaws.com}"
-  HARDWARE=`uname -m`
-  if [[ "${release}" == "CentOS" ]] && [[ "${HARDWARE}" == "x86_64" ]]; then
-    yum install -y "https://amazon-ssm-${REGION}.s3.${REGION}.${URL_SUFFIX}/latest/linux_amd64/amazon-ssm-agent.rpm"
+
+  if [[ "${release}" == 'CentOS' ]]; then
+    echo 'Installing the AWS Systems Manager (SSM) agent...'
+    yum install -y "https://amazon-ssm-${REGION}.s3.${REGION}.${URL_SUFFIX}/latest/linux_${ARCHITECTURE}/amazon-ssm-agent.rpm"
   fi
 
   if [[ "${release}" == "Ubuntu" ]]; then
