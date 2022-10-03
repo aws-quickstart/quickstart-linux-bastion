@@ -552,10 +552,10 @@ Conditions:
   2BastionConditionHost: !Or [!Equals [!Ref NumBastionHosts, 2], !Condition 3BastionCondition, !Condition 4BastionCondition]
   3BastionConditionHost: !Or [!Equals [!Ref NumBastionHosts, 3], !Condition 4BastionCondition]
   4BastionConditionHost: !Equals [!Ref NumBastionHosts, 4]
-  2BastionCondition: !And [!Condition PopulateRemoteCIDR, !Condition 2BastionConditionHost]
-  3BastionCondition: !And [!Condition PopulateRemoteCIDR, !Condition 3BastionConditionHost]
-  4BastionCondition: !And [!Condition PopulateRemoteCIDR, !Condition 4BastionConditionHost]
-  PopulateRemoteCIDR: !Not [!Equals [!Ref RemoteAccessCIDR, disabled-onlyssmaccess]]
+  2BastionCondition: !And [!Condition HasRemoteCIDR, !Condition 2BastionConditionHost]
+  3BastionCondition: !And [!Condition HasRemoteCIDR, !Condition 3BastionConditionHost]
+  4BastionCondition: !And [!Condition HasRemoteCIDR, !Condition 4BastionConditionHost]
+  HasRemoteCIDR: !Not [!Equals [!Ref RemoteAccessCIDR, disabled-onlyssmaccess]]
   UseAlternativeInitialization: !Not [!Equals [!Ref AlternativeInitializationScript, '']]
   CreateIAMRole: !Equals [!Ref AlternativeIAMRole, '']
   UseOSImageOverride: !Not [!Equals [!Ref OSImageOverride, '']]
@@ -639,7 +639,7 @@ Resources:
       Path: !If [CreateIAMRole, /, /account-managed/]
   EIP1:
     Type: AWS::EC2::EIP
-    Condition: PopulateRemoteCIDR
+    Condition: HasRemoteCIDR
     Properties:
       Domain: vpc
   EIP2:
@@ -810,7 +810,7 @@ Resources:
             CLOUDWATCHGROUP=${BastionMainLogGroup}
             cfn-init -v --stack '${AWS::StackName}' --resource BastionLaunchConfiguration --region ${AWS::Region} || cfn_fail
             [ $(qs_status) == 0 ] && cfn_success || cfn_fail
-          - EIP1: !If [PopulateRemoteCIDR, !Ref EIP1, 'Null']
+          - EIP1: !If [HasRemoteCIDR, !Ref EIP1, 'Null']
             EIP2: !If [2BastionCondition, !Ref EIP2, 'Null']
             EIP3: !If [3BastionCondition, !Ref EIP3, 'Null']
             EIP4: !If [4BastionCondition, !Ref EIP4, 'Null']
@@ -822,9 +822,8 @@ Resources:
       VpcId: !Ref VPCID
       SecurityGroupIngress:
         !If
-          - PopulateRemoteCIDR
-          -
-            - IpProtocol: tcp
+          - HasRemoteCIDR
+          - - IpProtocol: tcp
               FromPort: 22
               ToPort: 22
               CidrIp: !Ref RemoteAccessCIDR
@@ -840,7 +839,7 @@ Outputs:
     Export:
       Name: !Sub ${AWS::StackName}-BastionAutoScalingGroup
   EIP1:
-    Condition: PopulateRemoteCIDR
+    Condition: HasRemoteCIDR
     Description: Elastic IP 1 for bastion.
     Value: !Ref EIP1
     Export:
