@@ -412,17 +412,17 @@ Mappings:
       CENTOS7HVM: ami-04384c010169ed8d3
       SLES15SP4HVM: ami-0a8e14c344b199257
     us-east-1:
-      AMZNLINUX2: ami-01cc34ab2709337aa
-      AMZNLINUX2ARM: ami-0c582118883b46f4f
-      US2004HVM: ami-022d4249382309a48
-      US2204HVM: ami-051dcca84f1edfff1
+      AMZNLINUX2: '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2}}'
+      AMZNLINUX2ARM: '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-arm64-gp2}}'
+      US2004HVM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}'
+      US2204HVM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}'
       CENTOS7HVM: ami-002070d43b0a4f171
       SLES15SP4HVM: ami-08e167817c87ed7fd
     us-east-2:
-      AMZNLINUX2: ami-0dd0ccab7e2801812
-      AMZNLINUX2ARM: ami-0dd41089e5db1efc8
-      US2004HVM: ami-0b29b6e62f2343b46
-      US2204HVM: ami-0a5e8065e5b04c679
+      AMZNLINUX2: '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2}}'
+      AMZNLINUX2ARM: '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-arm64-gp2}}'
+      US2004HVM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}'
+      US2204HVM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}'
       CENTOS7HVM: ami-05a36e1502605b4aa
       SLES15SP4HVM: ami-0535d9b70179f9734
     us-west-1:
@@ -433,10 +433,10 @@ Mappings:
       CENTOS7HVM: ami-0dee0f906cf114191
       SLES15SP4HVM: ami-0d36c27f11154fad6
     us-west-2:
-      AMZNLINUX2: ami-07c73ee7f59efbb9a
-      AMZNLINUX2ARM: ami-05c53e3ce52089c5c
-      US2004HVM: ami-038a0ccaaedae6406
-      US2204HVM: ami-0c033eb565588ae0e
+      AMZNLINUX2: '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2}}'
+      AMZNLINUX2ARM: '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-arm64-gp2}}'
+      US2004HVM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}'
+      US2204HVM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}'
       CENTOS7HVM: ami-08c191625cfb7ee61
       SLES15SP4HVM: ami-0bfb58754b8025d15
     us-gov-east-1:
