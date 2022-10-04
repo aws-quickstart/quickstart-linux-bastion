@@ -582,14 +582,13 @@ Resources:
       PermissionsBoundary:
         !If [PermissionsBoundaryProvided, !Ref PermissionsBoundaryArn, !Ref AWS::NoValue]
       AssumeRolePolicyDocument:
+        Version: 2012-10-17
         Statement:
-          - Action:
-              - sts:AssumeRole
+          - Effect: Allow
+            Action: sts:AssumeRole
             Principal:
               Service:
                 - !Sub ec2.${AWS::URLSuffix}
-            Effect: Allow
-        Version: 2012-10-17
       ManagedPolicyArns:
         - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore
         - !Sub arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy
@@ -601,13 +600,23 @@ Resources:
       PolicyDocument:
         Version: 2012-10-17
         Statement:
-          - Action:
+          - Sid: ListQSS3BucketObjects
+            Effect: Allow
+            Action: s3:ListBucket
+            Resource: !Sub
+              - arn:${AWS::Partition}:s3:::${S3Bucket}
+              - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+          - Sid: GetQSS3Objects
+            Effect: Allow
+            Action:
               - s3:GetObject
+              - s3:GetObjectVersion
             Resource: !Sub
               - arn:${AWS::Partition}:s3:::${S3Bucket}/${QSS3KeyPrefix}*
               - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+          - Sid: WriteToCloudWatchLogs
             Effect: Allow
-          - Action:
+            Action:
               - logs:CreateLogStream
               - logs:GetLogEvents
               - logs:PutLogEvents
@@ -617,12 +626,13 @@ Resources:
               - logs:PutMetricFilter
               - logs:CreateLogGroup
             Resource: !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*
+          - Sid: Global
             Effect: Allow
-          - Action:
+            Action:
               - ec2:DescribeAddresses
             Resource: '*'
+          - Sid: AssociateStackEips
             Effect: Allow
-          - Effect: Allow
             Action:
               - ec2:AssociateAddress
             Resource: '*'
