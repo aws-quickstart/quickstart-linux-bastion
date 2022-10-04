@@ -1,14 +1,17 @@
-#!/bin/bash
-function install_stuff_ubuntu(){
+#!/usr/bin/env bash
+
+set -xe
+
+install_stuff_ubuntu() {
   apt-get -y install auditd
 }
 
-function add_the_rules(){
+add_the_rules() {
   cat /tmp/auditd.rules >> /etc/audit/rules.d/audit.rules
   rm /tmp/auditd.rules
 }
 
-function restart_services(){
+restart_services() {
   case "${BASTION_OS}" in
     Amazon)
       /usr/sbin/service auditd restart

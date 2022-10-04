@@ -1,9 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  **DEPRECATED: This template has been deprecated in favor of
-  'linux-bastion-entrypoint-new-vpc.template.yaml', and is no longer being
-  maintained.**
-  LinuxBastion+VPC Jul,30,2020 (qs-1qup6ra9p) (Please do not remove)
+  AWS CloudFormation template for deploying Linux bastion hosts in an
+  auto-scaling group in a new VPC. (qs-1qup6ra9p)
 Metadata:
   QuickStartDocumentation:
     EntrypointName: Launch into a new VPC
@@ -99,6 +97,8 @@ Parameters:
       - Amazon-Linux2-HVM-ARM
       - CentOS-7-HVM
       - Ubuntu-Server-20.04-LTS-HVM
+      - Ubuntu-Server-22.04-LTS-HVM
+      - Ubuntu-Server-22.04-LTS-HVM-ARM
       - SUSE-SLES-15-HVM
     Default: Amazon-Linux2-HVM
   BastionHostName:
@@ -119,7 +119,7 @@ Parameters:
   BastionInstanceType:
     Type: String
     Description: Amazon EC2 instance type for the bastion instances.
-    Default: t2.micro
+    Default: t3.micro
   EnableBanner:
     Type: String
     Description: Choose "true" to display a banner when connecting to the bastion using SSH.
@@ -129,14 +129,14 @@ Parameters:
     Default: 'false'
   EnableTCPForwarding:
     Type: String
-    Description: To enable TCP forwarding, choose "true".
+    Description: Choose "true" to enable TCP forwarding.
     AllowedValues:
       - 'true'
       - 'false'
     Default: 'false'
   EnableX11Forwarding:
     Type: String
-    Description: To enable X11 forwarding, choose "true".
+    Description: Choose "true" to enable X11 forwarding.
     AllowedValues:
       - 'true'
       - 'false'
@@ -260,7 +260,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub
-        - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/linux-bastion.template
+        - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/linux-bastion-entrypoint-existing-vpc.template.yaml
         - S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
           S3Region: !If [UsingDefaultBucket, !Ref AWS::Region, !Ref QSS3BucketRegion]
       Parameters:

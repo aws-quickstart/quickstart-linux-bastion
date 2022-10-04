@@ -1,9 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  **DEPRECATED: This template has been deprecated in favor of
-  'linux-bastion-entrypoint-existing-vpc.template.yaml', and is no longer being
-  maintained.**
-  LinuxBastion+VPC Jul,30,2020 (qs-1qup6ra99) (Please do not remove)
+  AWS CloudFormation template for deploying Linux bastion hosts in an
+  auto-scaling group in an existing VPC. (qs-1qup6ra99)
 Metadata:
   QuickStartDocumentation:
     EntrypointName: Launch into an existing VPC
@@ -111,6 +109,8 @@ Parameters:
       - Amazon-Linux2-HVM-ARM
       - CentOS-7-HVM
       - Ubuntu-Server-20.04-LTS-HVM
+      - Ubuntu-Server-22.04-LTS-HVM
+      - Ubuntu-Server-22.04-LTS-HVM-ARM
       - SUSE-SLES-15-HVM
     Default: Amazon-Linux2-HVM
   BastionHostName:
@@ -131,7 +131,7 @@ Parameters:
   BastionInstanceType:
     Type: String
     Description: Amazon EC2 instance type for the bastion instances.
-    Default: t2.micro
+    Default: t3.micro
   EnableBanner:
     Type: String
     Description: Choose "true" to display a banner when connecting to the bastion using SSH.
@@ -141,14 +141,14 @@ Parameters:
     Default: 'false'
   EnableTCPForwarding:
     Type: String
-    Description: To enable TCP forwarding, choose "true".
+    Description: Choose "true" to enable TCP forwarding.
     AllowedValues:
       - 'true'
       - 'false'
     Default: 'false'
   EnableX11Forwarding:
     Type: String
-    Description: To enable X11 forwarding, choose "true".
+    Description: Choose "true" to enable X11 forwarding.
     AllowedValues:
       - 'true'
       - 'false'
@@ -259,182 +259,271 @@ Rules:
             - Fn::RefAll: AWS::EC2::VPC::Id
         AssertDescription: All subnets must exist in the VPC.
   ArmInstance:
+    RuleCondition: !Contains
+      - - Amazon-Linux2-HVM-ARM
+        - Ubuntu-Server-22.04-LTS-HVM-ARM
+      - !Ref BastionAMIOS
     Assertions:
       - Assert: !Contains
+        - - t4g.nano
+          - t4g.micro
+          - t4g.small
+          - t4g.medium
+          - t4g.large
+          - t4g.xlarge
+          - t4g.2xlarge
+          - m6g.medium
+          - m6g.large
+          - m6g.xlarge
+          - m6g.2xlarge
+        - !Ref BastionInstanceType
+        AssertDescription: >-
+          You selected an ARM AMI operating system, so you must also enter an
+          ARM instance type, such as t4g.micro. For additional details, see
+          https://aws.amazon.com/ec2/instance-types/.
+  X86_64Instance:
+    RuleCondition: !Not
+      - !Contains
+        - - Amazon-Linux2-HVM-ARM
+          - Ubuntu-Server-22.04-LTS-HVM-ARM
+        - !Ref BastionAMIOS
+    Assertions:
+      - Assert: !Not
+        - !Contains
           - - t4g.nano
-            - t4g.medium
-            - t4g.large
             - t4g.micro
             - t4g.small
-            - t4g.2xlarge
+            - t4g.medium
+            - t4g.large
             - t4g.xlarge
+            - t4g.2xlarge
             - m6g.medium
             - m6g.large
             - m6g.xlarge
             - m6g.2xlarge
           - !Ref BastionInstanceType
-        AssertDescription: This instance type must use BastionAMIOS type of Amazon-Linux2-HVM-ARM.
-    RuleCondition: !Equals
-      - !Ref BastionAMIOS
-      - Amazon-Linux2-HVM-ARM
+        AssertDescription: >-
+          You selected a x86_64 AMI operating system, so you must also enter a
+          x86_64 instance type, such as t3.micro. For additional details, see
+          https://aws.amazon.com/ec2/instance-types/.
 Mappings:
   AWSAMIRegionMap:
     af-south-1:
-      AMZNLINUX2: ami-0adee70ff4394e3d5
-      AMZNLINUX2ARM: ami-0695bab7208ee1344
-      US2004HVM: ami-0f5298ccab965edeb
-      CENTOS7HVM: ami-0a2be7731769e6cc1
-      SLES15HVM: ami-0b182a175a9344329
+      AMZNLINUX2: ami-0c4d743431fd7abbf
+      AMZNLINUX2ARM: ami-0088d9a368f596bb5
+      US2004HVM: ami-028207f8881917f39
+      US2204HVM: ami-080bc3824e96f9b8d
+      US2204HVMARM: ami-06ef8344b79e6af19
+      CENTOS7HVM: ami-0e7ff6dec8807b69f
+      SLES15SP4HVM: ami-0b182a175a9344329
     ap-east-1:
-      AMZNLINUX2: ami-0b751f901b93720a5
-      AMZNLINUX2ARM: ami-0dcde9511d0b073f0
-      US2004HVM: ami-0dfad1f1f65cd083b
-      CENTOS7HVM: ami-0e5c29e6c87a9644f
-      SLES15HVM: ami-0ca7ed1fd25821f56
+      AMZNLINUX2: ami-05c09d1d8105ee02e
+      AMZNLINUX2ARM: ami-0372847b10ad85291
+      US2004HVM: ami-0b981d9ee99b28eba
+      US2204HVM: ami-0ecb6d8435affe2b6
+      US2204HVMARM: ami-04cb5fc457edb28ec
+      CENTOS7HVM: ami-09f998aa76774295f
+      SLES15SP4HVM: ami-06130ce0e5645edc4
     ap-northeast-1:
-      AMZNLINUX2: ami-06ce6680729711877
-      AMZNLINUX2ARM: ami-07b3b0525cef50a4a
-      US2004HVM: ami-0986c991cc80c6ad9
-      CENTOS7HVM: ami-06a46da680048c8ae
-      SLES15HVM: ami-08d5afff14b78a281
+      AMZNLINUX2: ami-02d36247c5bc58c23
+      AMZNLINUX2ARM: ami-03888b30ba5826eed
+      US2004HVM: ami-0af87654f2f8a8b78
+      US2204HVM: ami-081ce1b631be2b337
+      US2204HVMARM: ami-08df8bc7b568bf11d
+      CENTOS7HVM: ami-0fd48c6031f8700df
+      SLES15SP4HVM: ami-08d5afff14b78a281
     ap-northeast-2:
-      AMZNLINUX2: ami-0e1d09d8b7c751816
-      AMZNLINUX2ARM: ami-0008c5e405a3b3013
-      US2004HVM: ami-0565d651769eb3de5
-      CENTOS7HVM: ami-06e83aceba2cb0907
-      SLES15HVM: ami-0fe8ef15442bbbacb
+      AMZNLINUX2: ami-0eb7a369386789460
+      AMZNLINUX2ARM: ami-07071aa2caa3d64c8
+      US2004HVM: ami-0f8b8babb98cc66d0
+      US2204HVM: ami-05b9c9c0fe2f5a62c
+      US2204HVMARM: ami-04c65fa50a4122444
+      CENTOS7HVM: ami-09e2a570cb404b37e
+      SLES15SP4HVM: ami-0b8951725398f7575
     ap-northeast-3:
-      AMZNLINUX2: ami-0253beba286f3e848
-      AMZNLINUX2ARM: ami-011fa3a3b2ec9941a
-      US2004HVM: ami-0e6078093a109801c
-      CENTOS7HVM: ami-02d6b455335e3af14
-      SLES15HVM: ami-0bb84400e7507097c
+      AMZNLINUX2: ami-048b05baffa30bd5f
+      AMZNLINUX2ARM: ami-0f64af43106eecb59
+      US2004HVM: ami-029ae728cd655b533
+      US2204HVM: ami-0fa94f39b906bd429
+      US2204HVMARM: ami-06bb0aa85389bea81
+      CENTOS7HVM: ami-02483871b467662e6
+      SLES15SP4HVM: ami-044bb1b8d85d630a7
     ap-south-1:
-      AMZNLINUX2: ami-09de362f44ba0a166
-      AMZNLINUX2ARM: ami-044ba583062cb113b
-      US2004HVM: ami-0325e3016099f9112
-      CENTOS7HVM: ami-026f33d38b6410e30
-      SLES15HVM: ami-0931494f2532d950d
+      AMZNLINUX2: ami-064687fa05edcd686
+      AMZNLINUX2ARM: ami-0614f8971491dffbd
+      US2004HVM: ami-0a5b602444b05877e
+      US2204HVM: ami-068257025f72f470d
+      US2204HVMARM: ami-0b468cf6b5a2c3745
+      CENTOS7HVM: ami-0763cf792771fe1bd
+      SLES15SP4HVM: ami-03aa8cb259123c505
     ap-southeast-1:
-      AMZNLINUX2: ami-0adf622550366ea53
-      AMZNLINUX2ARM: ami-0b9800433ca2a0b20
+      AMZNLINUX2: ami-0e8e39877665a7c92
+      AMZNLINUX2ARM: ami-049f1d4d5acf4bad8
       US2004HVM: ami-0eaf04122a1ae7b3b
-      CENTOS7HVM: ami-054bf1c1a522aa6e8
-      SLES15HVM: ami-0cc06d620beca2a35
+      US2204HVM: ami-02ee763250491e04a
+      US2204HVMARM: ami-098579a2808e8ddac
+      CENTOS7HVM: ami-00d785f1c099d5a0e
+      SLES15SP4HVM: ami-01ae98b95555d6f5d
     ap-southeast-2:
-      AMZNLINUX2: ami-03b836d87d294e89e
-      AMZNLINUX2ARM: ami-0eb411a778563ea89
-      US2004HVM: ami-048a2d001938101dd
-      CENTOS7HVM: ami-0d1eb46a368923d43
-      SLES15HVM: ami-03790de3a37ba87cc
+      AMZNLINUX2: ami-0d2fb06f3c1484132
+      AMZNLINUX2ARM: ami-0dff18538ee15dd27
+      US2004HVM: ami-08f7fc611e4646855
+      US2204HVM: ami-09a5c873bc79530d9
+      US2204HVMARM: ami-089af3b675897e7ef
+      CENTOS7HVM: ami-0cf5f53cea16d8cbf
+      SLES15SP4HVM: ami-03790de3a37ba87cc
     ap-southeast-3:
-      AMZNLINUX2: ami-0483d92a8124da6c9
-      # AMZNLINUX2ARM:
-      US2004HVM: ami-09915141a4f1dafdd
-      CENTOS7HVM: ami-0c654ac429998fb1c
-      SLES15HVM: ami-005899737135b4201
+      AMZNLINUX2: ami-060edf23d8df73cc8
+      AMZNLINUX2ARM: ami-0fa0405f31f5fc05b
+      US2004HVM: ami-0b8cf521c3f4ecad8
+      US2204HVM: ami-0a7d0f34566ce9a9a
+      US2204HVMARM: ami-0a4fbbe826a96c187
+      CENTOS7HVM: ami-0dc1b02193df64768
+      SLES15SP4HVM: ami-01075fd3a01c91824
     ca-central-1:
-      AMZNLINUX2: ami-04c12937e87474def
-      AMZNLINUX2ARM: ami-058c397e06e2c3b81
-      US2004HVM: ami-04a579d2f00bb4001
-      CENTOS7HVM: ami-04a25c39dc7a8aebb
-      SLES15HVM: ami-054bc3c58e249d26f
+      AMZNLINUX2: ami-0cfc8f6b6d827ff08
+      AMZNLINUX2ARM: ami-0687cfe4923f5f229
+      US2004HVM: ami-03ed048435101372f
+      US2204HVM: ami-0fb99f22ad0184043
+      US2204HVMARM: ami-0f1e6dafdb1de0761
+      CENTOS7HVM: ami-0ca3e32c623d61bdf
+      SLES15SP4HVM: ami-04d0ed5d3fd5e05a8
     eu-central-1:
-      AMZNLINUX2: ami-094c442a8e9a67935
-      AMZNLINUX2ARM: ami-08600ae8f3553d244
-      US2004HVM: ami-06cac34c3836ff90b
-      CENTOS7HVM: ami-0e8286b71b81c3cc1
-      SLES15HVM: ami-00c80956d89173342
+      AMZNLINUX2: ami-00f22f6155d6d92c5
+      AMZNLINUX2ARM: ami-0d772c8a73f9b1923
+      US2004HVM: ami-0a875db8a031a9efb
+      US2204HVM: ami-0caef02b518350c8b
+      US2204HVMARM: ami-0641bed8c0ce71686
+      CENTOS7HVM: ami-0b4c74d41ee4bed78
+      SLES15SP4HVM: ami-001a77181c22a52ba
     eu-north-1:
-      AMZNLINUX2: ami-04e8b0e36ed3403dc
-      AMZNLINUX2ARM: ami-012b607981f0a40bd
-      US2004HVM: ami-0ede84a5f28ec932a
-      CENTOS7HVM: ami-05788af9005ef9a93
-      SLES15HVM: ami-0c61d9bf4e84dd26a
+      AMZNLINUX2: ami-03b26f0b11774cf30
+      AMZNLINUX2ARM: ami-0ac381499d9f2404b
+      US2004HVM: ami-062488ab9ead28259
+      US2204HVM: ami-0852b274a4f812259
+      US2204HVMARM: ami-08ead8f3135c7f665
+      CENTOS7HVM: ami-08998a9a61da37c77
+      SLES15SP4HVM: ami-0c61d9bf4e84dd26a
     eu-south-1:
-      AMZNLINUX2: ami-0432f14b68c3e0273
-      AMZNLINUX2ARM: ami-00ec6c30a5816e222
-      US2004HVM: ami-0a39f417b8836bc59
-      CENTOS7HVM: ami-03014b98e9665115a
-      SLES15HVM: ami-0324f5c2cb963f12b
+      AMZNLINUX2: ami-09e1a48112c81cec6
+      AMZNLINUX2ARM: ami-0948a331ab6aedb3b
+      US2004HVM: ami-0da1c7edc984ae450
+      US2204HVM: ami-07e67c061ef6a3779
+      US2204HVMARM: ami-0ea80cfe12bdc2926
+      CENTOS7HVM: ami-0ce6f8b3dbadf3b41
+      SLES15SP4HVM: ami-0324f5c2cb963f12b
     eu-west-1:
-      AMZNLINUX2: ami-0bba0a4cb75835f71
-      AMZNLINUX2ARM: ami-06b4c3e5d2605128e
-      US2004HVM: ami-0141514361b6a3c1b
-      CENTOS7HVM: ami-0fc585b7cdf48bbb0
-      SLES15HVM: ami-0688ec3cb81e58545
+      AMZNLINUX2: ami-0ce1e3f77cd41957e
+      AMZNLINUX2ARM: ami-018e343775002ae59
+      US2004HVM: ami-0c1aea1d6f3bdd76b
+      US2204HVM: ami-0c0aa81a5fab62093
+      US2204HVMARM: ami-0a359adcdbc93673e
+      CENTOS7HVM: ami-0c1f3a8058fde8814
+      SLES15SP4HVM: ami-0be8fad2a3296a74f
     eu-west-2:
-      AMZNLINUX2: ami-030770b178fa9d374
-      AMZNLINUX2ARM: ami-0f2913dd376f23830
-      US2004HVM: ami-014b642f603e350c3
-      CENTOS7HVM: ami-09e5afc68eed60ef4
-      SLES15HVM: ami-09dc0d3735677ec06
+      AMZNLINUX2: ami-001c1821bbfc6dfd5
+      AMZNLINUX2ARM: ami-033aa51347f0f33d8
+      US2004HVM: ami-0cbd3ff0171edf4c4
+      US2204HVM: ami-033c8ef001424a6d3
+      US2204HVMARM: ami-086ab28c6a6ecdbd7
+      CENTOS7HVM: ami-036e229aa5fa198ba
+      SLES15SP4HVM: ami-0ae5ba775e2b57305
     eu-west-3:
-      AMZNLINUX2: ami-0614433a16ab15878
-      AMZNLINUX2ARM: ami-07a985aa4099754db
-      US2004HVM: ami-0d0b8d91779dec1e5
-      CENTOS7HVM: ami-0cb72d2e599cffbf9
-      SLES15HVM: ami-055d9fcbed9687d9f
+      AMZNLINUX2: ami-072056ff9d3689e7b
+      AMZNLINUX2ARM: ami-0963a97df4f645aa0
+      US2004HVM: ami-002b18014084a58f7
+      US2204HVM: ami-00952d073cecd1d1f
+      US2204HVMARM: ami-08af63fb2564d106f
+      CENTOS7HVM: ami-0eb3117f2ccc34ba6
+      SLES15SP4HVM: ami-05c58114a34dbae09
+    me-central-1:
+      AMZNLINUX2: ami-0a770253fc75ffb34
+      AMZNLINUX2ARM: ami-0586e7a7f9f84353a
+      US2004HVM: ami-0ec4a9c4fb268d9d8
+      US2204HVM: ami-0b176a61215978ae7
+      US2204HVMARM: ami-059ccd326f437bdd7
+      CENTOS7HVM: ami-0f3bfe072614fef65
+      SLES15SP4HVM: ami-0e58a0202165f87c2
     me-south-1:
-      AMZNLINUX2: ami-07a68e42e669daed0
-      AMZNLINUX2ARM: ami-015db69a19b15f6f6
-      US2004HVM: ami-0c769d841005394ee
-      CENTOS7HVM: ami-011c71a894b10f35b
-      SLES15HVM: ami-01517fccda7ee908a
+      AMZNLINUX2: ami-00374a4f064f79cae
+      AMZNLINUX2ARM: ami-01f37d5d6bdaa5b1b
+      US2004HVM: ami-05a3d520f37b54e25
+      US2204HVM: ami-03de2671163dff759
+      US2204HVMARM: ami-00dafdc4666388a3
+      CENTOS7HVM: ami-03a968cc818f19908
+      SLES15SP4HVM: ami-0cb731bd07edfbcc4
     sa-east-1:
-      AMZNLINUX2: ami-0656df2cc0dfd150a
-      AMZNLINUX2ARM: ami-0bacea481e0d399f9
-      US2004HVM: ami-088afbba294231fe0
-      CENTOS7HVM: ami-0b30f38d939dd4b54
-      SLES15HVM: ami-0964ddd286e7d4a4f
+      AMZNLINUX2: ami-0e41adb6f66146d4f
+      AMZNLINUX2ARM: ami-096cd58c3fc542241
+      US2004HVM: ami-05572d2849beb8330
+      US2204HVM: ami-0deebba34ef22f5a9
+      US2204HVMARM: ami-07e1e26b11a904079
+      CENTOS7HVM: ami-04384c010169ed8d3
+      SLES15SP4HVM: ami-0a8e14c344b199257
     us-east-1:
-      AMZNLINUX2: ami-065efef2c739d613b
-      AMZNLINUX2ARM: ami-09f0bb50202ca06b0
-      US2004HVM: ami-0070c5311b7677678
-      CENTOS7HVM: ami-0810ddd646a26b133
-      SLES15HVM: ami-08199c714a509d3bc
+      AMZNLINUX2: '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2}}'
+      AMZNLINUX2ARM: '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-arm64-gp2}}'
+      US2004HVM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}'
+      US2204HVM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}'
+      US2204HVMARM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/22.04/stable/current/arm64/hvm/ebs-gp2/ami-id}}'
+      CENTOS7HVM: ami-002070d43b0a4f171
+      SLES15SP4HVM: ami-08e167817c87ed7fd
     us-east-2:
-      AMZNLINUX2: ami-07251f912d2a831a3
-      AMZNLINUX2ARM: ami-093dde316d91535f5
-      US2004HVM: ami-07f84a50d2dec2fa4
-      CENTOS7HVM: ami-01e36b7901e884a10
-      SLES15HVM: ami-013d257c3198b3759
+      AMZNLINUX2: '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2}}'
+      AMZNLINUX2ARM: '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-arm64-gp2}}'
+      US2004HVM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}'
+      US2204HVM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}'
+      US2204HVMARM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/22.04/stable/current/arm64/hvm/ebs-gp2/ami-id}}'
+      CENTOS7HVM: ami-05a36e1502605b4aa
+      SLES15SP4HVM: ami-0535d9b70179f9734
     us-west-1:
-      AMZNLINUX2: ami-09b2f6d85764ec71b
-      AMZNLINUX2ARM: ami-023670b6c7f24006a
-      US2004HVM: ami-040a251ee9d7d1a9b
-      CENTOS7HVM: ami-0a2e84f9f7388300f
-      SLES15HVM: ami-0d36c27f11154fad6
+      AMZNLINUX2: ami-029d71bf8ac93a007
+      AMZNLINUX2ARM: ami-00872c48515f06ba0
+      US2004HVM: ami-0b8dfd94ec1c80cd5
+      US2204HVM: ami-0d02a9285176ca8a8
+      US2204HVMARM: ami-0aac92f9fb62794dc
+      CENTOS7HVM: ami-0dee0f906cf114191
+      SLES15SP4HVM: ami-0d36c27f11154fad6
     us-west-2:
-      AMZNLINUX2: ami-0d08ef957f0e4722b
-      AMZNLINUX2ARM: ami-0d3c51ccaa76cbe2b
-      US2004HVM: ami-0aab355e1bfa1e72e
-      CENTOS7HVM: ami-0bc06212a56393ee1
-      SLES15HVM: ami-0bfb58754b8025d15
+      AMZNLINUX2: '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2}}'
+      AMZNLINUX2ARM: '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-arm64-gp2}}'
+      US2004HVM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}'
+      US2204HVM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}'
+      US2204HVMARM: '{{resolve:ssm:/aws/service/canonical/ubuntu/server/22.04/stable/current/arm64/hvm/ebs-gp2/ami-id}}'
+      CENTOS7HVM: ami-08c191625cfb7ee61
+      SLES15SP4HVM: ami-0bfb58754b8025d15
     us-gov-east-1:
-      AMZNLINUX2: ami-0c371616b3ca56690
+      AMZNLINUX2: ami-03dce36866ec508f5
       AMZNLINUX2ARM: ami-0b447912d3ca3271c
-      US2004HVM: ami-dee008af
-      CENTOS7HVM: ami-00e30c71
-      SLES15HVM: ami-0c49e39cbc98483b4
+      US2004HVM: ami-0e54ab9730eacf59c
+      US2204HVM: ami-02715d3e836877098
+      US2204HVMARM: ami-0dbcf7fc866b67aed
+      CENTOS7HVM: ami-00c6b007ba906a530
+      # SLES15SP4HVM:
     us-gov-west-1:
-      AMZNLINUX2: ami-0456d1223a9a0764a
-      AMZNLINUX2ARM: ami-00cf8e7b7f6d21416
-      US2004HVM: ami-84556de5
-      CENTOS7HVM: ami-bbba86da
-      SLES15HVM: ami-0602869f1391f1ba3
+      AMZNLINUX2: ami-084a90132ed03eff9
+      AMZNLINUX2ARM: ami-0fdc216bdfd5b7908
+      US2004HVM: ami-06bb91bded3536e72
+      US2204HVM: ami-09e0cb78220c19409
+      US2204HVMARM: ami-0b49c8153b5b39e72
+      CENTOS7HVM: ami-08b470dba6016d395
+      # SLES15SP4HVM:
     cn-north-1:
-      AMZNLINUX2: ami-06b608ec1cc843660
-      AMZNLINUX2ARM: ami-0ff4cb8981f10360d
-      US2004HVM: ami-0ee7de898385f3816
-      CENTOS7HVM: ami-08c16f7e830c0e393
-      SLES15HVM: ami-07563af55cf2eb31d
+      AMZNLINUX2: ami-0f013d34a0b511e5c
+      AMZNLINUX2ARM: ami-0fabc2ef286ed7b51
+      US2004HVM: ami-03611de1cc73ded5d
+      US2204HVM: ami-066463ec4673de53b
+      US2204HVMARM: ami-05895291a3b349a2f
+      CENTOS7HVM: ami-0860d3f26ee044bb9
+      # SLES15SP4HVM:
     cn-northwest-1:
-      AMZNLINUX2: ami-0f0625eb0f9444fd7
-      AMZNLINUX2ARM: ami-0846fdff25a81e0fc
-      US2004HVM: ami-08e0c0a54f075c9bc
-      CENTOS7HVM: ami-0f21aa96a61df8c44
-      SLES15HVM: ami-019b04518c072a050
+      AMZNLINUX2: ami-0264a841e816c29ba
+      AMZNLINUX2ARM: ami-048d2b8d39e4755e5
+      US2004HVM: ami-01c4a9e119a03055d
+      US2204HVM: ami-020ce060d4778563b
+      US2204HVMARM: ami-0390636708632f19a
+      CENTOS7HVM: ami-01cac994948aca880
+      # SLES15SP4HVM:
   LinuxAMINameMap:
     Amazon-Linux2-HVM:
       Code: AMZNLINUX2
@@ -445,14 +534,17 @@ Mappings:
     CentOS-7-HVM:
       Code: CENTOS7HVM
       OS: CentOS
-    Ubuntu-Server-18.04-LTS-HVM:
-      Code: US1804HVM
-      OS: Ubuntu
     Ubuntu-Server-20.04-LTS-HVM:
       Code: US2004HVM
       OS: Ubuntu
+    Ubuntu-Server-22.04-LTS-HVM:
+      Code: US2204HVM
+      OS: Ubuntu
+    Ubuntu-Server-22.04-LTS-HVM-ARM:
+      Code: US2204HVMARM
+      OS: Ubuntu
     SUSE-SLES-15-HVM:
-      Code: SLES15HVM
+      Code: SLES15SP4HVM
       OS: SLES
 Conditions:
   RolePathProvided: !Not [!Equals ['', !Ref RolePath]]
@@ -460,10 +552,10 @@ Conditions:
   2BastionConditionHost: !Or [!Equals [!Ref NumBastionHosts, 2], !Condition 3BastionCondition, !Condition 4BastionCondition]
   3BastionConditionHost: !Or [!Equals [!Ref NumBastionHosts, 3], !Condition 4BastionCondition]
   4BastionConditionHost: !Equals [!Ref NumBastionHosts, 4]
-  2BastionCondition: !And [!Condition PopulateRemoteCIDR, !Condition 2BastionConditionHost]
-  3BastionCondition: !And [!Condition PopulateRemoteCIDR, !Condition 3BastionConditionHost]
-  4BastionCondition: !And [!Condition PopulateRemoteCIDR, !Condition 4BastionConditionHost]
-  PopulateRemoteCIDR: !Not [!Equals [!Ref RemoteAccessCIDR, disabled-onlyssmaccess]]
+  2BastionCondition: !And [!Condition HasRemoteCIDR, !Condition 2BastionConditionHost]
+  3BastionCondition: !And [!Condition HasRemoteCIDR, !Condition 3BastionConditionHost]
+  4BastionCondition: !And [!Condition HasRemoteCIDR, !Condition 4BastionConditionHost]
+  HasRemoteCIDR: !Not [!Equals [!Ref RemoteAccessCIDR, disabled-onlyssmaccess]]
   UseAlternativeInitialization: !Not [!Equals [!Ref AlternativeInitializationScript, '']]
   CreateIAMRole: !Equals [!Ref AlternativeIAMRole, '']
   UseOSImageOverride: !Not [!Equals [!Ref OSImageOverride, '']]
@@ -490,14 +582,13 @@ Resources:
       PermissionsBoundary:
         !If [PermissionsBoundaryProvided, !Ref PermissionsBoundaryArn, !Ref AWS::NoValue]
       AssumeRolePolicyDocument:
+        Version: 2012-10-17
         Statement:
-          - Action:
-              - sts:AssumeRole
+          - Effect: Allow
+            Action: sts:AssumeRole
             Principal:
               Service:
                 - !Sub ec2.${AWS::URLSuffix}
-            Effect: Allow
-        Version: 2012-10-17
       ManagedPolicyArns:
         - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore
         - !Sub arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy
@@ -509,13 +600,23 @@ Resources:
       PolicyDocument:
         Version: 2012-10-17
         Statement:
-          - Action:
+          - Sid: ListQSS3BucketObjects
+            Effect: Allow
+            Action: s3:ListBucket
+            Resource: !Sub
+              - arn:${AWS::Partition}:s3:::${S3Bucket}
+              - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+          - Sid: GetQSS3Objects
+            Effect: Allow
+            Action:
               - s3:GetObject
+              - s3:GetObjectVersion
             Resource: !Sub
               - arn:${AWS::Partition}:s3:::${S3Bucket}/${QSS3KeyPrefix}*
               - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+          - Sid: WriteToCloudWatchLogs
             Effect: Allow
-          - Action:
+            Action:
               - logs:CreateLogStream
               - logs:GetLogEvents
               - logs:PutLogEvents
@@ -525,12 +626,13 @@ Resources:
               - logs:PutMetricFilter
               - logs:CreateLogGroup
             Resource: !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${BastionMainLogGroup}:*
+          - Sid: Global
             Effect: Allow
-          - Action:
+            Action:
               - ec2:DescribeAddresses
             Resource: '*'
+          - Sid: AssociateStackEips
             Effect: Allow
-          - Effect: Allow
             Action:
               - ec2:AssociateAddress
             Resource: '*'
@@ -547,7 +649,7 @@ Resources:
       Path: !If [CreateIAMRole, /, /account-managed/]
   EIP1:
     Type: AWS::EC2::EIP
-    Condition: PopulateRemoteCIDR
+    Condition: HasRemoteCIDR
     Properties:
       Domain: vpc
   EIP2:
@@ -635,9 +737,6 @@ Resources:
               env:
                 BASTION_OS: !FindInMap [LinuxAMINameMap, !Ref BastionAMIOS, OS]
               command: ./auditing_configure.sh
-              # command:
-              #   - !If [ ]
-              #   - "cat /tmp/auditd.rules >> /etc/audit/rules.d/audit.rules && service auditd restart"
             b-bootstrap:
               cwd: /tmp/
               env:
@@ -674,31 +773,45 @@ Resources:
       UserData:
         Fn::Base64: !Sub
           - |
-            #!/bin/bash
+            #!/usr/bin/env bash
             set -x
             for e in $(echo "${EnvironmentVariables}" | tr ',' ' '); do
               export $e
               echo "$e" >> /root/.bashrc
             done
             export PATH=$PATH:/usr/local/bin
-            #cfn signaling functions
-            yum install git -y || apt-get install -y git || zypper -n install git
+            yum install -y git unzip wget curl || apt-get install -y git unzip wget curl || zypper -n install git unzip wget curl
 
-            function cfn_fail
-            {
+            #cfn signaling functions
+            cfn_fail() {
               cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource BastionAutoScalingGroup
               exit 1
             }
 
-            function cfn_success
-            {
+            cfn_success() {
               cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource BastionAutoScalingGroup
               exit 0
             }
 
-            until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git ; do echo "Retrying"; done
-            cd /quickstart-linux-utilities;
-            source quickstart-cfn-tools.source;
+            pushd /tmp
+
+            if [[ "a$(which aws)" == "a" ]]
+            then
+              echo "Installing AWS CLI..."
+              uname=$(uname -m)
+              wget -nv -O "./awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-$uname.zip"
+              unzip -q ./awscliv2.zip
+              ./aws/install
+            fi
+
+            until aws s3 cp --no-progress --region ${AWS::Region} "s3://${S3Bucket}/${QSS3KeyPrefix}scripts/cfn-tools.sh" .
+            do
+              echo "Retrying..."
+            done
+            source ./cfn-tools.sh
+
+            popd /tmp
+
             qs_update-os || qs_err;
             qs_bootstrap_pip || qs_err " pip bootstrap failed ";
             qs_aws-cfn-bootstrap || qs_err " cfn bootstrap failed ";
@@ -707,10 +820,11 @@ Resources:
             CLOUDWATCHGROUP=${BastionMainLogGroup}
             cfn-init -v --stack '${AWS::StackName}' --resource BastionLaunchConfiguration --region ${AWS::Region} || cfn_fail
             [ $(qs_status) == 0 ] && cfn_success || cfn_fail
-          - EIP1: !If [PopulateRemoteCIDR, !Ref EIP1, 'Null']
+          - EIP1: !If [HasRemoteCIDR, !Ref EIP1, 'Null']
             EIP2: !If [2BastionCondition, !Ref EIP2, 'Null']
             EIP3: !If [3BastionCondition, !Ref EIP3, 'Null']
             EIP4: !If [4BastionCondition, !Ref EIP4, 'Null']
+            S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
   BastionSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -718,9 +832,8 @@ Resources:
       VpcId: !Ref VPCID
       SecurityGroupIngress:
         !If
-          - PopulateRemoteCIDR
-          -
-            - IpProtocol: tcp
+          - HasRemoteCIDR
+          - - IpProtocol: tcp
               FromPort: 22
               ToPort: 22
               CidrIp: !Ref RemoteAccessCIDR
@@ -728,7 +841,7 @@ Resources:
               FromPort: -1
               ToPort: -1
               CidrIp: !Ref RemoteAccessCIDR
-          - !Ref "AWS::NoValue"
+          - !Ref AWS::NoValue
 Outputs:
   BastionAutoScalingGroup:
     Description: Auto Scaling group reference ID.
@@ -736,7 +849,7 @@ Outputs:
     Export:
       Name: !Sub ${AWS::StackName}-BastionAutoScalingGroup
   EIP1:
-    Condition: PopulateRemoteCIDR
+    Condition: HasRemoteCIDR
     Description: Elastic IP 1 for bastion.
     Value: !Ref EIP1
     Export:

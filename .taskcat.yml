@@ -1,8 +1,6 @@
 project:
   name: quickstart-linux-bastion
   owner: quickstart-eng@amazon.com
-  lambda_source_path: functions/source
-  lambda_zip_path: packages
   s3_regional_buckets: true
   regions:
     - af-south-1
@@ -16,6 +14,8 @@ project:
     - ap-southeast-3
     - ca-central-1
     - eu-central-1
+    - eu-north-1
+    - eu-south-1
     - eu-west-1
     - eu-west-2
     - eu-west-3
@@ -29,56 +29,28 @@ project:
     - us-gov-west-1
     - cn-north-1
     - cn-northwest-1
-  template: templates/linux-bastion-master.template
+  template: templates/linux-bastion-entrypoint-new-vpc.template.yaml
   parameters:
     AvailabilityZones: $[taskcat_getaz_2]
-    KeyPairName: $[taskcat_getkeypair]
-    VPCCIDR: 10.0.0.0/16
-    PrivateSubnet1CIDR: 10.0.0.0/19
-    PrivateSubnet2CIDR: 10.0.32.0/19
-    PublicSubnet1CIDR: 10.0.128.0/20
-    PublicSubnet2CIDR: 10.0.144.0/20
+    KeyPairName: --override--
     QSS3BucketName: $[taskcat_autobucket]
     QSS3BucketRegion: $[taskcat_current_region]
 tests:
   amznlinux2hvm:
     parameters:
       BastionAMIOS: Amazon-Linux2-HVM
-      BastionInstanceType: t3.medium
       RemoteAccessCIDR: 10.0.0.0/16
     regions:
-      - ap-northeast-1
-      - ap-northeast-2
-      - ap-south-1
-      - ap-southeast-1
-      - ap-southeast-2
-      - ap-southeast-3
-      - ca-central-1
-      - eu-central-1
-      - eu-north-1
-      - eu-west-1
-      - eu-west-2
-      - eu-west-3
-      - sa-east-1
-      - us-east-1
-      - us-east-2
-      #- us-west-1
+      - me-south-1
       - us-west-2
-      #- cn-north-1
-      #- cn-northwest-1
-      #- us-gov-east-1
-      #- us-gov-west-1
+      - us-gov-east-1
+      - cn-north-1
   centos7hvm:
     parameters:
       BastionAMIOS: CentOS-7-HVM
       BastionInstanceType: t3.medium
       RemoteAccessCIDR: 10.0.0.0/16
     regions:
-      - ap-south-1
-      - ca-central-1
-      - eu-central-1
-      - eu-north-1
-      - eu-west-1
       - us-east-1
   sles15hvm:
     parameters:
@@ -86,49 +58,45 @@ tests:
       BastionInstanceType: t3.medium
       RemoteAccessCIDR: 10.0.0.0/16
     regions:
-      - ap-south-1
-      - ca-central-1
       - eu-central-1
-      - eu-north-1
-      - eu-west-1
-      - us-east-1
   us2004hvm:
     parameters:
       BastionAMIOS: Ubuntu-Server-20.04-LTS-HVM
-      BastionInstanceType: t3.medium
+      BastionInstanceType: t3.small
       RemoteAccessCIDR: 10.0.0.0/16
     regions:
-      - ap-south-1
-      - ca-central-1
-      - eu-central-1
+      - eu-west-3
+  us2204hvm:
+    parameters:
+      BastionAMIOS: Ubuntu-Server-22.04-LTS-HVM
+      BastionInstanceType: t3.small
+      RemoteAccessCIDR: 10.0.0.0/16
+    regions:
       - eu-north-1
-      - eu-west-1
-      - us-east-1
-  arminst:
+  amznlinux2hvmarm:
     parameters:
       BastionAMIOS: Amazon-Linux2-HVM-ARM
       BastionInstanceType: t4g.nano
       RemoteAccessCIDR: 10.0.0.0/16
     regions:
       - ap-south-1
-      - ca-central-1
-      - eu-central-1
-      - eu-north-1
-      - eu-west-1
-      - us-east-1
+      - us-west-1
+      - us-gov-west-1
+      - cn-northwest-1
+  us2204hvmarm:
+    parameters:
+      BastionAMIOS: Ubuntu-Server-22.04-LTS-HVM-ARM
+      BastionInstanceType: t4g.nano
+      RemoteAccessCIDR: 10.0.0.0/16
+    regions:
+      - ap-northeast-2
   onlyssmaccess:
     parameters:
       BastionAMIOS: Amazon-Linux2-HVM-ARM
       BastionInstanceType: t4g.nano
       RemoteAccessCIDR: disabled-onlyssmaccess
-      NumBastionHosts: 2
+      NumBastionHosts: 1
     regions:
-      - ap-south-1
-      - ca-central-1
-      - eu-central-1
-      - eu-north-1
-      - eu-west-1
-      - us-east-1
       - us-east-2
   multiplehosts:
     parameters:
