@@ -794,7 +794,7 @@ Resources:
               ./aws/install
             fi
 
-            until aws s3 cp --no-progress "s3://${S3Bucket}/${QSS3KeyPrefix}scripts/cfn-tools.sh" .
+            until aws s3 cp --no-progress --region ${AWS::Region} "s3://${S3Bucket}/${QSS3KeyPrefix}scripts/cfn-tools.sh" .
             do
               echo "Retrying..."
             done
