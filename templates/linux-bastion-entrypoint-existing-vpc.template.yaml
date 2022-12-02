@@ -7,6 +7,8 @@ Metadata:
     EntrypointName: Launch into an existing VPC
     Order: 2
   LICENSE: Apache License, Version 2.0
+  LintSpellExclude:
+    - onlyssmaccess
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
@@ -170,10 +172,16 @@ Parameters:
     Default: 1
   PublicSubnet1ID:
     Type: AWS::EC2::Subnet::Id
-    Description: ID of the public subnet 1 that you want to provision the first bastion into (for example, subnet-a0246dcd).
+    Description: >-
+      ID of the public subnet 1 that you want to provision the first bastion
+      into (for example, subnet-a0246dcd). If RemoteAccessCIDR is set to
+      'disabled-onlyssmaccess', enter the ID of a private subnet instead.
   PublicSubnet2ID:
     Type: AWS::EC2::Subnet::Id
-    Description: ID of the public subnet 2 that you want to provision the second bastion into (for example, subnet-e3246d8e).
+    Description: >-
+      ID of the public subnet 2 that you want to provision the second bastion
+      into (for example, subnet-e3246d8e). If RemoteAccessCIDR is set to
+      'disabled-onlyssmaccess', enter the ID of a private subnet instead.
   QSS3BucketName:
     Type: String
     Description: Name of the S3 bucket for your copy of the Quick Start assets.
@@ -631,14 +639,17 @@ Resources:
             Action:
               - ec2:DescribeAddresses
             Resource: '*'
-          - Sid: AssociateStackEips
-            Effect: Allow
-            Action:
-              - ec2:AssociateAddress
-            Resource: '*'
-            Condition:
-              StringEquals:
-                ec2:ResourceTag/aws:cloudformation:stack-id: !Ref AWS::StackId
+          - !If
+              - HasRemoteCIDR
+              - Sid: AssociateStackEips
+                Effect: Allow
+                Action:
+                  - ec2:AssociateAddress
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    ec2:ResourceTag/aws:cloudformation:stack-id: !Ref AWS::StackId
+              - !Ref AWS::NoValue
       Roles:
         - !If [CreateIAMRole, !Ref BastionHostRole, !Ref AlternativeIAMRole]
   BastionHostProfile:
@@ -752,7 +763,7 @@ Resources:
                       - S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
                     - !Ref BastionBanner
     Properties:
-      AssociatePublicIpAddress: true
+      AssociatePublicIpAddress: !If [HasRemoteCIDR, true, false]
       PlacementTenancy: !Ref BastionTenancy
       KeyName: !If [UseKeyPair, !Ref KeyPairName, !Ref AWS::NoValue]
       IamInstanceProfile: !Ref BastionHostProfile

@@ -238,6 +238,7 @@ Parameters:
     ConstraintDescription: CIDR block parameter must be in the format "x.x.x.x/16-28".
     Default: 10.0.0.0/16
 Conditions:
+  HasRemoteCIDR: !Not [!Equals [!Ref RemoteAccessCIDR, disabled-onlyssmaccess]]
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, aws-quickstart]
 Resources:
   VPCStack:
@@ -274,8 +275,8 @@ Resources:
         EnableX11Forwarding: !Ref EnableX11Forwarding
         KeyPairName: !Ref KeyPairName
         NumBastionHosts: !Ref NumBastionHosts
-        PublicSubnet1ID: !GetAtt VPCStack.Outputs.PublicSubnet1ID
-        PublicSubnet2ID: !GetAtt VPCStack.Outputs.PublicSubnet2ID
+        PublicSubnet1ID: !If [HasRemoteCIDR, !GetAtt VPCStack.Outputs.PublicSubnet1ID, !GetAtt VPCStack.Outputs.PrivateSubnet1AID]
+        PublicSubnet2ID: !If [HasRemoteCIDR, !GetAtt VPCStack.Outputs.PublicSubnet2ID, !GetAtt VPCStack.Outputs.PrivateSubnet2AID]
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
