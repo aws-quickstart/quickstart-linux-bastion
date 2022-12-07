@@ -197,6 +197,8 @@ setup_ssm() {
   echo "${FUNCNAME[0]} started"
   URL_SUFFIX="${URL_SUFFIX:-amazonaws.com}"
 
+  echo "ssm-user ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers.d/ssm-user
+
   if [[ "${release}" == 'CentOS' ]]; then
     echo 'Installing the AWS Systems Manager (SSM) agent...'
     yum install -y "https://amazon-ssm-${REGION}.s3.${REGION}.${URL_SUFFIX}/latest/linux_${ARCHITECTURE}/amazon-ssm-agent.rpm"
