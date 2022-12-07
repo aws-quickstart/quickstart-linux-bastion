@@ -82,7 +82,6 @@ tests:
       - ap-south-1
       - us-west-1
       - us-gov-west-1
-      - cn-northwest-1
   us2204hvmarm:
     parameters:
       BastionAMIOS: Ubuntu-Server-22.04-LTS-HVM-ARM
