@@ -14,7 +14,7 @@ As shown in <<architecture1>>, this Quick Start sets up the following:
 * A virtual private cloud (VPC) configured with public and private subnets, according to AWS best practices, to provide you with your own virtual network on AWS.*
 * In the public subnets:
 ** Managed network address translation (NAT) gateways to allow outbound internet access for resources in the private subnets.*
-** 1&#8209;4 Linux bastion hosts in an Auto Scaling group for connecting to Amazon Elastic Compute Cloud (Amazon EC2) instances in public and private subnets.**
+** 1&#8209;4 Linux bastion hosts in an Amazon Elastic Compute Cloud (Amazon&nbsp;EC2) Auto&nbsp;Scaling group for connecting to Amazon&nbsp;EC2 instances and other resources deployed in public and private subnets.**
 * An Amazon CloudWatch log group to hold the Linux bastion host shell history logs.
 * AWS Systems Manager for access to the bastion host.
 
