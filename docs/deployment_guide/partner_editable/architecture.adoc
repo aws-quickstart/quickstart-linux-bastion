@@ -14,8 +14,9 @@ As shown in <<architecture1>>, this Quick Start sets up the following:
 * A virtual private cloud (VPC) configured with public and private subnets, according to AWS best practices, to provide you with your own virtual network on AWS.*
 * In the public subnets:
 ** Managed network address translation (NAT) gateways to allow outbound internet access for resources in the private subnets.*
-** A Linux bastion host in an Auto Scaling group for connecting to Amazon Elastic Compute Cloud (Amazon EC2) instances in public and private subnets.
+** 1&#8209;4 Linux bastion hosts in an Auto Scaling group for connecting to Amazon Elastic Compute Cloud (Amazon EC2) instances in public and private subnets.**
 * An Amazon CloudWatch log group to hold the Linux bastion host shell history logs.
 * AWS Systems Manager for access to the bastion host.
 
-[.small]#* The template that deploys this Quick Start into an existing VPC skips the components marked by asterisks and prompts you for your existing VPC configuration.#
+[.small]#* The template that deploys this Quick Start into an existing VPC skips the components marked by asterisks and prompts you for your existing VPC configuration.# +
+[.small]#** https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-on-demand-instances.html[On&#8209;demand], https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html[spot], and combinations thereof are supported.# +
