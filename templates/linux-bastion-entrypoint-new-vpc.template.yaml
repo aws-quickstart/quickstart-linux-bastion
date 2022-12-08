@@ -30,6 +30,7 @@ Metadata:
           default: Linux bastion configuration
         Parameters:
           - NumBastionHosts
+          - OndemandPercentage
           - BastionHostName
           - BastionTenancy
           - EnableBanner
@@ -67,6 +68,8 @@ Metadata:
         default: Key pair name
       NumBastionHosts:
         default: Number of bastion hosts
+      OndemandPercentage:
+        default: On-demand percentage
       PrivateSubnet1CIDR:
         default: Private subnet 1 CIDR
       PrivateSubnet2CIDR:
@@ -156,6 +159,13 @@ Parameters:
       - 3
       - 4
     Default: 1
+  OndemandPercentage:
+    Type: Number
+    Description: >-
+      Percentage of on-demand instances versus spot instances. With the
+      default of 100, the ratio will be 100% on-demand instances and 0% spot
+      instances.
+    Default: 100
   PrivateSubnet1CIDR:
     Type: String
     Description: CIDR block for private subnet 1, located in Availability Zone 1.
@@ -275,6 +285,7 @@ Resources:
         EnableX11Forwarding: !Ref EnableX11Forwarding
         KeyPairName: !Ref KeyPairName
         NumBastionHosts: !Ref NumBastionHosts
+        OndemandPercentage: !Ref OndemandPercentage
         PublicSubnet1ID: !If [HasRemoteCIDR, !GetAtt VPCStack.Outputs.PublicSubnet1ID, !GetAtt VPCStack.Outputs.PrivateSubnet1AID]
         PublicSubnet2ID: !If [HasRemoteCIDR, !GetAtt VPCStack.Outputs.PublicSubnet2ID, !GetAtt VPCStack.Outputs.PrivateSubnet2AID]
         QSS3BucketRegion: !Ref QSS3BucketRegion

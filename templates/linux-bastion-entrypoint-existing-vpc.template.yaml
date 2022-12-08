@@ -34,6 +34,7 @@ Metadata:
           default: Linux bastion configuration
         Parameters:
           - NumBastionHosts
+          - OndemandPercentage
           - BastionHostName
           - BastionTenancy
           - EnableBanner
@@ -82,6 +83,8 @@ Metadata:
         default: Key pair name
       NumBastionHosts:
         default: Number of bastion hosts
+      OndemandPercentage:
+        default: On-demand percentage
       OSImageOverride:
         default: Operating system override
       PublicSubnet1ID:
@@ -170,6 +173,13 @@ Parameters:
       - 3
       - 4
     Default: 1
+  OndemandPercentage:
+    Type: Number
+    Description: >-
+      Percentage of on-demand instances versus spot instances. With the
+      default of 100, the ratio will be 100% on-demand instances and 0% spot
+      instances.
+    Default: 100
   PublicSubnet1ID:
     Type: AWS::EC2::Subnet::Id
     Description: >-
@@ -681,7 +691,6 @@ Resources:
   BastionAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      LaunchConfigurationName: !Ref BastionLaunchConfiguration
       VPCZoneIdentifier:
         - !Ref PublicSubnet1ID
         - !Ref PublicSubnet2ID
@@ -689,6 +698,14 @@ Resources:
       MaxSize: !Ref NumBastionHosts
       Cooldown: 900
       DesiredCapacity: !Ref NumBastionHosts
+      MixedInstancesPolicy:
+        LaunchTemplate:
+          LaunchTemplateSpecification:
+            LaunchTemplateId: !Ref BastionLaunchTemplate
+            Version: !GetAtt BastionLaunchTemplate.LatestVersionNumber
+        InstancesDistribution:
+          OnDemandPercentageAboveBaseCapacity: !Ref OndemandPercentage
+          SpotInstancePools: 1
       Tags:
         - Key: Name
           Value: !Ref BastionHostName
@@ -702,8 +719,8 @@ Resources:
     UpdatePolicy:
       AutoScalingReplacingUpdate:
         WillReplace: true
-  BastionLaunchConfiguration:
-    Type: AWS::AutoScaling::LaunchConfiguration
+  BastionLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
     Metadata:
       AWS::CloudFormation::Authentication:
         S3AccessCreds:
@@ -763,79 +780,84 @@ Resources:
                       - S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
                     - !Ref BastionBanner
     Properties:
-      AssociatePublicIpAddress: !If [HasRemoteCIDR, true, false]
-      PlacementTenancy: !Ref BastionTenancy
-      KeyName: !If [UseKeyPair, !Ref KeyPairName, !Ref AWS::NoValue]
-      IamInstanceProfile: !Ref BastionHostProfile
-      ImageId: !If
-        - UseOSImageOverride
-        - !Ref OSImageOverride
-        - !FindInMap [AWSAMIRegionMap, !Ref AWS::Region, !FindInMap [LinuxAMINameMap, !Ref BastionAMIOS, Code]]
-      SecurityGroups:
-        - !Ref BastionSecurityGroup
-      InstanceType: !Ref BastionInstanceType
-      BlockDeviceMappings:
-        - DeviceName: /dev/xvda
-          Ebs:
-            VolumeSize: !Ref RootVolumeSize
-            VolumeType: gp2
-            Encrypted: true
-            DeleteOnTermination: true
-      UserData:
-        Fn::Base64: !Sub
-          - |
-            #!/usr/bin/env bash
-            set -x
-            for e in $(echo "${EnvironmentVariables}" | tr ',' ' '); do
-              export $e
-              echo "$e" >> /root/.bashrc
-            done
-            export PATH=$PATH:/usr/local/bin
-            yum install -y git unzip wget curl || apt-get install -y git unzip wget curl || zypper -n install git unzip wget curl
+      LaunchTemplateData:
+        Placement:
+          Tenancy: !Ref BastionTenancy
+        KeyName: !If [UseKeyPair, !Ref KeyPairName, !Ref AWS::NoValue]
+        ImageId: !If
+          - UseOSImageOverride
+          - !Ref OSImageOverride
+          - !FindInMap [AWSAMIRegionMap, !Ref AWS::Region, !FindInMap [LinuxAMINameMap, !Ref BastionAMIOS, Code]]
+        InstanceType: !Ref BastionInstanceType
+        IamInstanceProfile:
+          Arn: !GetAtt BastionHostProfile.Arn
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            AssociatePublicIpAddress: !If [HasRemoteCIDR, true, false]
+            Groups:
+              - !Ref BastionSecurityGroup
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda
+            Ebs:
+              VolumeSize: !Ref RootVolumeSize
+              VolumeType: gp2
+              Encrypted: true
+              DeleteOnTermination: true
+        UserData:
+          Fn::Base64: !Sub
+            - |
+              #!/usr/bin/env bash
+              set -x
+              for e in $(echo "${EnvironmentVariables}" | tr ',' ' '); do
+                export $e
+                echo "$e" >> /root/.bashrc
+              done
+              export PATH=$PATH:/usr/local/bin
+              yum install -y git unzip wget curl || apt-get install -y git unzip wget curl || zypper -n install git unzip wget curl
 
-            #cfn signaling functions
-            cfn_fail() {
-              cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource BastionAutoScalingGroup
-              exit 1
-            }
+              #cfn signaling functions
+              cfn_fail() {
+                cfn-signal -e 1 --stack ${AWS::StackName} --region ${AWS::Region} --resource BastionAutoScalingGroup
+                exit 1
+              }
 
-            cfn_success() {
-              cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource BastionAutoScalingGroup
-              exit 0
-            }
+              cfn_success() {
+                cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource BastionAutoScalingGroup
+                exit 0
+              }
 
-            pushd /tmp
+              pushd /tmp
 
-            if [[ "a$(which aws)" == "a" ]]
-            then
-              echo "Installing AWS CLI..."
-              uname=$(uname -m)
-              wget -nv -O "./awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-$uname.zip"
-              unzip -q ./awscliv2.zip
-              ./aws/install
-            fi
+              if [[ "a$(which aws)" == "a" ]]
+              then
+                echo "Installing AWS CLI..."
+                uname=$(uname -m)
+                wget -nv -O "./awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-$uname.zip"
+                unzip -q ./awscliv2.zip
+                ./aws/install
+              fi
 
-            until aws s3 cp --no-progress --region ${AWS::Region} "s3://${S3Bucket}/${QSS3KeyPrefix}scripts/cfn-tools.sh" .
-            do
-              echo "Retrying..."
-            done
-            source ./cfn-tools.sh
+              until aws s3 cp --no-progress --region ${AWS::Region} "s3://${S3Bucket}/${QSS3KeyPrefix}scripts/cfn-tools.sh" .
+              do
+                echo "Retrying..."
+              done
+              source ./cfn-tools.sh
 
-            popd /tmp
+              popd /tmp
 
-            qs_update-os || qs_err;
-            qs_bootstrap_pip || qs_err " pip bootstrap failed ";
-            qs_aws-cfn-bootstrap || qs_err " cfn bootstrap failed ";
+              qs_update-os || qs_err;
+              qs_bootstrap_pip || qs_err " pip bootstrap failed ";
+              qs_aws-cfn-bootstrap || qs_err " cfn bootstrap failed ";
 
-            EIP_LIST="${EIP1},${EIP2},${EIP3},${EIP4}"
-            CLOUDWATCHGROUP=${BastionMainLogGroup}
-            cfn-init -v --stack '${AWS::StackName}' --resource BastionLaunchConfiguration --region ${AWS::Region} || cfn_fail
-            [ $(qs_status) == 0 ] && cfn_success || cfn_fail
-          - EIP1: !If [HasRemoteCIDR, !Ref EIP1, 'Null']
-            EIP2: !If [2BastionCondition, !Ref EIP2, 'Null']
-            EIP3: !If [3BastionCondition, !Ref EIP3, 'Null']
-            EIP4: !If [4BastionCondition, !Ref EIP4, 'Null']
-            S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
+              EIP_LIST="${EIP1},${EIP2},${EIP3},${EIP4}"
+              CLOUDWATCHGROUP=${BastionMainLogGroup}
+              cfn-init -v --stack '${AWS::StackName}' --resource BastionLaunchTemplate --region ${AWS::Region} || cfn_fail
+              [ $(qs_status) == 0 ] && cfn_success || cfn_fail
+            - EIP1: !If [HasRemoteCIDR, !Ref EIP1, 'Null']
+              EIP2: !If [2BastionCondition, !Ref EIP2, 'Null']
+              EIP3: !If [3BastionCondition, !Ref EIP3, 'Null']
+              EIP4: !If [4BastionCondition, !Ref EIP4, 'Null']
+              S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
   BastionSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:

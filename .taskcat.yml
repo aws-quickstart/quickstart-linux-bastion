@@ -105,3 +105,12 @@ tests:
       NumBastionHosts: 2
     regions:
       - eu-west-1
+  spot:
+    parameters:
+      BastionAMIOS: Amazon-Linux2-HVM-ARM
+      BastionInstanceType: t4g.nano
+      RemoteAccessCIDR: disabled-onlyssmaccess
+      OndemandPercentage: 0
+      NumBastionHosts: 1
+    regions:
+      - us-east-1
