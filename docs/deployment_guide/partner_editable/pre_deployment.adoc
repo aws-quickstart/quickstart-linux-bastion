@@ -6,7 +6,7 @@ If you want to access your Linux bastion host using SSH, you must create a key p
 
 === (Optional) Customize the Linux bastion host banner
 
-This Quick Start provides a banner for the Linux bastion hosts, as illustrated in <<banner>>.
+This Partner Solution provides a banner for the Linux bastion hosts, as illustrated in <<banner>>.
 
 [#banner]
 .The Linux bastion host banner

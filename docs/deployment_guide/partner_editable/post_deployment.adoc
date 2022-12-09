@@ -17,7 +17,7 @@ The Linux distribution is specified in the *Bastion AMI operating system* parame
 
 === Bastion logging
 
-The bastion hosts deployed by this Quick Start provide a command logger in the
+The bastion hosts deployed by this Partner Solution provide a command logger in the
 `/var/log/audit/audit.log` file.
 This log file contains the date, SSH client connection IP address, user name, working directory, and the commands issued.
 
@@ -31,12 +31,12 @@ image::../docs/deployment_guide/images/logging.png[Logging]
 
 The `bastion.log` file is an immutable file that cannot be easily deleted or tampered with.
 However, in case this happens, there is a shadow file with a copy of `bastion.log` located in `/var/log/audit/audit.log`.
-The Quick Start also stores the contents of `bastion.log` remotely using the CloudWatch Logs service.
+The Partner Solution also stores the contents of `bastion.log` remotely using the CloudWatch Logs service.
 Log files can be found under CloudWatch Logs using the instance ID as the log stream name.
 
 === Remote access
 
-This Quick Start provisions one Linux bastion host in each Availability Zone with a single security group as a virtual firewall.
+This Partner Solution provisions one Linux bastion host in each Availability Zone with a single security group as a virtual firewall.
 This security group is required for remote access from the Internet if a remote access CIDR block was configured for the deployment.
 The security group is configured as follows:
 
