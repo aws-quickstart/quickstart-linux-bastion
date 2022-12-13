@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.17">
 <meta name="description" content="Linux Bastion Hosts Deployment Guide on AWS">
-<meta name="keywords" content="Quick Start, AWS, Linux Bastion Hosts">
+<meta name="keywords" content="Partner Solution, AWS, Linux Bastion Hosts">
 <title>Linux Bastion Hosts on AWS</title>
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -878,7 +878,7 @@ p.footer-text a{color:#d7d8d8}
 </li>
 <li><a href="#_troubleshooting">Troubleshooting</a>
 <ul class="sectlevel2">
-<li><a href="#_i_encountered_a_create_failed_error_when_i_launched_the_quick_start">I encountered a <strong>CREATE_FAILED</strong> error when I launched the Quick Start</a></li>
+<li><a href="#_i_encountered_a_create_failed_error_when_i_launched_the_partner_solution">I encountered a <strong>CREATE_FAILED</strong> error when I launched the Partner Solution</a></li>
 <li><a href="#_i_encountered_a_size_limitation_error_when_i_deployed_the_aws_cloudformation_templates">I encountered a size-limitation error when I deployed the AWS CloudFormation templates</a></li>
 <li><a href="#_i_changed_the_instance_type_parameter_after_deployment_and_updated_the_stack_but_the_instance_types_did_not_change_or_the_elastic_ip_addresses_were_not_reassociated_after_the_stack_update">I changed the instance type parameter after deployment and updated the stack, but the instance types did not change or the Elastic IP addresses were not reassociated after the stack update</a></li>
 </ul>
@@ -894,14 +894,14 @@ p.footer-text a{color:#d7d8d8}
 <div id="preamble">
 <div class="sectionbody">
 <h2 id="_linux_bastion_hosts_on_aws" class="discrete text-center">Linux Bastion Hosts on AWS</h2>
-<h2 id="_quick_start_deployment_guide" class="discrete text-left text-center">Quick Start Deployment Guide</h2>
+<h2 id="_partner_solution_deployment_guide" class="discrete text-left text-center">Partner Solution Deployment Guide</h2>
 <div class="imageblock text-center">
 <div class="content">
 <img src="https://aws-quickstart.s3.amazonaws.com/docs/deployment-guide/aws-quickstart-deployment-graphic.png" alt="QS" width="80" height="80">
 </div>
 </div>
 <div class="paragraph text-center">
-<p><strong>August 2022</strong><br>
+<p><strong>December 2022</strong><br>
 <em>Santiago Cardenas, AWS Serverless Partners</em><br>
 <em>Tony Vattathil, Ian Hill, and Troy Lindsay, AWS Integration &amp; Automation team</em><br></p>
 </div>
@@ -917,13 +917,13 @@ p.footer-text a{color:#d7d8d8}
 <i class="fa icon-tip" title="Tip"></i>
 </td>
 <td class="content">
-Refer to the <a href="https://github.com/aws-quickstart/quickstart-linux-bastion" target="_blank" rel="noopener">GitHub repository</a> to view source files, report bugs, submit feature ideas, and post feedback about this Quick Start. To comment on the documentation, refer to <a href="#_feedback">Feedback</a>.
+Refer to the <a href="https://github.com/aws-quickstart/quickstart-linux-bastion" target="_blank" rel="noopener">GitHub repository</a> to view source files, report bugs, submit feature ideas, and post feedback about this Partner Solution. To comment on the documentation, refer to <a href="#_feedback">Feedback</a>.
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph text-left">
-<p>This Quick Start was created by Amazon Web Services (AWS). <a href="http://aws.amazon.com/quickstart/" target="_blank" rel="noopener">Quick Starts</a> are automated reference deployments that help people deploy popular technologies on AWS according to AWS best practices. If you&#8217;re unfamiliar with AWS Quick Starts, refer to the <a href="https://fwd.aws/rA69w?" target="_blank" rel="noopener">AWS Quick Start General Information Guide</a>.</p>
+<p>This Partner Solution was created by Amazon Web Services (AWS). <a href="https://aws.amazon.com/solutions/partners/" target="_blank" rel="noopener">Partner Solutions</a> are automated reference deployments that help people deploy popular technologies on AWS according to AWS best practices. If you&#8217;re unfamiliar with AWS Partner Solutions, refer to the <a href="https://fwd.aws/rA69w?" target="_blank" rel="noopener">AWS Partner Solution General Information Guide</a>.</p>
 </div>
 </div>
 </div>
@@ -931,7 +931,7 @@ Refer to the <a href="https://github.com/aws-quickstart/quickstart-linux-bastion
 <h2 id="_overview">Overview</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This Quick Start deploys Linux bastion hosts on the AWS Cloud. This guide covers the steps necessary to deploy this Quick Start.</p>
+<p>This Partner Solution deploys Linux bastion hosts on the AWS Cloud. This guide covers the steps necessary to deploy this Partner Solution.</p>
 </div>
 </div>
 </div>
@@ -939,7 +939,7 @@ Refer to the <a href="https://github.com/aws-quickstart/quickstart-linux-bastion
 <h2 id="_costs_and_licenses">Costs and licenses</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>There is no cost to use this Quick Start, but you will be billed for any AWS services or resources that this Quick Start deploys. For more information, refer to the <a href="https://fwd.aws/rA69w?" target="_blank" rel="noopener">AWS Quick Start General Information Guide</a>.</p>
+<p>There is no cost to use this Partner Solution, but you will be billed for any AWS services or resources that this Partner Solution deploys. For more information, refer to the <a href="https://fwd.aws/rA69w?" target="_blank" rel="noopener">AWS Partner Solution General Information Guide</a>.</p>
 </div>
 </div>
 </div>
@@ -947,7 +947,7 @@ Refer to the <a href="https://github.com/aws-quickstart/quickstart-linux-bastion
 <h2 id="_architecture">Architecture</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Deploying this Quick Start with default parameters builds the following Linux Bastion Hosts environment in the AWS Cloud.</p>
+<p>Deploying this Partner Solution with default parameters builds the following Linux Bastion Hosts environment in the AWS Cloud.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -965,10 +965,10 @@ The bastion host <a href="https://github.com/aws-quickstart/quickstart-linux-bas
 <div class="content">
 <img src="docs/deployment_guide/images/linux-bastion-architecture.png" alt="Architecture" width="85%">
 </div>
-<div class="title">Figure 1. Quick Start architecture for Linux Bastion Hosts on AWS</div>
+<div class="title">Figure 1. Partner Solution architecture for Linux Bastion Hosts on AWS</div>
 </div>
 <div class="paragraph">
-<p>As shown in <a href="#architecture1">Figure 1</a>, this Quick Start sets up the following:</p>
+<p>As shown in <a href="#architecture1">Figure 1</a>, this Partner Solution sets up the following:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -986,7 +986,7 @@ The bastion host <a href="https://github.com/aws-quickstart/quickstart-linux-bas
 <p>Managed network address translation (NAT) gateways to allow outbound internet access for resources in the private subnets.*</p>
 </li>
 <li>
-<p>A Linux bastion host in an Auto Scaling group for connecting to Amazon Elastic Compute Cloud (Amazon EC2) instances in public and private subnets.</p>
+<p>1&#8209;4 Linux bastion hosts in an Amazon Elastic Compute Cloud (Amazon&nbsp;EC2) Auto&nbsp;Scaling group for connecting to Amazon&nbsp;EC2 instances and other resources deployed in public and private subnets.**</p>
 </li>
 </ul>
 </div>
@@ -1000,7 +1000,8 @@ The bastion host <a href="https://github.com/aws-quickstart/quickstart-linux-bas
 </ul>
 </div>
 <div class="paragraph">
-<p><span class="small">* The template that deploys this Quick Start into an existing VPC skips the components marked by asterisks and prompts you for your existing VPC configuration.</span></p>
+<p><span class="small">* The template that deploys this Partner Solution into an existing VPC skips the components marked by asterisks and prompts you for your existing VPC configuration.</span><br>
+<span class="small">** <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-on-demand-instances.html">On&#8209;demand</a>, <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html">spot</a>, and combinations thereof are supported.</span><br></p>
 </div>
 </div>
 </div>
@@ -1008,7 +1009,7 @@ The bastion host <a href="https://github.com/aws-quickstart/quickstart-linux-bas
 <h2 id="_deployment_options">Deployment options</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This Quick Start provides the following deployment options:</p>
+<p>This Partner Solution provides the following deployment options:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -1021,7 +1022,7 @@ The bastion host <a href="https://github.com/aws-quickstart/quickstart-linux-bas
 </ul>
 </div>
 <div class="paragraph">
-<p>This Quick Start provides separate templates for these options. It also lets you configure Classless Inter-Domain Routing (CIDR) blocks, instance types, and Linux Bastion Hosts settings.</p>
+<p>This Partner Solution provides separate templates for these options. It also lets you configure Classless Inter-Domain Routing (CIDR) blocks, instance types, and Linux Bastion Hosts settings.</p>
 </div>
 </div>
 </div>
@@ -1031,13 +1032,13 @@ The bastion host <a href="https://github.com/aws-quickstart/quickstart-linux-bas
 <div class="sect2">
 <h3 id="_optional_create_a_key_pair">(Optional) Create a key pair</h3>
 <div class="paragraph">
-<p>If you want to access your Linux bastion host using SSH as well as AWS Systems Manager, you must create a key pair. For details, refer to <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html" target="_blank" rel="noopener">Amazon EC2 key pairs and Linux instances</a> and <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html#having-ec2-create-your-key-pair" target="_blank" rel="noopener">Create a key pair using Amazon EC2</a>.</p>
+<p>If you want to access your Linux bastion host using SSH, you must create a key pair. If you only want to access your bastion host using AWS Systems Manager Session Manager, a key pair is not required. For details, refer to <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html" target="_blank" rel="noopener">Amazon EC2 key pairs and Linux instances</a> and <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html#having-ec2-create-your-key-pair" target="_blank" rel="noopener">Create a key pair using Amazon EC2</a>.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_optional_customize_the_linux_bastion_host_banner">(Optional) Customize the Linux bastion host banner</h3>
 <div class="paragraph">
-<p>This Quick Start provides a banner for the Linux bastion hosts, as illustrated in <a href="#banner">Figure 2</a>.</p>
+<p>This Partner Solution provides a banner for the Linux bastion hosts, as illustrated in <a href="#banner">Figure 2</a>.</p>
 </div>
 <div id="banner" class="imageblock">
 <div class="content">
@@ -1060,7 +1061,7 @@ The bastion host <a href="https://github.com/aws-quickstart/quickstart-linux-bas
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Sign in to your AWS account, and launch this Quick Start, as described under <a href="#_deployment_options">Deployment options</a>. The AWS CloudFormation console opens with a prepopulated template. Deployment takes about 5 minutes to complete.</p>
+<p>Sign in to your AWS account, and launch this Partner Solution, as described under <a href="#_deployment_options">Deployment options</a>. The AWS CloudFormation console opens with a prepopulated template.</p>
 </li>
 <li>
 <p>Choose the correct AWS Region, and then choose <strong>Next</strong>.</p>
@@ -1077,7 +1078,7 @@ The bastion host <a href="https://github.com/aws-quickstart/quickstart-linux-bas
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Unless you are customizing the Quick Start templates for your own projects, don&#8217;t change the default settings for the following Amazon Simple Storage Service (Amazon S3) parameters: <strong>Quick Start S3 bucket name</strong>, <strong>Quick Start S3 bucket Region</strong>, and <strong>Quick Start S3 key prefix</strong>. Changing these settings automatically updates code references to point to a new Quick Start location. For more information, refer to the <a href="https://fwd.aws/NwqYA?" target="_blank" rel="noopener">AWS Quick Start Contributor&#8217;s Guide</a>.
+Unless you&#8217;re customizing the Partner Solution templates or are instructed otherwise in this guide&#8217;s <strong>Predeployment</strong> section, don&#8217;t change the default settings for the following parameters: <code>QSS3BucketName</code>, <code>QSS3BucketRegion</code>, and <code>QSS3KeyPrefix</code>. Changing the values of these parameters will modify code references that point to the Amazon Simple Storage Service (Amazon S3) bucket name and key prefix. For more information, refer to the <a href="https://fwd.aws/NwqYA?" target="_blank" rel="noopener">AWS Partner Solutions Contributor&#8217;s Guide</a>.
 </td>
 </tr>
 </table>
@@ -1090,7 +1091,7 @@ Unless you are customizing the Quick Start templates for your own projects, don&
 <p>On the <strong>Review</strong> page, review and confirm the template settings. Under <strong>Capabilities</strong>, select all of the check boxes to acknowledge that the template creates AWS Identity and Access Management (IAM)  resources that might require the ability to automatically expand macros.</p>
 </li>
 <li>
-<p>Choose <strong>Create stack</strong> to deploy the stack.</p>
+<p>Choose <strong>Create stack</strong>. The stack takes about 5 minutes to deploy.</p>
 </li>
 <li>
 <p>Monitor the stack&#8217;s status, and when the status is <strong>CREATE_COMPLETE</strong>, the Linux Bastion Hosts deployment is ready.</p>
@@ -1136,7 +1137,7 @@ Use one of the following user names, depending on your choice of Linux distribut
 <div class="sect2">
 <h3 id="_bastion_logging">Bastion logging</h3>
 <div class="paragraph">
-<p>The bastion hosts deployed by this Quick Start provide a command logger in the
+<p>The bastion hosts deployed by this Partner Solution provide a command logger in the
 <code>/var/log/audit/audit.log</code> file.
 This log file contains the date, SSH client connection IP address, user name, working directory, and the commands issued.</p>
 </div>
@@ -1155,14 +1156,14 @@ This log file contains the date, SSH client connection IP address, user name, wo
 <div class="paragraph">
 <p>The <code>bastion.log</code> file is an immutable file that cannot be easily deleted or tampered with.
 However, in case this happens, there is a shadow file with a copy of <code>bastion.log</code> located in <code>/var/log/audit/audit.log</code>.
-The Quick Start also stores the contents of <code>bastion.log</code> remotely using the CloudWatch Logs service.
+The Partner Solution also stores the contents of <code>bastion.log</code> remotely using the CloudWatch Logs service.
 Log files can be found under CloudWatch Logs using the instance ID as the log stream name.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_remote_access">Remote access</h3>
 <div class="paragraph">
-<p>This Quick Start provisions one Linux bastion host in each Availability Zone with a single security group as a virtual firewall.
+<p>This Partner Solution provisions one Linux bastion host in each Availability Zone with a single security group as a virtual firewall.
 This security group is required for remote access from the Internet if a remote access CIDR block was configured for the deployment.
 The security group is configured as follows:</p>
 </div>
@@ -1229,10 +1230,10 @@ The security group is configured as follows:</p>
 <h2 id="_troubleshooting">Troubleshooting</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>For troubleshooting common Quick Start issues, refer to the <a href="https://fwd.aws/rA69w?" target="_blank" rel="noopener">AWS Quick Start General Information Guide</a> and <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html" target="_blank" rel="noopener">Troubleshooting CloudFormation</a>.</p>
+<p>For troubleshooting common Partner Solution issues, refer to the <a href="https://fwd.aws/rA69w?" target="_blank" rel="noopener">AWS Partner Solution General Information Guide</a> and <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html" target="_blank" rel="noopener">Troubleshooting CloudFormation</a>.</p>
 </div>
 <div class="sect2">
-<h3 id="_i_encountered_a_create_failed_error_when_i_launched_the_quick_start">I encountered a <strong>CREATE_FAILED</strong> error when I launched the Quick Start</h3>
+<h3 id="_i_encountered_a_create_failed_error_when_i_launched_the_partner_solution">I encountered a <strong>CREATE_FAILED</strong> error when I launched the Partner Solution</h3>
 <div class="paragraph">
 <p>If AWS CloudFormation fails to create the stack, relaunch the template with <strong>Rollback on failure</strong> set to <strong>Disabled</strong>. This setting is under <strong>Advanced</strong> in the AWS CloudFormation console on the <strong>Configure stack options</strong> page. With this setting, the stack&#8217;s state is retained, and you can troubleshoot the issue.</p>
 </div>
@@ -1255,7 +1256,7 @@ When you set <strong>Rollback on failure</strong> to <strong>Disabled</strong>, 
 <div class="sect2">
 <h3 id="_i_encountered_a_size_limitation_error_when_i_deployed_the_aws_cloudformation_templates">I encountered a size-limitation error when I deployed the AWS CloudFormation templates</h3>
 <div class="paragraph">
-<p>Launch the Quick Start templates from the links in this guide or from another S3 bucket. If you deploy the templates from a local copy on your computer or from a location other than an S3 bucket, you might encounter template-size limitations. For more information, refer to <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html" target="_blank" rel="noopener">AWS CloudFormation quotas</a>.</p>
+<p>Launch the Partner Solution templates from the links in this guide or from another S3 bucket. If you deploy the templates from a local copy on your computer or from a location other than an S3 bucket, you might encounter template-size limitations. For more information, refer to <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html" target="_blank" rel="noopener">AWS CloudFormation quotas</a>.</p>
 </div>
 </div>
 <div class="sect2">
@@ -1308,7 +1309,7 @@ When you set <strong>Rollback on failure</strong> to <strong>Disabled</strong>, 
 <h2 id="_customer_responsibility">Customer responsibility</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>After you deploy a Quick Start, confirm that your resources and services are updated and configured—including any required patches—to meet your security and other needs. For more information, refer to the <a href="https://aws.amazon.com/compliance/shared-responsibility-model/" target="_blank" rel="noopener">Shared Responsibility Model</a>.</p>
+<p>After you deploy a Partner Solution, confirm that your resources and services are updated and configured—including any required patches—to meet your security and other needs. For more information, refer to the <a href="https://aws.amazon.com/compliance/shared-responsibility-model/" target="_blank" rel="noopener">Shared Responsibility Model</a>.</p>
 </div>
 </div>
 </div>
@@ -1316,7 +1317,7 @@ When you set <strong>Rollback on failure</strong> to <strong>Disabled</strong>, 
 <h2 id="_feedback">Feedback</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>To submit feature ideas and report bugs, use the <strong>Issues</strong> section of the <a href="https://github.com/aws-quickstart/quickstart-linux-bastion" target="_blank" rel="noopener">GitHub repository</a> for this Quick Start. To submit code, refer to the <a href="https://fwd.aws/NwqYA?" target="_blank" rel="noopener">Quick Start Contributor&#8217;s Guide</a>. To submit feedback on this deployment guide, use the following GitHub links:</p>
+<p>To submit feature ideas and report bugs, use the <strong>Issues</strong> section of the <a href="https://github.com/aws-quickstart/quickstart-linux-bastion" target="_blank" rel="noopener">GitHub repository</a> for this Partner Solution. To submit code, refer to the <a href="https://fwd.aws/NwqYA?" target="_blank" rel="noopener">Partner Solution Contributor&#8217;s Guide</a>. To submit feedback on this deployment guide, use the following GitHub links:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -1343,7 +1344,7 @@ When you set <strong>Rollback on failure</strong> to <strong>Disabled</strong>, 
 <p>This document is provided for informational purposes only. It represents current AWS product offerings and practices as of the date of issue of this document, which are subject to change without notice. Customers are responsible for making their own independent assessment of the information in this document and any use of AWS products or services, each of which is provided "as is" without warranty of any kind, whether expressed or implied. This document does not create any warranties, representations, contractual commitments, conditions, or assurances from AWS, its affiliates, suppliers, or licensors. The responsibilities and liabilities of AWS to its customers are controlled by AWS agreements, and this document is not part of, nor does it modify, any agreement between AWS and its customers.</p>
 </div>
 <div class="paragraph">
-<p>The software included with this paper is licensed under the Apache License, version 2.0 (the "License"). You may not use this file except in compliance with the License. A copy of the License is located at <a href="http://aws.amazon.com/apache2.0/" target="_blank" rel="noopener">http://aws.amazon.com/apache2.0/</a> or in the accompanying "license" file. This code is distributed on an "as is" basis, without warranties or conditions of any kind, either expressed or implied. Refer to the License for specific language governing permissions and limitations.</p>
+<p>The software included with this paper is licensed under the Apache License, version 2.0 (the "License"). You may not use this file except in compliance with the License. A copy of the License is located at <a href="https://aws.amazon.com/apache2.0/" target="_blank" rel="noopener">https://aws.amazon.com/apache2.0/</a> or in the accompanying "license" file. This code is distributed on an "as is" basis, without warranties or conditions of any kind, either expressed or implied. Refer to the License for specific language governing permissions and limitations.</p>
 </div>
 </div>
 </div>
@@ -1360,8 +1361,8 @@ When you set <strong>Rollback on failure</strong> to <strong>Disabled</strong>, 
 </html>
 <!--
 repo commit:
-a4fdabb6bdcffe90ffed64ed86161539580a70af
+d19b4c92581f3c4472c6a55f85c7e94e772eb0b9
 
 submodule config:
- c2fe0950e58d95c72d801ba3e7b4474704e43f5b docs/boilerplate (heads/main)
+ 7fa56a2f3f3ee511f887dd638f655e0c141bc19b docs/boilerplate (heads/main)
 -->

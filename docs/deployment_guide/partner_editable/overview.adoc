@@ -1,1 +1,1 @@
-This Quick Start deploys Linux bastion hosts on the AWS Cloud. This guide covers the steps necessary to deploy this Quick Start.
+This Partner Solution deploys Linux bastion hosts on the AWS Cloud. This guide covers the steps necessary to deploy this Partner Solution.

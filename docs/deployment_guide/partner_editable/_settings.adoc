@@ -1,9 +1,9 @@
-:quickstart-project-name: quickstart-linux-bastion
-:quickstart-github-org: aws-quickstart
+:partner-solution-project-name: quickstart-linux-bastion
+:partner-solution-github-org: aws-quickstart
 :partner-product-name: Linux Bastion Hosts
 :partner-product-short-name: Linux Bastion Hosts
 // :partner-company-name: Example Company Name, Ltd.
-:doc-month: August
+:doc-month: December
 :doc-year: 2022
 // :partner-contributors: John Smith, {partner-company-name}
 // :other-contributors: Akua Mansa, Trek10

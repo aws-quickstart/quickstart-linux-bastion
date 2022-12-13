@@ -1,21 +1,22 @@
 :xrefstyle: short
 
-Deploying this Quick Start with default parameters builds the following {partner-product-short-name} environment in the AWS Cloud.
+Deploying this Partner Solution with default parameters builds the following {partner-product-short-name} environment in the AWS Cloud.
 
 NOTE: The bastion host https://github.com/aws-quickstart/quickstart-linux-bastion/pull/142[no longer has a public IP address assigned for remote access by default^]. You can https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/session-manager.html[connect to your Linux instance using Session Manager^], a capability of AWS Systems Manager. If a remote-access CIDR block is configured for the deployment, an Elastic IP address is assigned, and inbound SSH (Secure Shell) access is permitted.
 
 [#architecture1]
-.Quick Start architecture for {partner-product-short-name} on AWS
+.Partner Solution architecture for {partner-product-short-name} on AWS
 image::../docs/deployment_guide/images/linux-bastion-architecture.png[Architecture, 85%]
 
-As shown in <<architecture1>>, this Quick Start sets up the following:
+As shown in <<architecture1>>, this Partner Solution sets up the following:
 
 * A highly available architecture that spans two Availability Zones.*
 * A virtual private cloud (VPC) configured with public and private subnets, according to AWS best practices, to provide you with your own virtual network on AWS.*
 * In the public subnets:
 ** Managed network address translation (NAT) gateways to allow outbound internet access for resources in the private subnets.*
-** A Linux bastion host in an Auto Scaling group for connecting to Amazon Elastic Compute Cloud (Amazon EC2) instances in public and private subnets.
+** 1&#8209;4 Linux bastion hosts in an Amazon Elastic Compute Cloud (Amazon&nbsp;EC2) Auto&nbsp;Scaling group for connecting to Amazon&nbsp;EC2 instances and other resources deployed in public and private subnets.**
 * An Amazon CloudWatch log group to hold the Linux bastion host shell history logs.
 * AWS Systems Manager for access to the bastion host.
 
-[.small]#* The template that deploys this Quick Start into an existing VPC skips the components marked by asterisks and prompts you for your existing VPC configuration.#
+[.small]#* The template that deploys this Partner Solution into an existing VPC skips the components marked by asterisks and prompts you for your existing VPC configuration.# +
+[.small]#** https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-on-demand-instances.html[On&#8209;demand], https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html[spot], and combinations thereof are supported.# +
