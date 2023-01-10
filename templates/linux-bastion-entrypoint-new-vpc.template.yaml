@@ -70,7 +70,7 @@ Metadata:
       BastionTenancy:
         default: Bastion tenancy
       BastionBanner:
-        default: Banner text
+        default: SSH banner content file URL
       BastionInstanceType:
         default: Bastion instance type
       EnableBanner:
@@ -137,7 +137,14 @@ Parameters:
     Default: LinuxBastion
   BastionBanner:
     Type: String
-    Description: Banner text to display upon login.
+    Description: >-
+      Amazon S3 object URL for the text file with the content to display upon
+      SSH login. The bastion host must have permission to download the file
+      from the S3 bucket.
+    AllowedPattern: ^(s3:\/\/[0-9a-z]+([0-9a-z-]*[0-9a-z])*/.+)?$
+    ConstraintDescription: >-
+      Must be either a valid Amazon S3 object URL
+      (example: s3://bucket/key/file.txt) or empty.
     Default: ''
   BastionTenancy:
     Type: String
