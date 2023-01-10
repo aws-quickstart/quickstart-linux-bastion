@@ -1,0 +1,287 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  **DEPRECATED: This template has been deprecated in favor of
+  'linux-bastion-entrypoint-new-vpc.template.yaml', and is no longer being
+  maintained.**
+  LinuxBastion+VPC Jul,30,2020 (qs-1qup6ra9p) (Please do not remove)
+Metadata:
+  QuickStartDocumentation:
+    EntrypointName: Launch into a new VPC
+    Order: 1
+  LICENSE: Apache License, Version 2.0
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Network configuration
+        Parameters:
+          - AvailabilityZones
+          - VPCCIDR
+          - PrivateSubnet1CIDR
+          - PrivateSubnet2CIDR
+          - PublicSubnet1CIDR
+          - PublicSubnet2CIDR
+          - RemoteAccessCIDR
+          - VPCTenancy
+      - Label:
+          default: Amazon EC2 configuration
+        Parameters:
+          - KeyPairName
+          - BastionAMIOS
+          - BastionInstanceType
+      - Label:
+          default: Linux bastion configuration
+        Parameters:
+          - NumBastionHosts
+          - BastionHostName
+          - BastionTenancy
+          - EnableBanner
+          - BastionBanner
+          - EnableTCPForwarding
+          - EnableX11Forwarding
+      - Label:
+          default: AWS Quick Start configuration
+        Parameters:
+          - QSS3BucketName
+          - QSS3KeyPrefix
+          - QSS3BucketRegion
+    ParameterLabels:
+      AvailabilityZones:
+        default: Availability Zones
+      BastionAMIOS:
+        default: Bastion AMI operating system
+      BastionHostName:
+        default: Bastion host name
+      BastionTenancy:
+        default: Bastion tenancy
+      BastionBanner:
+        default: Banner text
+      BastionInstanceType:
+        default: Bastion instance type
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket Region
+      EnableBanner:
+        default: Bastion banner
+      EnableTCPForwarding:
+        default: TCP forwarding
+      EnableX11Forwarding:
+        default: X11 forwarding
+      KeyPairName:
+        default: Key pair name
+      NumBastionHosts:
+        default: Number of bastion hosts
+      PrivateSubnet1CIDR:
+        default: Private subnet 1 CIDR
+      PrivateSubnet2CIDR:
+        default: Private subnet 2 CIDR
+      PublicSubnet1CIDR:
+        default: Public subnet 1 CIDR
+      PublicSubnet2CIDR:
+        default: Public subnet 2 CIDR
+      VPCTenancy:
+        default: VPC tenancy
+      QSS3BucketName:
+        default: Quick Start S3 bucket name
+      QSS3KeyPrefix:
+        default: Quick Start S3 key prefix
+      RemoteAccessCIDR:
+        default: Allowed bastion external access CIDR
+      VPCCIDR:
+        default: VPC CIDR
+Parameters:
+  AvailabilityZones:
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+    Description: List of Availability Zones to use for the subnets in the VPC.
+  BastionAMIOS:
+    Type: String
+    Description: The Linux distribution for the AMI to be used for the bastion host instances.
+    AllowedValues:
+      - Amazon-Linux2-HVM
+      - Amazon-Linux2-HVM-ARM
+      - CentOS-7-HVM
+      - Ubuntu-Server-20.04-LTS-HVM
+      - SUSE-SLES-15-HVM
+    Default: Amazon-Linux2-HVM
+  BastionHostName:
+    Type: String
+    Description: The value used for the name tag of the bastion host.
+    Default: LinuxBastion
+  BastionBanner:
+    Type: String
+    Description: Banner text to display upon login.
+    Default: ''
+  BastionTenancy:
+    Type: String
+    Description: Bastion VPC tenancy (dedicated or default).
+    AllowedValues:
+      - dedicated
+      - default
+    Default: default
+  BastionInstanceType:
+    Type: String
+    Description: Amazon EC2 instance type for the bastion instances.
+    Default: t2.micro
+  EnableBanner:
+    Type: String
+    Description: Choose "true" to display a banner when connecting to the bastion using SSH.
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'false'
+  EnableTCPForwarding:
+    Type: String
+    Description: To enable TCP forwarding, choose "true".
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'false'
+  EnableX11Forwarding:
+    Type: String
+    Description: To enable X11 forwarding, choose "true".
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'false'
+  KeyPairName:
+    Type: String
+    Description:
+      Name of an existing public/private key pair, which allows you to securely connect to your instance
+      after it launches. If left empty, AWS Systems Manager Session Manager can still be used to connect to the instance.
+    Default: ''
+  NumBastionHosts:
+    Type: String
+    Description: The number of bastion hosts to create. The maximum number is four.
+    AllowedValues:
+      - 1
+      - 2
+      - 3
+      - 4
+    Default: 1
+  PrivateSubnet1CIDR:
+    Type: String
+    Description: CIDR block for private subnet 1, located in Availability Zone 1.
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.0.0/19
+  PrivateSubnet2CIDR:
+    Type: String
+    Description: CIDR block for private subnet 2, located in Availability Zone 2.
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.32.0/19
+  PublicSubnet1CIDR:
+    Type: String
+    Description: CIDR block for the public DMZ subnet 1, located in Availability Zone 1.
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.128.0/20
+  PublicSubnet2CIDR:
+    Type: String
+    Description: CIDR block for the public DMZ subnet 2, located in Availability Zone 2.
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.144.0/20
+  VPCTenancy:
+    Type: String
+    Description: The allowed tenancy of instances launched into the VPC.
+    AllowedValues:
+      - default
+      - dedicated
+    Default: default
+  QSS3BucketName:
+    Type: String
+    Description: Name of the S3 bucket for your copy of the Quick Start assets.
+      Keep the default name unless you are customizing the template.
+      Changing the name updates code references to point to a new Quick
+      Start location. This name can include numbers, lowercase letters,
+      uppercase letters, and hyphens, but do not start or end with a hyphen (-).
+      See https://aws-quickstart.github.io/option1.html.
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription:
+      The Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a
+      hyphen (-).
+    Default: aws-quickstart
+  QSS3KeyPrefix:
+    Type: String
+    Description:
+      S3 key prefix that is used to simulate a directory for your copy of the
+      Quick Start assets. Keep the default prefix unless you are customizing
+      the template. Changing this prefix updates code references to point to
+      a new Quick Start location. This prefix can include numbers, lowercase
+      letters, uppercase letters, hyphens (-), and forward slashes (/). End with a forward slash.
+      See https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html
+      and https://aws-quickstart.github.io/option1.html.
+    AllowedPattern: ^([0-9a-zA-Z-.]+/)*$
+    ConstraintDescription:
+      The Quick Start S3 key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), and forward slashes (/).
+    Default: quickstart-linux-bastion/
+  QSS3BucketRegion:
+    Type: String
+    Description: >-
+      AWS Region where the Quick Start S3 bucket (QSS3BucketName) is
+      hosted. Keep the default Region unless you are customizing the template.
+      Changing this Region updates code references to point to a new Quick Start location.
+      When using your own bucket, specify the Region.
+      See https://aws-quickstart.github.io/option1.html.
+    Default: us-east-1
+  RemoteAccessCIDR:
+    Type: String
+    Description: Allowed CIDR block for external SSH access to the bastion hosts.
+    AllowedPattern: ^disabled-onlyssmaccess$|^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    ConstraintDescription: CIDR block parameter must be disabled-onlyssmaccess or in the format "x.x.x.x/x".
+    Default: disabled-onlyssmaccess
+  VPCCIDR:
+    Type: String
+    Description: CIDR block for the VPC.
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the format "x.x.x.x/16-28".
+    Default: 10.0.0.0/16
+Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, aws-quickstart]
+Resources:
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub
+        - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template.yaml
+        - S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
+          S3Region: !If [UsingDefaultBucket, !Ref AWS::Region, !Ref QSS3BucketRegion]
+      Parameters:
+        AvailabilityZones: !Join [',', !Ref AvailabilityZones]
+        NumberOfAZs: 2
+        PrivateSubnet1ACIDR: !Ref PrivateSubnet1CIDR
+        PrivateSubnet2ACIDR: !Ref PrivateSubnet2CIDR
+        PublicSubnet1CIDR: !Ref PublicSubnet1CIDR
+        PublicSubnet2CIDR: !Ref PublicSubnet2CIDR
+        VPCCIDR: !Ref VPCCIDR
+        VPCTenancy: !Ref VPCTenancy
+  BastionStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub
+        - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/linux-bastion.template
+        - S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
+          S3Region: !If [UsingDefaultBucket, !Ref AWS::Region, !Ref QSS3BucketRegion]
+      Parameters:
+        BastionAMIOS: !Ref BastionAMIOS
+        BastionHostName: !Ref BastionHostName
+        BastionBanner: !Ref BastionBanner
+        BastionInstanceType: !Ref BastionInstanceType
+        BastionTenancy: !Ref BastionTenancy
+        EnableBanner: !Ref EnableBanner
+        EnableTCPForwarding: !Ref EnableTCPForwarding
+        EnableX11Forwarding: !Ref EnableX11Forwarding
+        KeyPairName: !Ref KeyPairName
+        NumBastionHosts: !Ref NumBastionHosts
+        PublicSubnet1ID: !GetAtt VPCStack.Outputs.PublicSubnet1ID
+        PublicSubnet2ID: !GetAtt VPCStack.Outputs.PublicSubnet2ID
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        RemoteAccessCIDR: !Ref RemoteAccessCIDR
+        VPCID: !GetAtt VPCStack.Outputs.VPCID
+Outputs:
+  Postdeployment:
+    Description: See the deployment guide for post-deployment steps.
+    Value: https://fwd.aws/YqpXk?
