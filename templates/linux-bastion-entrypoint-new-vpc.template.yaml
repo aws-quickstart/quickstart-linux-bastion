@@ -230,9 +230,11 @@ Parameters:
       Keep the default name unless you are customizing the template.
       Changing the name updates code references to point to a new Quick
       Start location. This name can include numbers, lowercase letters,
-      uppercase letters, and hyphens, but do not start or end with a hyphen (-).
+      and hyphens, but do not start or end with a hyphen (-).
       See https://aws-quickstart.github.io/option1.html.
-    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    MinLength: 3
+    MaxLength: 63
+    AllowedPattern: ^[0-9a-z]+([0-9a-z-]*[0-9a-z])*$
     ConstraintDescription:
       The Quick Start bucket name can include numbers, lowercase
       letters, uppercase letters, and hyphens (-). It cannot start or end with a
