@@ -67,8 +67,6 @@ Metadata:
         default: Bastion tenancy
       BastionBanner:
         default: Banner text
-      QSS3BucketRegion:
-        default: Quick Start S3 bucket Region
       BastionInstanceType:
         default: Bastion instance type
       EnableBanner:
@@ -93,6 +91,8 @@ Metadata:
         default: Public subnet 2 ID
       QSS3BucketName:
         default: Quick Start S3 bucket name
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket Region
       QSS3KeyPrefix:
         default: Quick Start S3 key prefix
       RemoteAccessCIDR:

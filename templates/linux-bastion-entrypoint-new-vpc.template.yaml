@@ -21,11 +21,17 @@ Metadata:
           - RemoteAccessCIDR
           - VPCTenancy
       - Label:
+          default: IAM configuration
+        Parameters:
+          - RolePath
+          - PermissionsBoundaryArn
+      - Label:
           default: Amazon EC2 configuration
         Parameters:
           - KeyPairName
           - BastionAMIOS
           - BastionInstanceType
+          - RootVolumeSize
       - Label:
           default: Linux bastion configuration
         Parameters:
@@ -38,12 +44,23 @@ Metadata:
           - EnableTCPForwarding
           - EnableX11Forwarding
       - Label:
+          default: Alternative configurations
+        Parameters:
+          - AlternativeInitializationScript
+          - OSImageOverride
+          - AlternativeIAMRole
+          - EnvironmentVariables
+      - Label:
           default: AWS Quick Start configuration
         Parameters:
           - QSS3BucketName
           - QSS3KeyPrefix
           - QSS3BucketRegion
     ParameterLabels:
+      AlternativeIAMRole:
+        default: Alternative IAM role
+      AlternativeInitializationScript:
+        default: Alternative initialization script URL
       AvailabilityZones:
         default: Availability Zones
       BastionAMIOS:
@@ -56,20 +73,22 @@ Metadata:
         default: Banner text
       BastionInstanceType:
         default: Bastion instance type
-      QSS3BucketRegion:
-        default: Quick Start S3 bucket Region
       EnableBanner:
         default: Bastion banner
       EnableTCPForwarding:
         default: TCP forwarding
       EnableX11Forwarding:
         default: X11 forwarding
+      EnvironmentVariables:
+        default: Environment variables
       KeyPairName:
         default: Key pair name
       NumBastionHosts:
         default: Number of bastion hosts
       OndemandPercentage:
         default: On-demand percentage
+      OSImageOverride:
+        default: Operating system override
       PrivateSubnet1CIDR:
         default: Private subnet 1 CIDR
       PrivateSubnet2CIDR:
@@ -82,12 +101,20 @@ Metadata:
         default: VPC tenancy
       QSS3BucketName:
         default: Quick Start S3 bucket name
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket Region
       QSS3KeyPrefix:
         default: Quick Start S3 key prefix
       RemoteAccessCIDR:
         default: Allowed bastion external access CIDR
       VPCCIDR:
         default: VPC CIDR
+      RootVolumeSize:
+        default: Root volume size
+      PermissionsBoundaryArn:
+        default: Permissions boundary ARN
+      RolePath:
+        default: Role path
 Parameters:
   AvailabilityZones:
     Type: List<AWS::EC2::AvailabilityZone::Name>
@@ -218,7 +245,8 @@ Parameters:
       Quick Start assets. Keep the default prefix unless you are customizing
       the template. Changing this prefix updates code references to point to
       a new Quick Start location. This prefix can include numbers, lowercase
-      letters, uppercase letters, hyphens (-), and forward slashes (/). End with a forward slash.
+      letters, uppercase letters, hyphens (-), and forward slashes (/). End
+      with a forward slash.
       See https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html
       and https://aws-quickstart.github.io/option1.html.
     AllowedPattern: ^([0-9a-zA-Z-.]+/)*$
@@ -247,6 +275,45 @@ Parameters:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
     ConstraintDescription: CIDR block parameter must be in the format "x.x.x.x/16-28".
     Default: 10.0.0.0/16
+  AlternativeInitializationScript:
+    Type: String
+    Description: >-
+      HTTPS format Amazon S3 object URL for your custom initialization script
+      to run during setup. The bastion host must have permission to download
+      the file from the S3 bucket.
+    AllowedPattern: ^https.*|^$
+    ConstraintDescription: >-
+      Must be either a valid Amazon S3 object URL
+      (example: https://bucket/key/file.txt) or empty.
+    Default: ''
+  OSImageOverride:
+    Type: String
+    Description: The Region-specific image to use for the instance.
+    Default: ''
+  AlternativeIAMRole:
+    Type: String
+    Description:
+      An existing IAM role name to attach to the bastion. If left blank,
+      a new role will be created.
+    Default: ''
+  EnvironmentVariables:
+    Type: String
+    Description: A comma-separated list of environment variables for use in
+      bootstrapping. Variables must be in the format "key=value". "Value" cannot
+      contain commas.
+    Default: ''
+  RootVolumeSize:
+    Type: Number
+    Description: The size in GB for the root EBS volume.
+    Default: 10
+  PermissionsBoundaryArn:
+    Type: String
+    Description: Will be attached to all created IAM roles to satisfy security requirements.
+    Default: ''
+  RolePath:
+    Type: String
+    Description: Will be attached to all created IAM roles to satisfy security requirements.
+    Default: ''
 Conditions:
   HasRemoteCIDR: !Not [!Equals [!Ref RemoteAccessCIDR, disabled-onlyssmaccess]]
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, aws-quickstart]
@@ -293,6 +360,13 @@ Resources:
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         RemoteAccessCIDR: !Ref RemoteAccessCIDR
         VPCID: !GetAtt VPCStack.Outputs.VPCID
+        AlternativeInitializationScript: !Ref AlternativeInitializationScript
+        AlternativeIAMRole: !Ref AlternativeIAMRole
+        OSImageOverride: !Ref OSImageOverride
+        EnvironmentVariables: !Ref EnvironmentVariables
+        RootVolumeSize: !Ref RootVolumeSize
+        PermissionsBoundaryArn: !Ref PermissionsBoundaryArn
+        RolePath: !Ref RolePath
 Outputs:
   Postdeployment:
     Description: See the deployment guide for post-deployment steps.
