@@ -58,7 +58,7 @@ Metadata:
       AlternativeIAMRole:
         default: Alternative IAM role
       AlternativeInitializationScript:
-        default: Alternative initialization script
+        default: Alternative initialization script URL
       BastionAMIOS:
         default: Bastion AMI operating system
       BastionHostName:
@@ -236,9 +236,14 @@ Parameters:
     Description: ID of the VPC (for example, vpc-0343606e).
   AlternativeInitializationScript:
     Type: String
-    Description: An alternative initialization script to run during setup.
+    Description: >-
+      HTTPS format Amazon S3 object URL for your custom initialization script
+      to run during setup. The bastion host must have permission to download
+      the file from the S3 bucket.
     AllowedPattern: ^https.*|^$
-    ConstraintDescription: URL must begin with https.
+    ConstraintDescription: >-
+      Must be either a valid Amazon S3 object URL
+      (example: https://bucket/key/file.txt) or empty.
     Default: ''
   OSImageOverride:
     Type: String
