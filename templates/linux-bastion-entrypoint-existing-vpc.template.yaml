@@ -301,31 +301,6 @@ Rules:
       - !Ref BastionAMIOS
     Assertions:
       - Assert: !Contains
-        - - t4g.nano
-          - t4g.micro
-          - t4g.small
-          - t4g.medium
-          - t4g.large
-          - t4g.xlarge
-          - t4g.2xlarge
-          - m6g.medium
-          - m6g.large
-          - m6g.xlarge
-          - m6g.2xlarge
-        - !Ref BastionInstanceType
-        AssertDescription: >-
-          You selected an ARM AMI operating system, so you must also enter an
-          ARM instance type, such as t4g.micro. For additional details, see
-          https://aws.amazon.com/ec2/instance-types/.
-  X86_64Instance:
-    RuleCondition: !Not
-      - !Contains
-        - - Amazon-Linux2-HVM-ARM
-          - Ubuntu-Server-22.04-LTS-HVM-ARM
-        - !Ref BastionAMIOS
-    Assertions:
-      - Assert: !Not
-        - !Contains
           - - t4g.nano
             - t4g.micro
             - t4g.small
@@ -338,6 +313,32 @@ Rules:
             - m6g.xlarge
             - m6g.2xlarge
           - !Ref BastionInstanceType
+        AssertDescription: >-
+          You selected an ARM AMI operating system, so you must also enter an
+          ARM instance type, such as t4g.micro. For additional details, see
+          https://aws.amazon.com/ec2/instance-types/.
+  X86_64Instance:
+    RuleCondition: !Not
+      - !Contains
+          - - Amazon-Linux2-HVM-ARM
+            - Amazon-Linux2022-ARM
+            - Ubuntu-Server-22.04-LTS-HVM-ARM
+          - !Ref BastionAMIOS
+    Assertions:
+      - Assert: !Not
+        - !Contains
+            - - t4g.nano
+              - t4g.micro
+              - t4g.small
+              - t4g.medium
+              - t4g.large
+              - t4g.xlarge
+              - t4g.2xlarge
+              - m6g.medium
+              - m6g.large
+              - m6g.xlarge
+              - m6g.2xlarge
+            - !Ref BastionInstanceType
         AssertDescription: >-
           You selected a x86_64 AMI operating system, so you must also enter a
           x86_64 instance type, such as t3.micro. For additional details, see
