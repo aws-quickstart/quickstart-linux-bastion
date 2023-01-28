@@ -179,15 +179,15 @@ setup_os() {
 
   if [[ "${release}" == "SLES" ]]; then
     echo "0 0 * * * zypper patch --non-interactive" > ~/mycron
+    crontab ~/mycron
+    rm ~/mycron
   elif [[ "${release}" == "Ubuntu" ]]; then
     apt-get install -y unattended-upgrades
-    echo "0 0 * * * unattended-upgrades -d" > ~/mycron
+    echo "0 0 * * * unattended-upgrades -d" > /etc/cron.d/yum-security-updates
   else
-    echo "0 0 * * * yum -y update --security" > ~/mycron
+    echo "0 0 * * * yum -y update --security" > /etc/cron.d/yum-security-updates
   fi
 
-  crontab ~/mycron
-  rm ~/mycron
   systemctl restart sshd
   echo "${FUNCNAME[0]} ended"
 }

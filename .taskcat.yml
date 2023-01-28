@@ -49,6 +49,15 @@ tests:
       - us-west-2
       - us-gov-east-1
       - cn-north-1
+  amznlinux2022:
+    parameters:
+      BastionAMIOS: Amazon-Linux2022
+      RemoteAccessCIDR: 10.0.0.0/16
+    regions:
+      - eu-west-2
+      - ap-southeast-2
+      - us-gov-east-1
+      - cn-north-1
   centos7hvm:
     parameters:
       BastionAMIOS: CentOS-7-HVM
@@ -84,6 +93,15 @@ tests:
       RemoteAccessCIDR: 10.0.0.0/16
     regions:
       - ap-south-1
+      - us-west-1
+      - us-gov-west-1
+  amznlinux2022arm:
+    parameters:
+      BastionAMIOS: Amazon-Linux2022-ARM
+      BastionInstanceType: t4g.nano
+      RemoteAccessCIDR: 10.0.0.0/16
+    regions:
+      - ap-southeast-1
       - us-west-1
       - us-gov-west-1
   us2204hvmarm:

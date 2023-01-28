@@ -125,6 +125,8 @@ Parameters:
     AllowedValues:
       - Amazon-Linux2-HVM
       - Amazon-Linux2-HVM-ARM
+      - Amazon-Linux2022
+      - Amazon-Linux2022-ARM
       - CentOS-7-HVM
       - Ubuntu-Server-20.04-LTS-HVM
       - Ubuntu-Server-22.04-LTS-HVM
