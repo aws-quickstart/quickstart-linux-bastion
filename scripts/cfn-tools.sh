@@ -6,6 +6,7 @@
 # Supported only while bootstrapping Amazon EC2:
 #
 # -Amazon Linux 2
+# -Amazon Linux 2022
 # -CentOS 7
 # -SUSE Linux Enterprise Server 15
 # -Ubuntu 20.04 & 22.04
@@ -235,13 +236,14 @@ qs_aws-cfn-bootstrap() {
   qs_get-osversion INSTANCE_OSVERSION
 
   echo "[INSTALL aws-cfn-bootstrap tools]"
-  if [ "$INSTANCE_OSTYPE" == "amzn" ] && [ "$INSTANCE_OSVERSION" == "2" ]; then
+  if [[ "$INSTANCE_OSTYPE" == "amzn" && ( "$INSTANCE_OSVERSION" == "2" || "$INSTANCE_OSVERSION" == "2022" ) ]]; then
     cp scripts/opt-aws.sh /etc/profile.d/
     ln -s /opt/aws/bin/cfn-* /usr/bin/
     export PATH=$PATH:/opt/aws/bin
     yum install -y python3-pip
-    alternatives --set python /usr/bin/python3
-
+    if [ "$INSTANCE_OSVERSION" == "2" ]; then
+      alternatives --set python /usr/bin/python3
+    fi
   elif [ "$INSTANCE_OSTYPE" == "ubuntu" ]; then
     apt-get -y update
     apt-get -y install python2.7
