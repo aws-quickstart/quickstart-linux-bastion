@@ -139,6 +139,6 @@ tests:
       - us-east-1
   prefix-list-access:
     parameters:
-      RemoteAccessCIDR: pl-95a643fc
+      RemoteAccessCIDR: pl-6ca54005
     regions:
-      - ap-southeast-3
+      - eu-south-1
