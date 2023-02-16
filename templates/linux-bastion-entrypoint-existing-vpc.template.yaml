@@ -41,6 +41,8 @@ Metadata:
           - BastionBanner
           - EnableTCPForwarding
           - EnableX11Forwarding
+          - EC2MetadataPutResponseHopLimit
+          - EC2MetadataHttpTokens
       - Label:
           default: Alternative configurations
         Parameters:
@@ -105,6 +107,10 @@ Metadata:
         default: Permissions boundary ARN
       RolePath:
         default: Role path
+      EC2MetadataPutResponseHopLimit:
+        default: Amazon EC2 metadata put response hop limit
+      EC2MetadataHttpTokens:
+        default: Amazon EC2 metadata HTTP tokens
 Parameters:
   BastionAMIOS:
     Type: String
@@ -201,6 +207,23 @@ Parameters:
       ID of the public subnet 2 that you want to provision the second bastion
       into (for example, subnet-e3246d8e). If RemoteAccessCIDR is set to
       'disabled-onlyssmaccess', enter the ID of a private subnet instead.
+  EC2MetadataPutResponseHopLimit:
+    Type: String
+    Description: >-
+      The desired HTTP PUT response hop limit for instance metadata requests.
+      The larger the number, the further instance metadata requests can travel.
+    Default: 2
+  EC2MetadataHttpTokens:
+    Type: String
+    Description: >-
+      If set to "optional" instances will be able to use their IAM instance
+      profile. If set to "required" amd "EC2MetadataPutResponseHopLimit" is set
+      to 1, instances will not be able to access the IAM role. If set to
+      "required" amd "EC2MetadataPutResponseHopLimit" is set greater than 1
+      instances must send a signed token header with any instance metadata
+      retrieval requests.
+    AllowedValues: [optional, required]
+    Default: required
   QSS3BucketName:
     Type: String
     Description: Name of the S3 bucket for your copy of the Quick Start assets.
@@ -976,6 +999,10 @@ Resources:
               EIP3: !If [3BastionCondition, !Ref EIP3, 'Null']
               EIP4: !If [4BastionCondition, !Ref EIP4, 'Null']
               S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
+        MetadataOptions:
+          HttpEndpoint: enabled
+          HttpPutResponseHopLimit: !Ref EC2MetadataPutResponseHopLimit
+          HttpTokens: !Ref EC2MetadataHttpTokens
   BastionSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
