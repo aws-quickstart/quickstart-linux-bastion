@@ -1001,29 +1001,44 @@ Resources:
   BastionSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Enables SSH Access to Bastion Hosts
+      GroupDescription: Enables access to bastion hosts
       VpcId: !Ref VPCID
-      SecurityGroupIngress: !If
-        - HasRemoteCIDR
-        - - IpProtocol: tcp
-            FromPort: 22
-            ToPort: 22
-            CidrIp: !Ref RemoteAccessCIDR
-          - IpProtocol: icmp
-            FromPort: -1
-            ToPort: -1
-            CidrIp: !Ref RemoteAccessCIDR
-        - !If
-            - HasPrefixList
-            - - IpProtocol: tcp
-                FromPort: 22
-                ToPort: 22
-                SourcePrefixListId: !Ref RemoteAccessCIDR
-              - IpProtocol: icmp
-                FromPort: -1
-                ToPort: -1
-                SourcePrefixListId: !Ref RemoteAccessCIDR
-            - !Ref AWS::NoValue
+  BastionSecurityGroupCidrSshIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Condition: HasRemoteCIDR
+    Properties:
+      GroupId: !Ref BastionSecurityGroup
+      CidrIp: !Ref RemoteAccessCIDR
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+  BastionSecurityGroupCidrIcmpIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Condition: HasRemoteCIDR
+    Properties:
+      GroupId: !Ref BastionSecurityGroup
+      CidrIp: !Ref RemoteAccessCIDR
+      IpProtocol: icmp
+      FromPort: -1
+      ToPort: -1
+  BastionSecurityGroupPrefixListSshIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Condition: HasPrefixList
+    Properties:
+      GroupId: !Ref BastionSecurityGroup
+      SourcePrefixListId: !Ref RemoteAccessCIDR
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+  BastionSecurityGroupPrefixListIcmpIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Condition: HasPrefixList
+    Properties:
+      GroupId: !Ref BastionSecurityGroup
+      SourcePrefixListId: !Ref RemoteAccessCIDR
+      IpProtocol: icmp
+      FromPort: -1
+      ToPort: -1
 Outputs:
   BastionAutoScalingGroup:
     Description: Auto Scaling group reference ID.
