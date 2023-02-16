@@ -157,9 +157,7 @@ Parameters:
   BastionTenancy:
     Type: String
     Description: Bastion VPC tenancy (dedicated or default).
-    AllowedValues:
-      - dedicated
-      - default
+    AllowedValues: [dedicated, default]
     Default: default
   BastionInstanceType:
     Type: String
@@ -168,23 +166,17 @@ Parameters:
   EnableBanner:
     Type: String
     Description: Choose "true" to display a banner when connecting to the bastion using SSH.
-    AllowedValues:
-      - 'true'
-      - 'false'
+    AllowedValues: ['true', 'false']
     Default: 'false'
   EnableTCPForwarding:
     Type: String
     Description: Choose "true" to enable TCP forwarding.
-    AllowedValues:
-      - 'true'
-      - 'false'
+    AllowedValues: ['true', 'false']
     Default: 'false'
   EnableX11Forwarding:
     Type: String
     Description: Choose "true" to enable X11 forwarding.
-    AllowedValues:
-      - 'true'
-      - 'false'
+    AllowedValues: ['true', 'false']
     Default: 'false'
   KeyPairName:
     Type: String
@@ -195,11 +187,7 @@ Parameters:
   NumBastionHosts:
     Type: String
     Description: The number of bastion hosts to create. The maximum number is four.
-    AllowedValues:
-      - 1
-      - 2
-      - 3
-      - 4
+    AllowedValues: [1, 2, 3, 4]
     Default: 1
   OndemandPercentage:
     Type: Number
@@ -235,9 +223,7 @@ Parameters:
   VPCTenancy:
     Type: String
     Description: The allowed tenancy of instances launched into the VPC.
-    AllowedValues:
-      - default
-      - dedicated
+    AllowedValues: [default, dedicated]
     Default: default
   EC2MetadataPutResponseHopLimit:
     Type: String
