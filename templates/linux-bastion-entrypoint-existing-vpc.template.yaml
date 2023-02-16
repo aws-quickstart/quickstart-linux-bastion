@@ -970,9 +970,13 @@ Resources:
                 ./aws/install
               fi
 
-              until aws s3 cp --no-progress --region ${AWS::Region} "s3://${S3Bucket}/${QSS3KeyPrefix}scripts/cfn-tools.sh" .
+              for (( i=0; i<=5; i++ ))
               do
-                echo "Retrying..."
+                aws s3 cp --no-progress --region ${AWS::Region} "s3://${S3Bucket}/${QSS3KeyPrefix}scripts/cfn-tools.sh" .
+                if [ $? -ne 0 ]
+                then
+                  echo "Retrying..."
+                fi
               done
               source ./cfn-tools.sh
 
