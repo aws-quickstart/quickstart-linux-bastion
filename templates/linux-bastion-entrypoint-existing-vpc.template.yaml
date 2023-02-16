@@ -288,10 +288,9 @@ Parameters:
 Rules:
   SubnetsInVPC:
     Assertions:
-      - Assert:
-          Fn::EachMemberIn:
-            - !ValueOfAll [AWS::EC2::Subnet::Id, VpcId]
-            - Fn::RefAll: AWS::EC2::VPC::Id
+      - Assert: !EachMemberIn
+          - !ValueOfAll [AWS::EC2::Subnet::Id, VpcId]
+          - !RefAll AWS::EC2::VPC::Id
         AssertDescription: All subnets must exist in the VPC.
   ArmInstance:
     RuleCondition: !Contains
