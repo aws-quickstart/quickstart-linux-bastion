@@ -250,8 +250,10 @@ Parameters:
     Default: quickstart-linux-bastion/
   RemoteAccessCIDR:
     Type: String
-    Description: Allowed CIDR block for external SSH access to the bastions.
-    AllowedPattern: ^disabled-onlyssmaccess$|^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    Description: >-
+      Allowed CIDR block or prefix list for external SSH access to the
+      bastions.
+    AllowedPattern: ^disabled-onlyssmaccess$|^pl-([0-9a-f]{8}|[0-9a-f]{17})$|^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: CIDR block parameter must be disabled-onlyssmaccess or in the format "x.x.x.x/x".
     Default: disabled-onlyssmaccess
   VPCID:
@@ -702,7 +704,10 @@ Conditions:
   2BastionCondition: !And [!Condition HasRemoteCIDR, !Condition 2BastionConditionHost]
   3BastionCondition: !And [!Condition HasRemoteCIDR, !Condition 3BastionConditionHost]
   4BastionCondition: !And [!Condition HasRemoteCIDR, !Condition 4BastionConditionHost]
-  HasRemoteCIDR: !Not [!Equals [!Ref RemoteAccessCIDR, disabled-onlyssmaccess]]
+  HasRemoteCIDR: !And
+    - !Not [!Equals [!Ref RemoteAccessCIDR, disabled-onlyssmaccess]]
+    - !Not [!Condition HasPrefixList]
+  HasPrefixList: !Equals [!Select [0, !Split ['-', !Ref RemoteAccessCIDR]], pl]
   UseAlternativeInitialization: !Not [!Equals [!Ref AlternativeInitializationScript, '']]
   CreateIAMRole: !Equals [!Ref AlternativeIAMRole, '']
   UseOSImageOverride: !Not [!Equals [!Ref OSImageOverride, '']]
@@ -994,18 +999,27 @@ Resources:
     Properties:
       GroupDescription: Enables SSH Access to Bastion Hosts
       VpcId: !Ref VPCID
-      SecurityGroupIngress:
-        !If
-          - HasRemoteCIDR
-          - - IpProtocol: tcp
-              FromPort: 22
-              ToPort: 22
-              CidrIp: !Ref RemoteAccessCIDR
-            - IpProtocol: icmp
-              FromPort: -1
-              ToPort: -1
-              CidrIp: !Ref RemoteAccessCIDR
-          - !Ref AWS::NoValue
+      SecurityGroupIngress: !If
+        - HasRemoteCIDR
+        - - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            CidrIp: !Ref RemoteAccessCIDR
+          - IpProtocol: icmp
+            FromPort: -1
+            ToPort: -1
+            CidrIp: !Ref RemoteAccessCIDR
+        - !If
+            - HasPrefixList
+            - - IpProtocol: tcp
+                FromPort: 22
+                ToPort: 22
+                SourcePrefixListId: !Ref RemoteAccessCIDR
+              - IpProtocol: icmp
+                FromPort: -1
+                ToPort: -1
+                SourcePrefixListId: !Ref RemoteAccessCIDR
+            - !Ref AWS::NoValue
 Outputs:
   BastionAutoScalingGroup:
     Description: Auto Scaling group reference ID.
