@@ -788,8 +788,7 @@ Resources:
               - NeedsEip
               - Sid: AssociateStackEips
                 Effect: Allow
-                Action:
-                  - ec2:AssociateAddress
+                Action: ec2:AssociateAddress
                 Resource: '*'
                 Condition:
                   StringEquals:
