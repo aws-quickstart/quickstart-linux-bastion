@@ -137,3 +137,8 @@ tests:
       NumBastionHosts: 1
     regions:
       - us-east-1
+  prefix-list-access:
+    parameters:
+      RemoteAccessCIDR: pl-a6a742cf
+    regions:
+      - sa-east-1

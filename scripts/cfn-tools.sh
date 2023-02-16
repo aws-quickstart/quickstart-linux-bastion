@@ -246,10 +246,7 @@ qs_aws-cfn-bootstrap() {
     fi
   elif [ "$INSTANCE_OSTYPE" == "ubuntu" ]; then
     apt-get -y update
-    apt-get -y install python2.7
-    curl -sS https://bootstrap.pypa.io/pip/2.7/get-pip.py --output /tmp/get-pip2.7.py
-    python2.7 /tmp/get-pip2.7.py
-    pip2 install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+    pip3 install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz
   elif [ "$INSTANCE_OSTYPE" == "centos" ]; then
     yum update -y
     qs_bootstrap_pip

@@ -43,6 +43,8 @@ Metadata:
           - BastionBanner
           - EnableTCPForwarding
           - EnableX11Forwarding
+          - EC2MetadataPutResponseHopLimit
+          - EC2MetadataHttpTokens
       - Label:
           default: Alternative configurations
         Parameters:
@@ -115,6 +117,10 @@ Metadata:
         default: Permissions boundary ARN
       RolePath:
         default: Role path
+      EC2MetadataPutResponseHopLimit:
+        default: Amazon EC2 metadata put response hop limit
+      EC2MetadataHttpTokens:
+        default: Amazon EC2 metadata HTTP tokens
 Parameters:
   AvailabilityZones:
     Type: List<AWS::EC2::AvailabilityZone::Name>
@@ -151,9 +157,7 @@ Parameters:
   BastionTenancy:
     Type: String
     Description: Bastion VPC tenancy (dedicated or default).
-    AllowedValues:
-      - dedicated
-      - default
+    AllowedValues: [dedicated, default]
     Default: default
   BastionInstanceType:
     Type: String
@@ -162,23 +166,17 @@ Parameters:
   EnableBanner:
     Type: String
     Description: Choose "true" to display a banner when connecting to the bastion using SSH.
-    AllowedValues:
-      - 'true'
-      - 'false'
+    AllowedValues: ['true', 'false']
     Default: 'false'
   EnableTCPForwarding:
     Type: String
     Description: Choose "true" to enable TCP forwarding.
-    AllowedValues:
-      - 'true'
-      - 'false'
+    AllowedValues: ['true', 'false']
     Default: 'false'
   EnableX11Forwarding:
     Type: String
     Description: Choose "true" to enable X11 forwarding.
-    AllowedValues:
-      - 'true'
-      - 'false'
+    AllowedValues: ['true', 'false']
     Default: 'false'
   KeyPairName:
     Type: String
@@ -189,11 +187,7 @@ Parameters:
   NumBastionHosts:
     Type: String
     Description: The number of bastion hosts to create. The maximum number is four.
-    AllowedValues:
-      - 1
-      - 2
-      - 3
-      - 4
+    AllowedValues: [1, 2, 3, 4]
     Default: 1
   OndemandPercentage:
     Type: Number
@@ -229,10 +223,25 @@ Parameters:
   VPCTenancy:
     Type: String
     Description: The allowed tenancy of instances launched into the VPC.
-    AllowedValues:
-      - default
-      - dedicated
+    AllowedValues: [default, dedicated]
     Default: default
+  EC2MetadataPutResponseHopLimit:
+    Type: String
+    Description: >-
+      The desired HTTP PUT response hop limit for instance metadata requests.
+      The larger the number, the further instance metadata requests can travel.
+    Default: 2
+  EC2MetadataHttpTokens:
+    Type: String
+    Description: >-
+      If set to "optional" instances will be able to use their IAM instance
+      profile. If set to "required" amd "EC2MetadataPutResponseHopLimit" is set
+      to 1, instances will not be able to access the IAM role. If set to
+      "required" amd "EC2MetadataPutResponseHopLimit" is set greater than 1
+      instances must send a signed token header with any instance metadata
+      retrieval requests.
+    AllowedValues: [optional, required]
+    Default: required
   QSS3BucketName:
     Type: String
     Description: Name of the S3 bucket for your copy of the Quick Start assets.
@@ -276,8 +285,10 @@ Parameters:
     Default: us-east-1
   RemoteAccessCIDR:
     Type: String
-    Description: Allowed CIDR block for external SSH access to the bastion hosts.
-    AllowedPattern: ^disabled-onlyssmaccess$|^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    Description: >-
+      Allowed CIDR block or prefix list for external SSH access to the
+      bastions.
+    AllowedPattern: ^disabled-onlyssmaccess$|^pl-([0-9a-f]{8}|[0-9a-f]{17})$|^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: CIDR block parameter must be disabled-onlyssmaccess or in the format "x.x.x.x/x".
     Default: disabled-onlyssmaccess
   VPCCIDR:
@@ -326,7 +337,7 @@ Parameters:
     Description: Will be attached to all created IAM roles to satisfy security requirements.
     Default: ''
 Conditions:
-  HasRemoteCIDR: !Not [!Equals [!Ref RemoteAccessCIDR, disabled-onlyssmaccess]]
+  NeedsEip: !Not [!Equals [!Ref RemoteAccessCIDR, disabled-onlyssmaccess]]
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, aws-quickstart]
 Resources:
   VPCStack:
@@ -364,8 +375,8 @@ Resources:
         KeyPairName: !Ref KeyPairName
         NumBastionHosts: !Ref NumBastionHosts
         OndemandPercentage: !Ref OndemandPercentage
-        PublicSubnet1ID: !If [HasRemoteCIDR, !GetAtt VPCStack.Outputs.PublicSubnet1ID, !GetAtt VPCStack.Outputs.PrivateSubnet1AID]
-        PublicSubnet2ID: !If [HasRemoteCIDR, !GetAtt VPCStack.Outputs.PublicSubnet2ID, !GetAtt VPCStack.Outputs.PrivateSubnet2AID]
+        PublicSubnet1ID: !If [NeedsEip, !GetAtt VPCStack.Outputs.PublicSubnet1ID, !GetAtt VPCStack.Outputs.PrivateSubnet1AID]
+        PublicSubnet2ID: !If [NeedsEip, !GetAtt VPCStack.Outputs.PublicSubnet2ID, !GetAtt VPCStack.Outputs.PrivateSubnet2AID]
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
@@ -378,6 +389,8 @@ Resources:
         RootVolumeSize: !Ref RootVolumeSize
         PermissionsBoundaryArn: !Ref PermissionsBoundaryArn
         RolePath: !Ref RolePath
+        EC2MetadataPutResponseHopLimit: !Ref EC2MetadataPutResponseHopLimit
+        EC2MetadataHttpTokens: !Ref EC2MetadataHttpTokens
 Outputs:
   Postdeployment:
     Description: See the deployment guide for post-deployment steps.

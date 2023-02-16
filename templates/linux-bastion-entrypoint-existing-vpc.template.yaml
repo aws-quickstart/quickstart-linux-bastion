@@ -41,6 +41,8 @@ Metadata:
           - BastionBanner
           - EnableTCPForwarding
           - EnableX11Forwarding
+          - EC2MetadataPutResponseHopLimit
+          - EC2MetadataHttpTokens
       - Label:
           default: Alternative configurations
         Parameters:
@@ -105,6 +107,10 @@ Metadata:
         default: Permissions boundary ARN
       RolePath:
         default: Role path
+      EC2MetadataPutResponseHopLimit:
+        default: Amazon EC2 metadata put response hop limit
+      EC2MetadataHttpTokens:
+        default: Amazon EC2 metadata HTTP tokens
 Parameters:
   BastionAMIOS:
     Type: String
@@ -138,9 +144,7 @@ Parameters:
   BastionTenancy:
     Type: String
     Description: Bastion VPC tenancy (dedicated or default).
-    AllowedValues:
-      - dedicated
-      - default
+    AllowedValues: [dedicated, default]
     Default: default
   BastionInstanceType:
     Type: String
@@ -149,23 +153,17 @@ Parameters:
   EnableBanner:
     Type: String
     Description: Choose "true" to display a banner when connecting to the bastion using SSH.
-    AllowedValues:
-      - 'true'
-      - 'false'
+    AllowedValues: ['true', 'false']
     Default: 'false'
   EnableTCPForwarding:
     Type: String
     Description: Choose "true" to enable TCP forwarding.
-    AllowedValues:
-      - 'true'
-      - 'false'
+    AllowedValues: ['true', 'false']
     Default: 'false'
   EnableX11Forwarding:
     Type: String
     Description: Choose "true" to enable X11 forwarding.
-    AllowedValues:
-      - 'true'
-      - 'false'
+    AllowedValues: ['true', 'false']
     Default: 'false'
   KeyPairName:
     Type: String
@@ -176,11 +174,7 @@ Parameters:
   NumBastionHosts:
     Type: String
     Description: The number of bastion hosts to create. The maximum number is four.
-    AllowedValues:
-      - 1
-      - 2
-      - 3
-      - 4
+    AllowedValues: [1, 2, 3, 4]
     Default: 1
   OndemandPercentage:
     Type: Number
@@ -201,6 +195,23 @@ Parameters:
       ID of the public subnet 2 that you want to provision the second bastion
       into (for example, subnet-e3246d8e). If RemoteAccessCIDR is set to
       'disabled-onlyssmaccess', enter the ID of a private subnet instead.
+  EC2MetadataPutResponseHopLimit:
+    Type: String
+    Description: >-
+      The desired HTTP PUT response hop limit for instance metadata requests.
+      The larger the number, the further instance metadata requests can travel.
+    Default: 2
+  EC2MetadataHttpTokens:
+    Type: String
+    Description: >-
+      If set to "optional" instances will be able to use their IAM instance
+      profile. If set to "required" amd "EC2MetadataPutResponseHopLimit" is set
+      to 1, instances will not be able to access the IAM role. If set to
+      "required" amd "EC2MetadataPutResponseHopLimit" is set greater than 1
+      instances must send a signed token header with any instance metadata
+      retrieval requests.
+    AllowedValues: [optional, required]
+    Default: required
   QSS3BucketName:
     Type: String
     Description: Name of the S3 bucket for your copy of the Quick Start assets.
@@ -239,8 +250,10 @@ Parameters:
     Default: quickstart-linux-bastion/
   RemoteAccessCIDR:
     Type: String
-    Description: Allowed CIDR block for external SSH access to the bastions.
-    AllowedPattern: ^disabled-onlyssmaccess$|^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    Description: >-
+      Allowed CIDR block or prefix list for external SSH access to the
+      bastions.
+    AllowedPattern: ^disabled-onlyssmaccess$|^pl-([0-9a-f]{8}|[0-9a-f]{17})$|^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: CIDR block parameter must be disabled-onlyssmaccess or in the format "x.x.x.x/x".
     Default: disabled-onlyssmaccess
   VPCID:
@@ -288,10 +301,9 @@ Parameters:
 Rules:
   SubnetsInVPC:
     Assertions:
-      - Assert:
-          Fn::EachMemberIn:
-            - !ValueOfAll [AWS::EC2::Subnet::Id, VpcId]
-            - Fn::RefAll: AWS::EC2::VPC::Id
+      - Assert: !EachMemberIn
+          - !ValueOfAll [AWS::EC2::Subnet::Id, VpcId]
+          - !RefAll AWS::EC2::VPC::Id
         AssertDescription: All subnets must exist in the VPC.
   ArmInstance:
     RuleCondition: !Contains
@@ -326,19 +338,19 @@ Rules:
           - !Ref BastionAMIOS
     Assertions:
       - Assert: !Not
-        - !Contains
-            - - t4g.nano
-              - t4g.micro
-              - t4g.small
-              - t4g.medium
-              - t4g.large
-              - t4g.xlarge
-              - t4g.2xlarge
-              - m6g.medium
-              - m6g.large
-              - m6g.xlarge
-              - m6g.2xlarge
-            - !Ref BastionInstanceType
+          - !Contains
+              - - t4g.nano
+                - t4g.micro
+                - t4g.small
+                - t4g.medium
+                - t4g.large
+                - t4g.xlarge
+                - t4g.2xlarge
+                - m6g.medium
+                - m6g.large
+                - m6g.xlarge
+                - m6g.2xlarge
+              - !Ref BastionInstanceType
         AssertDescription: >-
           You selected a x86_64 AMI operating system, so you must also enter a
           x86_64 instance type, such as t3.micro. For additional details, see
@@ -689,10 +701,14 @@ Conditions:
   2BastionConditionHost: !Or [!Equals [!Ref NumBastionHosts, 2], !Condition 3BastionCondition, !Condition 4BastionCondition]
   3BastionConditionHost: !Or [!Equals [!Ref NumBastionHosts, 3], !Condition 4BastionCondition]
   4BastionConditionHost: !Equals [!Ref NumBastionHosts, 4]
-  2BastionCondition: !And [!Condition HasRemoteCIDR, !Condition 2BastionConditionHost]
-  3BastionCondition: !And [!Condition HasRemoteCIDR, !Condition 3BastionConditionHost]
-  4BastionCondition: !And [!Condition HasRemoteCIDR, !Condition 4BastionConditionHost]
-  HasRemoteCIDR: !Not [!Equals [!Ref RemoteAccessCIDR, disabled-onlyssmaccess]]
+  2BastionCondition: !And [!Condition NeedsEip, !Condition 2BastionConditionHost]
+  3BastionCondition: !And [!Condition NeedsEip, !Condition 3BastionConditionHost]
+  4BastionCondition: !And [!Condition NeedsEip, !Condition 4BastionConditionHost]
+  HasRemoteCIDR: !And
+    - !Not [!Equals [!Ref RemoteAccessCIDR, disabled-onlyssmaccess]]
+    - !Not [!Condition HasPrefixList]
+  HasPrefixList: !Equals [!Select [0, !Split ['-', !Ref RemoteAccessCIDR]], pl]
+  NeedsEip: !Or [!Condition HasRemoteCIDR, !Condition HasPrefixList]
   UseAlternativeInitialization: !Not [!Equals [!Ref AlternativeInitializationScript, '']]
   CreateIAMRole: !Equals [!Ref AlternativeIAMRole, '']
   UseOSImageOverride: !Not [!Equals [!Ref OSImageOverride, '']]
@@ -769,11 +785,10 @@ Resources:
               - ec2:DescribeAddresses
             Resource: '*'
           - !If
-              - HasRemoteCIDR
+              - NeedsEip
               - Sid: AssociateStackEips
                 Effect: Allow
-                Action:
-                  - ec2:AssociateAddress
+                Action: ec2:AssociateAddress
                 Resource: '*'
                 Condition:
                   StringEquals:
@@ -789,7 +804,7 @@ Resources:
       Path: !If [CreateIAMRole, /, /account-managed/]
   EIP1:
     Type: AWS::EC2::EIP
-    Condition: HasRemoteCIDR
+    Condition: NeedsEip
     Properties:
       Domain: vpc
   EIP2:
@@ -810,9 +825,7 @@ Resources:
   BastionAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      VPCZoneIdentifier:
-        - !Ref PublicSubnet1ID
-        - !Ref PublicSubnet2ID
+      VPCZoneIdentifier: [!Ref PublicSubnet1ID, !Ref PublicSubnet2ID]
       MinSize: !Ref NumBastionHosts
       MaxSize: !Ref NumBastionHosts
       Cooldown: 900
@@ -871,9 +884,9 @@ Resources:
                 - UseAlternativeInitialization
                 - !Ref AlternativeInitializationScript
                 - !Sub
-                  - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh
-                  - S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
-                    S3Region: !If [UsingDefaultBucket, !Ref AWS::Region, !Ref QSS3BucketRegion]
+                    - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh
+                    - S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
+                      S3Region: !If [UsingDefaultBucket, !Ref AWS::Region, !Ref QSS3BucketRegion]
               mode: 000550
               owner: root
               group: root
@@ -895,8 +908,8 @@ Resources:
                 - BannerUrl: !If
                     - DefaultBanner
                     - !Sub
-                      - s3://${S3Bucket}/${QSS3KeyPrefix}scripts/banner_message.txt
-                      - S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
+                        - s3://${S3Bucket}/${QSS3KeyPrefix}scripts/banner_message.txt
+                        - S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
                     - !Ref BastionBanner
     Properties:
       LaunchTemplateData:
@@ -912,7 +925,7 @@ Resources:
           Arn: !GetAtt BastionHostProfile.Arn
         NetworkInterfaces:
           - DeviceIndex: 0
-            AssociatePublicIpAddress: !If [HasRemoteCIDR, true, false]
+            AssociatePublicIpAddress: !If [NeedsEip, true, false]
             Groups:
               - !Ref BastionSecurityGroup
         BlockDeviceMappings:
@@ -956,9 +969,13 @@ Resources:
                 ./aws/install
               fi
 
-              until aws s3 cp --no-progress --region ${AWS::Region} "s3://${S3Bucket}/${QSS3KeyPrefix}scripts/cfn-tools.sh" .
+              for (( i=0; i<=5; i++ ))
               do
-                echo "Retrying..."
+                aws s3 cp --no-progress --region ${AWS::Region} "s3://${S3Bucket}/${QSS3KeyPrefix}scripts/cfn-tools.sh" .
+                if [ $? -ne 0 ]
+                then
+                  echo "Retrying..."
+                fi
               done
               source ./cfn-tools.sh
 
@@ -972,28 +989,56 @@ Resources:
               CLOUDWATCHGROUP=${BastionMainLogGroup}
               cfn-init -v --stack '${AWS::StackName}' --resource BastionLaunchTemplate --region ${AWS::Region} || cfn_fail
               [ $(qs_status) == 0 ] && cfn_success || cfn_fail
-            - EIP1: !If [HasRemoteCIDR, !Ref EIP1, 'Null']
+            - EIP1: !If [NeedsEip, !Ref EIP1, 'Null']
               EIP2: !If [2BastionCondition, !Ref EIP2, 'Null']
               EIP3: !If [3BastionCondition, !Ref EIP3, 'Null']
               EIP4: !If [4BastionCondition, !Ref EIP4, 'Null']
               S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
+        MetadataOptions:
+          HttpEndpoint: enabled
+          HttpPutResponseHopLimit: !Ref EC2MetadataPutResponseHopLimit
+          HttpTokens: !Ref EC2MetadataHttpTokens
   BastionSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Enables SSH Access to Bastion Hosts
+      GroupDescription: Enables access to bastion hosts
       VpcId: !Ref VPCID
-      SecurityGroupIngress:
-        !If
-          - HasRemoteCIDR
-          - - IpProtocol: tcp
-              FromPort: 22
-              ToPort: 22
-              CidrIp: !Ref RemoteAccessCIDR
-            - IpProtocol: icmp
-              FromPort: -1
-              ToPort: -1
-              CidrIp: !Ref RemoteAccessCIDR
-          - !Ref AWS::NoValue
+  BastionSecurityGroupCidrSshIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Condition: HasRemoteCIDR
+    Properties:
+      GroupId: !Ref BastionSecurityGroup
+      CidrIp: !Ref RemoteAccessCIDR
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+  BastionSecurityGroupCidrIcmpIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Condition: HasRemoteCIDR
+    Properties:
+      GroupId: !Ref BastionSecurityGroup
+      CidrIp: !Ref RemoteAccessCIDR
+      IpProtocol: icmp
+      FromPort: -1
+      ToPort: -1
+  BastionSecurityGroupPrefixListSshIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Condition: HasPrefixList
+    Properties:
+      GroupId: !Ref BastionSecurityGroup
+      SourcePrefixListId: !Ref RemoteAccessCIDR
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+  BastionSecurityGroupPrefixListIcmpIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Condition: HasPrefixList
+    Properties:
+      GroupId: !Ref BastionSecurityGroup
+      SourcePrefixListId: !Ref RemoteAccessCIDR
+      IpProtocol: icmp
+      FromPort: -1
+      ToPort: -1
 Outputs:
   BastionAutoScalingGroup:
     Description: Auto Scaling group reference ID.
@@ -1001,7 +1046,7 @@ Outputs:
     Export:
       Name: !Sub ${AWS::StackName}-BastionAutoScalingGroup
   EIP1:
-    Condition: HasRemoteCIDR
+    Condition: NeedsEip
     Description: Elastic IP 1 for bastion.
     Value: !Ref EIP1
     Export:
