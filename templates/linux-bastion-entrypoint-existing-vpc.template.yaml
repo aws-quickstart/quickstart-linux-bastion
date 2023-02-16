@@ -326,19 +326,19 @@ Rules:
           - !Ref BastionAMIOS
     Assertions:
       - Assert: !Not
-        - !Contains
-            - - t4g.nano
-              - t4g.micro
-              - t4g.small
-              - t4g.medium
-              - t4g.large
-              - t4g.xlarge
-              - t4g.2xlarge
-              - m6g.medium
-              - m6g.large
-              - m6g.xlarge
-              - m6g.2xlarge
-            - !Ref BastionInstanceType
+          - !Contains
+              - - t4g.nano
+                - t4g.micro
+                - t4g.small
+                - t4g.medium
+                - t4g.large
+                - t4g.xlarge
+                - t4g.2xlarge
+                - m6g.medium
+                - m6g.large
+                - m6g.xlarge
+                - m6g.2xlarge
+              - !Ref BastionInstanceType
         AssertDescription: >-
           You selected a x86_64 AMI operating system, so you must also enter a
           x86_64 instance type, such as t3.micro. For additional details, see
@@ -871,9 +871,9 @@ Resources:
                 - UseAlternativeInitialization
                 - !Ref AlternativeInitializationScript
                 - !Sub
-                  - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh
-                  - S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
-                    S3Region: !If [UsingDefaultBucket, !Ref AWS::Region, !Ref QSS3BucketRegion]
+                    - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/bastion_bootstrap.sh
+                    - S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
+                      S3Region: !If [UsingDefaultBucket, !Ref AWS::Region, !Ref QSS3BucketRegion]
               mode: 000550
               owner: root
               group: root
@@ -895,8 +895,8 @@ Resources:
                 - BannerUrl: !If
                     - DefaultBanner
                     - !Sub
-                      - s3://${S3Bucket}/${QSS3KeyPrefix}scripts/banner_message.txt
-                      - S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
+                        - s3://${S3Bucket}/${QSS3KeyPrefix}scripts/banner_message.txt
+                        - S3Bucket: !If [UsingDefaultBucket, !Sub 'aws-quickstart-${AWS::Region}', !Ref QSS3BucketName]
                     - !Ref BastionBanner
     Properties:
       LaunchTemplateData:
