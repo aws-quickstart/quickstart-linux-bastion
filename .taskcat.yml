@@ -59,20 +59,6 @@ tests:
       - ap-southeast-2
       - us-gov-east-1
       - cn-north-1
-  centos7hvm:
-    parameters:
-      BastionAMIOS: CentOS-7-HVM
-      BastionInstanceType: t3.medium
-      RemoteAccessCIDR: 10.0.0.0/16
-    regions:
-      - us-east-1
-  sles15hvm:
-    parameters:
-      BastionAMIOS: SUSE-SLES-15-HVM
-      BastionInstanceType: t3.medium
-      RemoteAccessCIDR: 10.0.0.0/16
-    regions:
-      - eu-central-1
   us2004hvm:
     parameters:
       BastionAMIOS: Ubuntu-Server-20.04-LTS-HVM
