@@ -296,7 +296,7 @@ Parameters:
     Type: String
     Description: Choose "true" to disable public IP.
     AllowedValues: ['true', 'false']
-    Default: "false"
+    Default: 'false'
   VPCCIDR:
     Type: String
     Description: CIDR block for the VPC.

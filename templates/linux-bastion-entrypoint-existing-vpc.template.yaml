@@ -261,7 +261,7 @@ Parameters:
     Type: String
     Description: Choose "true" to disable public IP.
     AllowedValues: ['true', 'false']
-    Default: "false"
+    Default: 'false'
   VPCID:
     Type: AWS::EC2::VPC::Id
     Description: ID of the VPC (for example, vpc-0343606e).
