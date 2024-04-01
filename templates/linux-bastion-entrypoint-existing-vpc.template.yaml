@@ -18,6 +18,7 @@ Metadata:
           - PublicSubnet1ID
           - PublicSubnet2ID
           - RemoteAccessCIDR
+          - ForcePrivateOnly
       - Label:
           default: IAM configuration
         Parameters:
@@ -79,6 +80,8 @@ Metadata:
         default: X11 forwarding
       EnvironmentVariables:
         default: Environment variables
+      ForcePrivateOnly:
+        default: Use to disable public IP
       KeyPairName:
         default: Key pair name
       NumBastionHosts:
@@ -254,6 +257,11 @@ Parameters:
     AllowedPattern: ^disabled-onlyssmaccess$|^pl-([0-9a-f]{8}|[0-9a-f]{17})$|^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: CIDR block parameter must be disabled-onlyssmaccess or in the format "x.x.x.x/x".
     Default: disabled-onlyssmaccess
+  ForcePrivateOnly:
+    Type: String
+    Description: Choose "true" to disable public IP.
+    AllowedValues: ['true', 'false']
+    Default: 'false'
   VPCID:
     Type: AWS::EC2::VPC::Id
     Description: ID of the VPC (for example, vpc-0343606e).
@@ -638,7 +646,9 @@ Conditions:
     - !Not [!Equals [!Ref RemoteAccessCIDR, disabled-onlyssmaccess]]
     - !Not [!Condition HasPrefixList]
   HasPrefixList: !Equals [!Select [0, !Split ['-', !Ref RemoteAccessCIDR]], pl]
-  NeedsEip: !Or [!Condition HasRemoteCIDR, !Condition HasPrefixList]
+  NeedsEip: !And
+    - !Or [!Condition HasRemoteCIDR, !Condition HasPrefixList]
+    - !Equals [!Ref ForcePrivateOnly, 'false']
   UseAlternativeInitialization: !Not [!Equals [!Ref AlternativeInitializationScript, '']]
   CreateIAMRole: !Equals [!Ref AlternativeIAMRole, '']
   UseOSImageOverride: !Not [!Equals [!Ref OSImageOverride, '']]
